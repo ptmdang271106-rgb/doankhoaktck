@@ -14,7 +14,12 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Tuổi trẻ Khoa Kỹ thuật Cơ khí - CTUT",
-  description: "Cổng thông tin & Hoạt động phong trào Đoàn Khoa Kỹ thuật Cơ khí Trường Đại học Kỹ thuật - Công nghệ Cần Thơ",
+  description: "Cổng thông tin sinh viên & Hoạt động phong trào Đoàn Khoa Kỹ thuật Cơ khí CTUT",
+  icons: {
+    icon: "/logodk.png",
+    shortcut: "/logodk.png",
+    apple: "/logodk.png",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
