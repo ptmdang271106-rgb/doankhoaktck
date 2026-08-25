@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-export default function DangNhapPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get("redirect") || "/";
@@ -54,7 +54,7 @@ export default function DangNhapPage() {
         return;
       }
 
-      // Kiem tra mat khau (Mac dinh la 3 so cuoi MSSV hoac mat khau duoc luu tren Supabase)
+      // Kiem tra mat khau
       const expectedPassword = studentData.password || cleanUser.slice(-3);
       if (cleanPass !== expectedPassword && cleanPass !== cleanUser.slice(-3)) {
         setLoading(false);
@@ -62,7 +62,7 @@ export default function DangNhapPage() {
         return;
       }
 
-      // Dang nhap thanh cong: Luu thong tin phien lam viec
+      // Dang nhap thanh cong
       const loggedInStudent = {
         mssv: studentData.mssv,
         fullName: studentData.full_name,
@@ -80,6 +80,54 @@ export default function DangNhapPage() {
     }
   };
 
+  return (
+    <form onSubmit={handleLogin} className="space-y-4">
+      {errorMsg && (
+        <div className="mb-4 p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs rounded-2xl font-medium leading-relaxed">
+          {errorMsg}
+        </div>
+      )}
+
+      <div>
+        <label className="block text-xs font-bold text-slate-700 mb-1">
+          Mã số sinh viên (MSSV) *
+        </label>
+        <input
+          type="text"
+          required
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder="VD: CNDT2411081"
+          className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-xs font-mono uppercase outline-none focus:border-[#EE6425]"
+        />
+      </div>
+
+      <div>
+        <label className="block text-xs font-bold text-slate-700 mb-1">
+          Mật khẩu *
+        </label>
+        <input
+          type="password"
+          required
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Mật khẩu (Mặc định: 3 số cuối MSSV)"
+          className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#EE6425]"
+        />
+      </div>
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full bg-[#EE6425] hover:bg-[#d85216] text-white font-bold py-3 rounded-xl transition text-xs uppercase shadow tracking-wider disabled:bg-slate-300"
+      >
+        {loading ? "Đang xác thực dữ liệu..." : "Đăng nhập ngay"}
+      </button>
+    </form>
+  );
+}
+
+export default function DangNhapPage() {
   return (
     <main className="min-h-screen bg-slate-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans antialiased text-slate-800">
       <div className="max-w-md w-full bg-white rounded-3xl p-8 shadow-xl border border-slate-200">
@@ -101,51 +149,10 @@ export default function DangNhapPage() {
           </p>
         </div>
 
-        {/* THONG BAO LOI */}
-        {errorMsg && (
-          <div className="mb-5 p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs rounded-2xl font-medium leading-relaxed">
-            {errorMsg}
-          </div>
-        )}
-
-        {/* FORM DANG NHAP */}
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">
-              Mã số sinh viên (MSSV) *
-            </label>
-            <input
-              type="text"
-              required
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="VD: CNDT2411081"
-              className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-xs font-mono uppercase outline-none focus:border-[#EE6425]"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">
-              Mật khẩu *
-            </label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Mật khẩu (Mặc định: 3 số cuối MSSV)"
-              className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#EE6425]"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-[#EE6425] hover:bg-[#d85216] text-white font-bold py-3 rounded-xl transition text-xs uppercase shadow tracking-wider disabled:bg-slate-300"
-          >
-            {loading ? "Đang xác thực dữ liệu..." : "Đăng nhập ngay"}
-          </button>
-        </form>
+        {/* BOC SUSPENSE CHO USE SEARCH PARAMS */}
+        <Suspense fallback={<div className="text-center text-xs text-slate-400 py-4">Đang tải trang đăng nhập...</div>}>
+          <LoginForm />
+        </Suspense>
 
         <div className="mt-6 pt-4 border-t border-slate-100 flex justify-between text-xs font-bold text-[#007A87]">
           <Link href="/" className="hover:underline">Về trang chủ</Link>
