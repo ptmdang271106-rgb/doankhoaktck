@@ -3,15 +3,52 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 
+// Danh sách bài viết mặc định ban đầu
+const DEFAULT_POSTS = [
+  {
+    id: "default-1",
+    title: "Hành trình chinh phục giải thưởng Sáng tạo Khoa học Kỹ thuật 2026 của nhóm sinh viên Cơ điện tử K21",
+    category: "Học thuật - NCKH",
+    content: "Chia sẻ về phương pháp nghiên cứu đề tài ứng dụng IoT và Trí tuệ nhân tạo trong việc giám sát dây chuyền sản xuất tự động hóa thông minh...",
+    date: "24 Tháng 08, 2026",
+    badge: "Sinh viên 5 Tốt",
+    featured: true,
+  },
+  {
+    id: "default-2",
+    title: "Workshop: Ứng dụng công nghệ AI tạo sinh trong tối ưu hóa thiết kế mô hình 3D SolidWorks",
+    category: "Học thuật - NCKH",
+    content: "Chuỗi hội thảo nâng cao năng lực thiết kế đồ họa kỹ thuật dành cho đoàn viên sinh viên Khoa Cơ khí.",
+    date: "22 Tháng 08, 2026",
+    badge: "Học thuật",
+  },
+  {
+    id: "default-3",
+    title: "Đoàn Khoa ra quân Chiến dịch tình nguyện sửa chữa điện - máy công cụ tại địa bàn Quận Ninh Kiều",
+    category: "Phong trào",
+    content: "Hoạt động phát huy chuyên môn ngành nghề của sinh viên Cơ khí hỗ trợ cộng đồng.",
+    date: "20 Tháng 08, 2026",
+    badge: "Phong trào",
+  },
+];
+
 export default function CTUTYouthPortal() {
   const [activeCategory, setActiveCategory] = useState("Tất cả");
   const [activeTabRank, setActiveTabRank] = useState("Nổi bật");
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [allPosts, setAllPosts] = useState<any[]>(DEFAULT_POSTS);
 
   useEffect(() => {
+    // 1. Kiểm tra tài khoản đăng nhập
     const savedUser = localStorage.getItem("ctut_current_user");
     if (savedUser) {
       setCurrentUser(JSON.parse(savedUser));
+    }
+
+    // 2. Đọc bài viết do Admin đăng từ LocalStorage
+    const customPosts = JSON.parse(localStorage.getItem("ctut_custom_posts") || "[]");
+    if (customPosts.length > 0) {
+      setAllPosts([...customPosts, ...DEFAULT_POSTS]);
     }
   }, []);
 
@@ -30,9 +67,14 @@ export default function CTUTYouthPortal() {
     { name: "Tình nguyện", color: "bg-[#7F8C8D] text-white" },
   ];
 
+  // Lọc bài viết theo danh mục được bấm chọn
+  const filteredPosts = activeCategory === "Tất cả"
+    ? allPosts
+    : allPosts.filter((post) => post.category === activeCategory);
+
   return (
     <div className="min-h-screen bg-white text-[#333333] font-sans antialiased">
-      {/* 1. THANH ĐIỀU HƯỚNG TẦNG 1: CHIA 3 CỘT ĐỀU NHAU, KHÔNG BAO GIỜ BỊ ĐÈ CHỮ */}
+      {/* 1. THANH ĐIỀU HƯỚNG TẦNG 1: CHIA 3 CỘT CÂN XỨNG */}
       <header className="border-b border-gray-100 bg-white sticky top-0 z-40">
         <div className="w-full px-4 sm:px-6 lg:px-10">
           <div className="h-24 grid grid-cols-12 items-center text-[13px] font-medium text-[#2C3E50]">
@@ -59,7 +101,7 @@ export default function CTUTYouthPortal() {
               </a>
             </div>
 
-            {/* LOGO CHÍNH GIỮA: CĂN GIỮA TUYỆT ĐỐI */}
+            {/* LOGO CHÍNH GIỮA: CĂN TÂM TUYỆT ĐỐI */}
             <div className="col-span-12 lg:col-span-4 flex items-center justify-center py-1">
               <Link href="/">
                 <img
@@ -70,7 +112,7 @@ export default function CTUTYouthPortal() {
               </Link>
             </div>
 
-            {/* MENU PHẢI: Hỗ trợ sinh viên | Văn phòng điện tử | Đăng nhập */}
+            {/* MENU PHẢI: Hỗ trợ SV | Văn phòng điện tử | Đăng nhập */}
             <div className="col-span-4 hidden lg:flex items-center justify-end space-x-4 whitespace-nowrap">
               <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1 text-xs font-semibold">
                 Hỗ trợ sinh viên <span className="text-[9px]">▼</span>
@@ -129,7 +171,7 @@ export default function CTUTYouthPortal() {
         </div>
       </header>
 
-      {/* 3. BANNER CHÀO ĐÓN TÂN SINH VIÊN */}
+      {/* 3. BANNER */}
       <section className="w-full bg-[#0A2540] flex justify-center items-center">
         <div className="w-full max-w-7xl mx-auto px-0 sm:px-4 lg:px-8 py-2 sm:py-4">
           <img
@@ -140,7 +182,7 @@ export default function CTUTYouthPortal() {
         </div>
       </section>
 
-      {/* 4. KHỐI NỘI DUNG: ĐỌC GÌ HÔM NAY VÀ BỘ LỌC */}
+      {/* 4. BỘ LỌC DANH MỤC */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="flex flex-col md:flex-row md:items-center justify-between border-b-2 border-gray-100 pb-4 gap-4">
           <h2 className="text-2xl font-bold text-[#006674] tracking-tight">
@@ -164,71 +206,52 @@ export default function CTUTYouthPortal() {
           </div>
         </div>
 
-        {/* 5. KHU VỰC BÀI VIẾT (GRID CHÍNH + CỘT PHỤ BÊN PHẢI) */}
+        {/* 5. KHU VỰC BÀI VIẾT (TỰ ĐỘNG CẬP NHẬT TỪ ADMIN) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-6">
-          {/* Cột chính (8 cột) */}
+          {/* Cột chính hiển thị danh sách bài viết */}
           <div className="lg:col-span-8 space-y-6">
-            <div className="group grid grid-cols-1 sm:grid-cols-12 gap-5 bg-white p-3 rounded-lg border border-gray-100 hover:shadow-md transition-shadow">
-              <div className="sm:col-span-5 relative h-48 sm:h-auto bg-gradient-to-tr from-[#006674] to-[#16A085] rounded overflow-hidden flex items-center justify-center p-4">
-                <span className="absolute top-2 left-2 bg-[#007A87] text-white text-[10px] font-bold px-2 py-0.5 rounded">
-                  Gương sáng Cơ khí
-                </span>
-                <span className="text-white text-lg font-black text-center uppercase tracking-wider">
-                  CTUT MECHANICAL TALENT
-                </span>
+            {filteredPosts.length === 0 ? (
+              <div className="text-center py-12 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-slate-400 text-sm">
+                Chưa có bài viết nào thuộc danh mục này.
               </div>
-              <div className="sm:col-span-7 flex flex-col justify-between py-1">
-                <div>
-                  <span className="text-[11px] font-bold text-[#D35400] uppercase">
-                    [Sinh viên 5 Tốt]
-                  </span>
-                  <h3 className="text-base font-bold text-gray-900 mt-1 leading-snug group-hover:text-[#007A87] transition-colors">
-                    Hành trình chinh phục giải thưởng Sáng tạo Khoa học Kỹ thuật 2026 của nhóm sinh viên Cơ điện tử K21
-                  </h3>
-                  <p className="text-xs text-gray-500 mt-2 line-clamp-3 leading-relaxed">
-                    Chia sẻ về phương pháp nghiên cứu đề tài ứng dụng IoT và Trí tuệ nhân tạo trong việc giám sát dây chuyền sản xuất tự động hóa thông minh...
-                  </p>
+            ) : (
+              filteredPosts.map((post, idx) => (
+                <div
+                  key={post.id || idx}
+                  className="group grid grid-cols-1 sm:grid-cols-12 gap-5 bg-white p-4 rounded-xl border border-gray-100 hover:shadow-md transition-shadow"
+                >
+                  <div className="sm:col-span-5 relative h-44 sm:h-auto bg-gradient-to-tr from-[#006674] to-[#16A085] rounded-lg overflow-hidden flex items-center justify-center p-4">
+                    <span className="absolute top-2 left-2 bg-[#007A87] text-white text-[10px] font-bold px-2 py-0.5 rounded">
+                      {post.category || "Tin tức Cơ khí"}
+                    </span>
+                    <span className="text-white text-base font-black text-center uppercase tracking-wider">
+                      CTUT MECHANICAL
+                    </span>
+                  </div>
+                  <div className="sm:col-span-7 flex flex-col justify-between py-1">
+                    <div>
+                      {post.badge && (
+                        <span className="text-[11px] font-bold text-[#D35400] uppercase block mb-1">
+                          [{post.badge}]
+                        </span>
+                      )}
+                      <h3 className="text-base font-bold text-gray-900 leading-snug group-hover:text-[#007A87] transition-colors">
+                        {post.title}
+                      </h3>
+                      <p className="text-xs text-gray-500 mt-2 line-clamp-3 leading-relaxed">
+                        {post.content}
+                      </p>
+                    </div>
+                    <div className="text-[11px] text-gray-400 font-medium mt-3">
+                      {post.date} • Cổng thông tin CTUT
+                    </div>
+                  </div>
                 </div>
-                <div className="text-[11px] text-gray-400 font-medium mt-3">
-                  24 Tháng 08, 2026 • 1.4k lượt xem
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
-              <div className="border border-gray-100 rounded-lg p-3 hover:shadow-md transition-shadow">
-                <div className="h-36 bg-gradient-to-r from-orange-400 to-amber-500 rounded flex items-center justify-center text-white font-bold text-sm">
-                  WORKSHOP AI IN CAD/CAM
-                </div>
-                <div className="mt-3">
-                  <span className="text-[10px] font-bold text-[#16A085] bg-teal-50 px-2 py-0.5 rounded">
-                    Học thuật
-                  </span>
-                  <h4 className="text-xs font-bold text-gray-800 mt-1.5 leading-snug line-clamp-2 hover:text-[#007A87] cursor-pointer">
-                    Workshop: Ứng dụng công nghệ AI tạo sinh trong tối ưu hóa thiết kế mô hình 3D SolidWorks
-                  </h4>
-                  <div className="text-[10px] text-gray-400 mt-2">22 Tháng 08, 2026</div>
-                </div>
-              </div>
-
-              <div className="border border-gray-100 rounded-lg p-3 hover:shadow-md transition-shadow">
-                <div className="h-36 bg-gradient-to-r from-blue-500 to-indigo-600 rounded flex items-center justify-center text-white font-bold text-sm">
-                  NGÀY THỨ BẢY TÌNH NGUYỆN
-                </div>
-                <div className="mt-3">
-                  <span className="text-[10px] font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded">
-                    Phong trào
-                  </span>
-                  <h4 className="text-xs font-bold text-gray-800 mt-1.5 leading-snug line-clamp-2 hover:text-[#007A87] cursor-pointer">
-                    Đoàn Khoa ra quân Chiến dịch tình nguyện sửa chữa điện - máy công cụ tại địa bàn Quận Ninh Kiều
-                  </h4>
-                  <div className="text-[10px] text-gray-400 mt-2">20 Tháng 08, 2026</div>
-                </div>
-              </div>
-            </div>
+              ))
+            )}
           </div>
 
-          {/* Cột phụ bên phải (4 cột) */}
+          {/* Cột phụ bên phải */}
           <div className="lg:col-span-4">
             <div className="border-b border-gray-200 flex space-x-6 text-sm font-bold pb-2">
               <button
@@ -255,22 +278,10 @@ export default function CTUTYouthPortal() {
 
             <div className="divide-y divide-gray-100 mt-2">
               {[
-                {
-                  title: "[Thông báo] Mở cổng tự đánh giá Điểm Rèn Luyện Học kỳ II trực tuyến",
-                  date: "25/08/2026",
-                },
-                {
-                  title: "Kế hoạch tổ chức Hội thi Thiết kế xe tiết kiệm nhiên liệu CTUT 2026",
-                  date: "23/08/2026",
-                },
-                {
-                  title: "Danh sách sinh viên Khoa Cơ khí nhận học bổng Khuyến khích Tài năng đợt 1",
-                  date: "21/08/2026",
-                },
-                {
-                  title: "Thông báo tuyển Cộng tác viên Ban Truyền thông & Kỹ thuật Đoàn Khoa",
-                  date: "19/08/2026",
-                },
+                { title: "[Thông báo] Mở cổng tự đánh giá Điểm Rèn Luyện Học kỳ II trực tuyến", date: "25/08/2026" },
+                { title: "Kế hoạch tổ chức Hội thi Thiết kế xe tiết kiệm nhiên liệu CTUT 2026", date: "23/08/2026" },
+                { title: "Danh sách sinh viên Khoa Cơ khí nhận học bổng Khuyến khích Tài năng đợt 1", date: "21/08/2026" },
+                { title: "Thông báo tuyển Cộng tác viên Ban Truyền thông & Kỹ thuật Đoàn Khoa", date: "19/08/2026" },
               ].map((post, i) => (
                 <div key={i} className="py-3 group cursor-pointer">
                   <h4 className="text-xs font-semibold text-gray-800 leading-snug group-hover:text-[#007A87] transition-colors">
