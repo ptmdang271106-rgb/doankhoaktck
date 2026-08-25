@@ -276,7 +276,7 @@ export default function AdminDashboard() {
                 : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
             }`}
           >
-            📝 Đăng & Quản lý bài viết
+            Đăng & Quản lý bài viết
           </button>
           <button
             onClick={() => setActiveTab("students")}
@@ -286,7 +286,7 @@ export default function AdminDashboard() {
                 : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
             }`}
           >
-            🎓 Quản lý tài khoản Sinh viên ({students.length})
+            Quản lý tài khoản Sinh viên ({students.length})
           </button>
         </div>
 
@@ -325,7 +325,7 @@ export default function AdminDashboard() {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    🖼️ Chọn ảnh bìa đại diện (Tỷ lệ 16:9)
+                    Chọn ảnh bìa đại diện (Tỷ lệ 16:9)
                   </label>
                   <input
                     type="file"
@@ -413,7 +413,7 @@ export default function AdminDashboard() {
             <div className="lg:col-span-4 space-y-6">
               {/* KHỐI NHẬP FILE EXCEL / CSV */}
               <div className="bg-white p-5 rounded-2xl border border-teal-200 bg-teal-50/40 shadow-sm">
-                <h3 className="text-sm font-bold text-[#004A52] mb-1">📊 Nhập hàng loạt từ Excel / CSV</h3>
+                <h3 className="text-sm font-bold text-[#004A52] mb-1">Nhập hàng loạt từ Excel / CSV</h3>
                 <p className="text-[11px] text-slate-500 mb-3">
                   Tải file mẫu về, điền 3 cột <strong>MSSV, Họ và tên, Lớp</strong>. Hệ thống tự động tạo Email và đặt mật khẩu là <strong>3 số cuối của MSSV</strong>.
                 </p>
@@ -430,7 +430,7 @@ export default function AdminDashboard() {
                     onClick={downloadSampleTemplate}
                     className="w-full text-center text-xs font-bold text-[#007A87] hover:underline py-1"
                   >
-                    📥 Tải file CSV mẫu (trắng) về máy
+                    Tải file CSV mẫu (trắng) về máy
                   </button>
                 </div>
               </div>
