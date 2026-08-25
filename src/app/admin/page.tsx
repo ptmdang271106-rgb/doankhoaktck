@@ -134,7 +134,7 @@ export default function AdminDashboard() {
   const [officerFinalScore, setOfficerFinalScore] = useState<number>(80);
   const [reviewSemester, setReviewSemester] = useState("hk1_2026_2027");
 
-  // State sự kiện (Có thêm hình bìa & nội dung soạn thảo như Word)
+  // State sự kiện
   const [eventTitle, setEventTitle] = useState("");
   const [eventCategory, setEventCategory] = useState("Phong trào");
   const [eventCategoryCode, setEventCategoryCode] = useState("III.8");
@@ -143,6 +143,7 @@ export default function AdminDashboard() {
   const [eventLocation, setEventLocation] = useState("Hội trường A - Trường ĐH Kỹ thuật - Công nghệ Cần Thơ");
   const [eventDeadline, setEventDeadline] = useState("");
   const [eventCoverImage, setEventCoverImage] = useState("");
+  const [eventDesc, setEventDesc] = useState("");
   const eventEditorRef = useRef<HTMLDivElement>(null);
   const [activeQrEvent, setActiveQrEvent] = useState<any>(null);
 
@@ -488,6 +489,7 @@ export default function AdminDashboard() {
       fetchAllData();
       setEventTitle("");
       setEventCoverImage("");
+      setEventDesc("");
       if (eventEditorRef.current) eventEditorRef.current.innerHTML = "";
     }
   };
