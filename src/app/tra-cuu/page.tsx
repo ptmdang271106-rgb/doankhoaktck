@@ -12,18 +12,18 @@ const DRL_SECTIONS = [
     title: "I. Đánh giá về ý thức tham gia học tập",
     maxPoints: 20,
     items: [
-      { id: "1_1", title: "1. Điểm trung bình học tập tích lũy thang điểm 4", subtext: "Loại Trung bình: 2đ | Khá: 3đ | Giỏi: 4đ | Xuất sắc: 5đ", max: 5, maxLabel: "5 đ/kỳ", type: "fixed", minus: "" },
-      { id: "1_2", title: "2. Giấy chứng nhận tham gia lớp kỹ năng học tập", subtext: "Có giấy xác nhận, chứng nhận, giấy khen", max: 3, maxLabel: "3 đ/kỳ", type: "fixed", minus: "" },
-      { id: "1_3", title: "3. Hội thảo hoặc Tọa đàm do Khoa hoặc Trường tổ chức", subtext: "Trực tiếp: 3 đ/lần | Trực tuyến: 1 đ/lần (Nhập số lần tham gia)", max: 3, maxLabel: "3 đ/lần", type: "per_time", unit: 3, minus: "" },
-      { id: "1_4", title: "4. Cuộc thi học thuật cấp Khoa hoặc Trường", subtext: "Cổ vũ: 1đ | BTC: 2đ | Tham gia: 3đ | Giải: 4-7đ (Nhập số lần)", max: 7, maxLabel: "7 đ/lần", type: "per_time", unit: 3, minus: "" },
-      { id: "1_5", title: "5. Cuộc thi học thuật do đơn vị bên ngoài trường tổ chức", subtext: "Cổ vũ: 2đ | BTC: 3đ | Tham gia: 4đ | Giải: 5-8đ (Nhập số lần)", max: 8, maxLabel: "8 đ/lần", type: "per_time", unit: 4, minus: "" },
-      { id: "1_6", title: "6. Báo cáo khoa học cấp Khoa", subtext: "TB: 3đ | Khá: 4đ | Tốt: 6đ | Xuất sắc: 8đ (Nhập số lần)", max: 8, maxLabel: "8 đ/lần", type: "per_time", unit: 4, minus: "" },
-      { id: "1_7", title: "7. Tham gia đề tài NCKH cấp Trường", subtext: "TB: 5đ | Khá: 6đ | Tốt: 8đ | Xuất sắc: 10đ (Nhập số lần)", max: 10, maxLabel: "10 đ/lần", type: "per_time", unit: 5, minus: "" },
-      { id: "1_8", title: "8. Viết bài báo khoa học trong và ngoài Trường", subtext: "Kỷ yếu: 5đ | Tạp chí: 8đ (Nhập số lần)", max: 8, maxLabel: "8 đ/lần", type: "per_time", unit: 5, minus: "" },
-      { id: "1_9", title: "9. Cuộc thi khởi nghiệp do Trường tổ chức", subtext: "Cổ vũ: 1đ | BTC: 2đ | Tham gia: 3đ | Giải: 4-7đ (Nhập số lần)", max: 7, maxLabel: "7 đ/lần", type: "per_time", unit: 3, minus: "" },
-      { id: "1_10", title: "10. Cuộc thi khởi nghiệp đơn vị ngoài Trường", subtext: "Cổ vũ: 2đ | BTC: 3đ | Tham gia: 4đ | Giải: 5-8đ (Nhập số lần)", max: 8, maxLabel: "8 đ/lần", type: "per_time", unit: 4, minus: "" },
-      { id: "1_11", title: "11. Thành viên các câu lạc bộ học thuật cấp Khoa, Trường", subtext: "Minh chứng thành viên", max: 2, maxLabel: "2 đ/kỳ", type: "fixed", minus: "" },
-      { id: "1_12", title: "12. Các hoạt động học tập khác", subtext: "Trực tiếp: 3 đ/lần | Trực tuyến: 1 đ/lần (Nhập số lần)", max: 3, maxLabel: "3 đ/lần", type: "per_time", unit: 3, minus: "" },
+      { id: "1_1", title: "1. Điểm trung bình học tập tích lũy thang điểm 4", subtext: "Loại Trung bình: 2đ | Khá: 3đ | Giỏi: 4đ | Xuất sắc: 5đ", max: 5, maxLabel: "5 đ/kỳ", type: "fixed", unit: 1, minus: "" },
+      { id: "1_2", title: "2. Giấy chứng nhận tham gia lớp kỹ năng học tập", subtext: "Có giấy xác nhận, chứng nhận, giấy khen", max: 3, maxLabel: "3 đ/kỳ", type: "fixed", unit: 1, minus: "" },
+      { id: "1_3", title: "3. Hội thảo hoặc Tọa đàm do Khoa hoặc Trường tổ chức", subtext: "Trực tiếp: 3 đ/lần | Trực tuyến: 1 đ/lần", max: 3, maxLabel: "3 đ/lần", type: "per_time", unit: 3, minus: "" },
+      { id: "1_4", title: "4. Cuộc thi học thuật cấp Khoa hoặc Trường", subtext: "Cổ vũ: 1đ | BTC: 2đ | Tham gia: 3đ | Giải: 4-7đ", max: 7, maxLabel: "7 đ/lần", type: "per_time", unit: 3, minus: "" },
+      { id: "1_5", title: "5. Cuộc thi học thuật do đơn vị bên ngoài trường tổ chức", subtext: "Cổ vũ: 2đ | BTC: 3đ | Tham gia: 4đ | Giải: 5-8đ", max: 8, maxLabel: "8 đ/lần", type: "per_time", unit: 4, minus: "" },
+      { id: "1_6", title: "6. Báo cáo khoa học cấp Khoa", subtext: "TB: 3đ | Khá: 4đ | Tốt: 6đ | Xuất sắc: 8đ", max: 8, maxLabel: "8 đ/lần", type: "per_time", unit: 4, minus: "" },
+      { id: "1_7", title: "7. Tham gia đề tài NCKH cấp Trường", subtext: "TB: 5đ | Khá: 6đ | Tốt: 8đ | Xuất sắc: 10đ", max: 10, maxLabel: "10 đ/lần", type: "per_time", unit: 5, minus: "" },
+      { id: "1_8", title: "8. Viết bài báo khoa học trong và ngoài Trường", subtext: "Kỷ yếu: 5đ | Tạp chí: 8đ", max: 8, maxLabel: "8 đ/lần", type: "per_time", unit: 5, minus: "" },
+      { id: "1_9", title: "9. Cuộc thi khởi nghiệp do Trường tổ chức", subtext: "Cổ vũ: 1đ | BTC: 2đ | Tham gia: 3đ | Giải: 4-7đ", max: 7, maxLabel: "7 đ/lần", type: "per_time", unit: 3, minus: "" },
+      { id: "1_10", title: "10. Cuộc thi khởi nghiệp đơn vị ngoài Trường", subtext: "Cổ vũ: 2đ | BTC: 3đ | Tham gia: 4đ | Giải: 5-8đ", max: 8, maxLabel: "8 đ/lần", type: "per_time", unit: 4, minus: "" },
+      { id: "1_11", title: "11. Thành viên các câu lạc bộ học thuật cấp Khoa, Trường", subtext: "Minh chứng thành viên", max: 2, maxLabel: "2 đ/kỳ", type: "fixed", unit: 1, minus: "" },
+      { id: "1_12", title: "12. Các hoạt động học tập khác", subtext: "Trực tiếp: 3 đ/lần | Trực tuyến: 1 đ/lần", max: 3, maxLabel: "3 đ/lần", type: "per_time", unit: 3, minus: "" },
     ],
   },
   {
@@ -31,14 +31,14 @@ const DRL_SECTIONS = [
     title: "II. Ý thức chấp hành nội quy, quy chế và các quy định của Nhà trường",
     maxPoints: 25,
     items: [
-      { id: "2_1", title: "1. Ý thức, thái độ trong học tập", subtext: "Đi học đủ: +5đ | Nghỉ không phép: -3đ | Muộn/Bỏ tiết: -1đ | Cấm thi: -5đ", max: 5, maxLabel: "5 đ/kỳ", type: "fixed", minus: "-5 đ" },
-      { id: "2_2", title: "2. Chấp hành tốt nội quy, quy chế Nhà trường", subtext: "Chấp hành tốt: +5đ | Kỷ luật: -5đ", max: 5, maxLabel: "5 đ/kỳ", type: "fixed", minus: "-5 đ" },
-      { id: "2_3", title: "3. Thực hiện tốt quy chế thi cử", subtext: "Thực hiện tốt: +5đ | Vi phạm: -5đ", max: 5, maxLabel: "5 đ/kỳ", type: "fixed", minus: "-5 đ" },
-      { id: "2_4", title: "4. Chấp hành quy định của thư viện", subtext: "Chấp hành tốt: +5đ | Vi phạm: -5đ", max: 5, maxLabel: "5 đ/kỳ", type: "fixed", minus: "-5 đ" },
-      { id: "2_5", title: "5. Chấp hành quy định phòng học, máy, xưởng", subtext: "Chấp hành tốt: +5đ | Vi phạm: -5đ", max: 5, maxLabel: "5 đ/kỳ", type: "fixed", minus: "-5 đ" },
-      { id: "2_6", title: "6. Thực hiện đăng ký ngoại trú", subtext: "Đăng ký đúng hạn: +5đ | Không làm: -5đ", max: 5, maxLabel: "5 đ/kỳ", type: "fixed", minus: "-5 đ" },
-      { id: "2_7", title: "7. Mặc đồng phục đúng quy định", subtext: "Thực hiện đúng: +5đ | Vi phạm: -5đ", max: 5, maxLabel: "5 đ/kỳ", type: "fixed", minus: "-5 đ" },
-      { id: "2_8", title: "8. Sinh hoạt lớp với Cố vấn học tập", subtext: "Tham gia đủ: +5đ | Vắng không phép: -5đ", max: 5, maxLabel: "5 đ/kỳ", type: "fixed", minus: "-5 đ" },
+      { id: "2_1", title: "1. Ý thức, thái độ trong học tập", subtext: "Đi học đủ: +5đ | Nghỉ không phép: -3đ | Muộn/Bỏ tiết: -1đ | Cấm thi: -5đ", max: 5, maxLabel: "5 đ/kỳ", type: "fixed", unit: 1, minus: "-5 đ" },
+      { id: "2_2", title: "2. Chấp hành tốt nội quy, quy chế Nhà trường", subtext: "Chấp hành tốt: +5đ | Kỷ luật: -5đ", max: 5, maxLabel: "5 đ/kỳ", type: "fixed", unit: 1, minus: "-5 đ" },
+      { id: "2_3", title: "3. Thực hiện tốt quy chế thi cử", subtext: "Thực hiện tốt: +5đ | Vi phạm: -5đ", max: 5, maxLabel: "5 đ/kỳ", type: "fixed", unit: 1, minus: "-5 đ" },
+      { id: "2_4", title: "4. Chấp hành quy định của thư viện", subtext: "Chấp hành tốt: +5đ | Vi phạm: -5đ", max: 5, maxLabel: "5 đ/kỳ", type: "fixed", unit: 1, minus: "-5 đ" },
+      { id: "2_5", title: "5. Chấp hành quy định phòng học, máy, xưởng", subtext: "Chấp hành tốt: +5đ | Vi phạm: -5đ", max: 5, maxLabel: "5 đ/kỳ", type: "fixed", unit: 1, minus: "-5 đ" },
+      { id: "2_6", title: "6. Thực hiện đăng ký ngoại trú", subtext: "Đăng ký đúng hạn: +5đ | Không làm: -5đ", max: 5, maxLabel: "5 đ/kỳ", type: "fixed", unit: 1, minus: "-5 đ" },
+      { id: "2_7", title: "7. Mặc đồng phục đúng quy định", subtext: "Thực hiện đúng: +5đ | Vi phạm: -5đ", max: 5, maxLabel: "5 đ/kỳ", type: "fixed", unit: 1, minus: "-5 đ" },
+      { id: "2_8", title: "8. Sinh hoạt lớp với Cố vấn học tập", subtext: "Tham gia đủ: +5đ | Vắng không phép: -5đ", max: 5, maxLabel: "5 đ/kỳ", type: "fixed", unit: 1, minus: "-5 đ" },
     ],
   },
   {
@@ -46,21 +46,21 @@ const DRL_SECTIONS = [
     title: "III. Hoạt động chính trị, xã hội, văn hóa, văn nghệ, thể thao, phòng chống tội phạm",
     maxPoints: 20,
     items: [
-      { id: "3_1", title: "1. Hoạt động bắt buộc do Khoa hoặc Trường tổ chức", subtext: "Tham gia: +3 đ/lần | Vắng không lý do: -3 đ/lần (Nhập số lần)", max: 3, maxLabel: "3 đ/lần", type: "per_time", unit: 3, minus: "-3 đ/lần" },
-      { id: "3_2", title: "2. Đại hội Chi Đoàn/Chi Hội; sinh hoạt Chi Đoàn", subtext: "Tham gia: +3 đ/lần | Vắng không lý do: -3 đ/lần (Nhập số lần)", max: 3, maxLabel: "3 đ/lần", type: "per_time", unit: 3, minus: "-3 đ/lần" },
-      { id: "3_3", title: "3. Báo cáo chuyên đề do Trường tổ chức", subtext: "Cổ vũ: 1đ | BTC: 2đ | Tham gia: 4 đ/lần (Nhập số lần)", max: 4, maxLabel: "4 đ/lần", type: "per_time", unit: 4, minus: "" },
-      { id: "3_4", title: "4. Hoạt động ngoại khóa/Cuộc thi CLB, Khoa, Trường", subtext: "Cổ vũ: 1đ | BTC: 2đ | Tham gia: 3đ | Giải: 4-7 đ/lần (Nhập số lần)", max: 7, maxLabel: "7 đ/lần", type: "per_time", unit: 3, minus: "" },
-      { id: "3_5", title: "5. Hoạt động ngoại khóa/Cuộc thi cấp Thành phố trở lên", subtext: "Cổ vũ: 1đ | BTC: 3đ | Tham gia: 4đ | Giải: 5-8 đ/lần (Nhập số lần)", max: 8, maxLabel: "8 đ/lần", type: "per_time", unit: 4, minus: "" },
-      { id: "3_6", title: "6. Được kết nạp Đoàn", subtext: "Cộng 1 lần vào kỳ kết nạp: 5đ", max: 5, maxLabel: "5 đ", type: "fixed", minus: "" },
-      { id: "3_7", title: "7. Được kết nạp Đảng", subtext: "Cộng 1 lần vào kỳ kết nạp: 8đ", max: 8, maxLabel: "8 đ", type: "fixed", minus: "" },
-      { id: "3_8", title: "8. Hoạt động, phong trào do đơn vị, Đoàn, Hội điều động", subtext: "Tham gia: 2 đ/lần | BTC: 4 đ/lần (Nhập số lần)", max: 4, maxLabel: "4 đ/lần", type: "per_time", unit: 2, minus: "" },
-      { id: "3_9", title: "9. Thành viên các Câu lạc bộ, đội, nhóm Đoàn - Hội", subtext: "Minh chứng thành viên", max: 2, maxLabel: "2 đ/kỳ", type: "fixed", minus: "" },
-      { id: "3_10", title: "10. Hoạt động 'Học tập các bài lý luận chính trị'", subtext: "Hoàn thành bài kiểm tra: 4 đ/lần (Nhập số lần)", max: 4, maxLabel: "4 đ/lần", type: "per_time", unit: 4, minus: "" },
-      { id: "3_11", title: "11. Hoạt động đền ơn đáp nghĩa, Thắp nến tri ân", subtext: "Tham gia hoạt động: 3 đ/lần (Nhập số lần)", max: 3, maxLabel: "3 đ/lần", type: "per_time", unit: 3, minus: "" },
-      { id: "3_12", title: "12. Hoạt động lao động tình nguyện tại Trường", subtext: "Vệ sinh, dọn giảng đường: 3 đ/lần (Nhập số lần)", max: 3, maxLabel: "3 đ/lần", type: "per_time", unit: 3, minus: "" },
-      { id: "3_13", title: "13. Được khen thưởng trong các hoạt động phong trào", subtext: "Giấy khen: 5đ | Bằng khen: 7 đ/lần (Nhập số lần)", max: 7, maxLabel: "7 đ/lần", type: "per_time", unit: 5, minus: "" },
-      { id: "3_14", title: "14. Tập thể được khen thưởng trong phong trào", subtext: "Mỗi SV trong tập thể: 1 đ/lần (Nhập số lần)", max: 1, maxLabel: "1 đ/lần", type: "per_time", unit: 1, minus: "" },
-      { id: "3_15", title: "15. Các hoạt động phong trào khác", subtext: "Trực tiếp: 3 đ/lần | Online: 1 đ/lần (Nhập số lần)", max: 3, maxLabel: "3 đ/lần", type: "per_time", unit: 3, minus: "" },
+      { id: "3_1", title: "1. Hoạt động bắt buộc do Khoa hoặc Trường tổ chức", subtext: "Tham gia: +3 đ/lần | Vắng không lý do: -3 đ/lần", max: 3, maxLabel: "3 đ/lần", type: "per_time", unit: 3, minus: "-3 đ/lần" },
+      { id: "3_2", title: "2. Đại hội Chi Đoàn/Chi Hội; sinh hoạt Chi Đoàn", subtext: "Tham gia: +3 đ/lần | Vắng không lý do: -3 đ/lần", max: 3, maxLabel: "3 đ/lần", type: "per_time", unit: 3, minus: "-3 đ/lần" },
+      { id: "3_3", title: "3. Báo cáo chuyên đề do Trường tổ chức", subtext: "Cổ vũ: 1đ | BTC: 2đ | Tham gia: 4 đ/lần", max: 4, maxLabel: "4 đ/lần", type: "per_time", unit: 4, minus: "" },
+      { id: "3_4", title: "4. Hoạt động ngoại khóa/Cuộc thi CLB, Khoa, Trường", subtext: "Cổ vũ: 1đ | BTC: 2đ | Tham gia: 3đ | Giải: 4-7 đ/lần", max: 7, maxLabel: "7 đ/lần", type: "per_time", unit: 3, minus: "" },
+      { id: "3_5", title: "5. Hoạt động ngoại khóa/Cuộc thi cấp Thành phố trở lên", subtext: "Cổ vũ: 1đ | BTC: 3đ | Tham gia: 4đ | Giải: 5-8 đ/lần", max: 8, maxLabel: "8 đ/lần", type: "per_time", unit: 4, minus: "" },
+      { id: "3_6", title: "6. Được kết nạp Đoàn", subtext: "Cộng 1 lần vào kỳ kết nạp: 5đ", max: 5, maxLabel: "5 đ", type: "fixed", unit: 1, minus: "" },
+      { id: "3_7", title: "7. Được kết nạp Đảng", subtext: "Cộng 1 lần vào kỳ kết nạp: 8đ", max: 8, maxLabel: "8 đ", type: "fixed", unit: 1, minus: "" },
+      { id: "3_8", title: "8. Hoạt động, phong trào do đơn vị, Đoàn, Hội điều động", subtext: "Tham gia: 2 đ/lần | BTC: 4 đ/lần", max: 4, maxLabel: "4 đ/lần", type: "per_time", unit: 2, minus: "" },
+      { id: "3_9", title: "9. Thành viên các Câu lạc bộ, đội, nhóm Đoàn - Hội", subtext: "Minh chứng thành viên", max: 2, maxLabel: "2 đ/kỳ", type: "fixed", unit: 1, minus: "" },
+      { id: "3_10", title: "10. Hoạt động 'Học tập các bài lý luận chính trị'", subtext: "Hoàn thành bài kiểm tra: 4 đ/lần", max: 4, maxLabel: "4 đ/lần", type: "per_time", unit: 4, minus: "" },
+      { id: "3_11", title: "11. Hoạt động đền ơn đáp nghĩa, Thắp nến tri ân", subtext: "Tham gia hoạt động: 3 đ/lần", max: 3, maxLabel: "3 đ/lần", type: "per_time", unit: 3, minus: "" },
+      { id: "3_12", title: "12. Hoạt động lao động tình nguyện tại Trường", subtext: "Vệ sinh, dọn giảng đường: 3 đ/lần", max: 3, maxLabel: "3 đ/lần", type: "per_time", unit: 3, minus: "" },
+      { id: "3_13", title: "13. Được khen thưởng trong các hoạt động phong trào", subtext: "Giấy khen: 5đ | Bằng khen: 7 đ/lần", max: 7, maxLabel: "7 đ/lần", type: "per_time", unit: 5, minus: "" },
+      { id: "3_14", title: "14. Tập thể được khen thưởng trong phong trào", subtext: "Mỗi SV trong tập thể: 1 đ/lần", max: 1, maxLabel: "1 đ/lần", type: "per_time", unit: 1, minus: "" },
+      { id: "3_15", title: "15. Các hoạt động phong trào khác", subtext: "Trực tiếp: 3 đ/lần | Online: 1 đ/lần", max: 3, maxLabel: "3 đ/lần", type: "per_time", unit: 3, minus: "" },
     ],
   },
   {
@@ -68,24 +68,24 @@ const DRL_SECTIONS = [
     title: "IV. Đánh giá về ý thức công dân trong quan hệ cộng đồng",
     maxPoints: 25,
     items: [
-      { id: "4_1", title: "1. Chấp hành luật pháp, quy định Nhà nước", subtext: "Chấp hành tốt: +10đ | Công an báo về: -5đ", max: 10, maxLabel: "10 đ/lần", type: "fixed", minus: "-5 đ/lần" },
-      { id: "4_2", title: "2. Giúp đỡ người yếu thế được ghi nhận bằng văn bản", subtext: "Cấp xã/trường trở lên: 5 đ/lần (Nhập số lần)", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 5, minus: "" },
-      { id: "4_3", title: "3. Khen thưởng hoạt động xã hội ngoài trường", subtext: "Ghi nhận từ cấp xã/trường: 5 đ/lần (Nhập số lần)", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 5, minus: "" },
-      { id: "4_4", title: "4. Giao lưu các Câu lạc bộ, Đội, Nhóm trực thuộc", subtext: "Tham gia: 3đ | BTC: 5 đ/lần (Nhập số lần)", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 3, minus: "" },
-      { id: "4_5", title: "5. Chương trình 'Tư vấn tuyển sinh'", subtext: "Hỗ trợ ban tư vấn: 5 đ/lần (Nhập số lần)", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 5, minus: "" },
-      { id: "4_6", title: "6. Công tác nhập học", subtext: "Hỗ trợ làm thủ tục nhập học: 5 đ/lần (Nhập số lần)", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 5, minus: "" },
-      { id: "4_7", title: "7. Khám sức khỏe sinh viên đầu khóa", subtext: "Hỗ trợ khám sức khỏe: 5 đ/lần (Nhập số lần)", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 5, minus: "" },
-      { id: "4_8", title: "8. Công tác Ngày hội việc làm", subtext: "Hỗ trợ tổ chức: 5 đ/lần (Nhập số lần)", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 5, minus: "" },
-      { id: "4_9", title: "9. Công tác tổ chức Lễ Tốt nghiệp", subtext: "Hỗ trợ Lễ tốt nghiệp: 5 đ/lần (Nhập số lần)", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 5, minus: "" },
-      { id: "4_10", title: "10. Công tác kiểm tra hồ sơ sinh viên", subtext: "Hỗ trợ rà soát hồ sơ: 5 đ/lần (Nhập số lần)", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 5, minus: "" },
-      { id: "4_11", title: "11. Tham gia các phiên giao dịch việc làm", subtext: "Tư vấn: 1đ | Cà phê VL: 2đ | Khu vực: 3 đ/lần (Nhập số lần)", max: 3, maxLabel: "3 đ/lần", type: "per_time", unit: 2, minus: "" },
-      { id: "4_12", title: "12. Hiến máu tình nguyện", subtext: "Trực tiếp hiến máu: 10đ | BTC: 5 đ/lần (Nhập số lần)", max: 10, maxLabel: "10 đ/lần", type: "per_time", unit: 10, minus: "" },
-      { id: "4_13", title: "13. Chương trình 'Xuân tình nguyện'", subtext: "Tham gia: 4đ | BTC: 5 đ/lần (Nhập số lần)", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 4, minus: "" },
-      { id: "4_14", title: "14. Chiến dịch tình nguyện 'Mùa hè xanh'", subtext: "Tham gia: 5đ | BTC: 7 đ/lần (Nhập số lần)", max: 7, maxLabel: "7 đ/lần", type: "per_time", unit: 5, minus: "" },
-      { id: "4_15", title: "15. Chương trình 'Ngày Chủ nhật xanh'", subtext: "Tham gia: 3đ | BTC: 5 đ/lần (Nhập số lần)", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 3, minus: "" },
-      { id: "4_16", title: "16. Chương trình 'Thứ Bảy tình nguyện'", subtext: "Tham gia: 3đ | BTC: 5 đ/lần (Nhập số lần)", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 3, minus: "" },
-      { id: "4_17", title: "17. Chương trình 'Chào đón tân sinh viên'", subtext: "Tham gia: 3đ | BTC: 5 đ/lần (Nhập số lần)", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 3, minus: "" },
-      { id: "4_18", title: "18. Hoạt động trách nhiệm xã hội, phát triển bền vững", subtext: "Trực tiếp: 3 đ/lần | Trực tuyến: 1 đ/lần (Nhập số lần)", max: 3, maxLabel: "3 đ/lần", type: "per_time", unit: 3, minus: "" },
+      { id: "4_1", title: "1. Chấp hành luật pháp, quy định Nhà nước", subtext: "Chấp hành tốt: +10đ | Công an báo về: -5đ", max: 10, maxLabel: "10 đ/lần", type: "fixed", unit: 1, minus: "-5 đ/lần" },
+      { id: "4_2", title: "2. Giúp đỡ người yếu thế được ghi nhận bằng văn bản", subtext: "Cấp xã/trường trở lên: 5 đ/lần", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 5, minus: "" },
+      { id: "4_3", title: "3. Khen thưởng hoạt động xã hội ngoài trường", subtext: "Ghi nhận từ cấp xã/trường: 5 đ/lần", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 5, minus: "" },
+      { id: "4_4", title: "4. Giao lưu các Câu lạc bộ, Đội, Nhóm trực thuộc", subtext: "Tham gia: 3đ | BTC: 5 đ/lần", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 3, minus: "" },
+      { id: "4_5", title: "5. Chương trình 'Tư vấn tuyển sinh'", subtext: "Hỗ trợ ban tư vấn: 5 đ/lần", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 5, minus: "" },
+      { id: "4_6", title: "6. Công tác nhập học", subtext: "Hỗ trợ làm thủ tục nhập học: 5 đ/lần", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 5, minus: "" },
+      { id: "4_7", title: "7. Khám sức khỏe sinh viên đầu khóa", subtext: "Hỗ trợ khám sức khỏe: 5 đ/lần", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 5, minus: "" },
+      { id: "4_8", title: "8. Công tác Ngày hội việc làm", subtext: "Hỗ trợ tổ chức: 5 đ/lần", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 5, minus: "" },
+      { id: "4_9", title: "9. Công tác tổ chức Lễ Tốt nghiệp", subtext: "Hỗ trợ Lễ tốt nghiệp: 5 đ/lần", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 5, minus: "" },
+      { id: "4_10", title: "10. Công tác kiểm tra hồ sơ sinh viên", subtext: "Hỗ trợ rà soát hồ sơ: 5 đ/lần", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 5, minus: "" },
+      { id: "4_11", title: "11. Tham gia các phiên giao dịch việc làm", subtext: "Tư vấn: 1đ | Cà phê VL: 2đ | Khu vực: 3 đ/lần", max: 3, maxLabel: "3 đ/lần", type: "per_time", unit: 2, minus: "" },
+      { id: "4_12", title: "12. Hiến máu tình nguyện", subtext: "Trực tiếp hiến máu: 10đ | BTC: 5 đ/lần", max: 10, maxLabel: "10 đ/lần", type: "per_time", unit: 10, minus: "" },
+      { id: "4_13", title: "13. Chương trình 'Xuân tình nguyện'", subtext: "Tham gia: 4đ | BTC: 5 đ/lần", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 4, minus: "" },
+      { id: "4_14", title: "14. Chiến dịch tình nguyện 'Mùa hè xanh'", subtext: "Tham gia: 5đ | BTC: 7 đ/lần", max: 7, maxLabel: "7 đ/lần", type: "per_time", unit: 5, minus: "" },
+      { id: "4_15", title: "15. Chương trình 'Ngày Chủ nhật xanh'", subtext: "Tham gia: 3đ | BTC: 5 đ/lần", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 3, minus: "" },
+      { id: "4_16", title: "16. Chương trình 'Thứ Bảy tình nguyện'", subtext: "Tham gia: 3đ | BTC: 5 đ/lần", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 3, minus: "" },
+      { id: "4_17", title: "17. Chương trình 'Chào đón tân sinh viên'", subtext: "Tham gia: 3đ | BTC: 5 đ/lần", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 3, minus: "" },
+      { id: "4_18", title: "18. Hoạt động trách nhiệm xã hội, phát triển bền vững", subtext: "Trực tiếp: 3 đ/lần | Trực tuyến: 1 đ/lần", max: 3, maxLabel: "3 đ/lần", type: "per_time", unit: 3, minus: "" },
     ],
   },
   {
@@ -94,13 +94,13 @@ const DRL_SECTIONS = [
     maxPoints: 10,
     items: [
       { id: "5_1", title: "1. Tham gia tích cực vào phong trào của Lớp, Đoàn, Hội", subtext: "+1 điểm/hoạt động (Tối đa 3 điểm)", max: 3, maxLabel: "3 đ/kỳ", type: "per_time", unit: 1, minus: "" },
-      { id: "5_2", title: "2. Hoàn thành tốt nhiệm vụ người cán bộ Lớp, Chi đoàn, CLB", subtext: "Lớp trưởng/Chủ nhiệm: 5đ | Phó: 4đ | UVBCH/Tổ: 3 đ/kỳ", max: 5, maxLabel: "5 đ/kỳ", type: "fixed", minus: "" },
-      { id: "5_3", title: "3. Sinh viên đạt giải về học tập, Nghiên cứu khoa học", subtext: "Cấp TP: 3-6đ | Toàn quốc: 4-7 đ/lần (Nhập số lần)", max: 7, maxLabel: "7 đ/lần", type: "per_time", unit: 4, minus: "" },
-      { id: "5_4", title: "4. Bằng khen UBND Tỉnh/Thành phố hoặc tương đương", subtext: "Hoạt động chính trị, cứu người: 5 đ/lần (Nhập số lần)", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 5, minus: "" },
-      { id: "5_5", title: "5. Sinh viên 5 tốt cấp Trường, Đoàn viên tiêu biểu", subtext: "Minh chứng công nhận: 6 đ/lần (Nhập số lần)", max: 6, maxLabel: "6 đ/lần", type: "per_time", unit: 6, minus: "" },
-      { id: "5_6", title: "6. Sinh viên 5 tốt cấp Thành/Trung ương, Sao Tháng Giêng", subtext: "Minh chứng công nhận: 10 đ/lần (Nhập số lần)", max: 10, maxLabel: "10 đ/lần", type: "per_time", unit: 10, minus: "" },
-      { id: "5_7", title: "7. Đạt danh hiệu Đoàn viên ưu tú", subtext: "Được công nhận trong kỳ: 6 đ/lần (Nhập số lần)", max: 6, maxLabel: "6 đ/lần", type: "per_time", unit: 6, minus: "" },
-      { id: "5_8", title: "8. Giấy khen tập thể của Đoàn", subtext: "Mỗi sinh viên trong tập thể được 2 điểm: 2 đ/SV", max: 2, maxLabel: "2 đ/SV", type: "fixed", minus: "" },
+      { id: "5_2", title: "2. Hoàn thành tốt nhiệm vụ người cán bộ Lớp, Chi đoàn, CLB", subtext: "Lớp trưởng/Chủ nhiệm: 5đ | Phó: 4đ | UVBCH/Tổ: 3 đ/kỳ", max: 5, maxLabel: "5 đ/kỳ", type: "fixed", unit: 1, minus: "" },
+      { id: "5_3", title: "3. Sinh viên đạt giải về học tập, Nghiên cứu khoa học", subtext: "Cấp TP: 3-6đ | Toàn quốc: 4-7 đ/lần", max: 7, maxLabel: "7 đ/lần", type: "per_time", unit: 4, minus: "" },
+      { id: "5_4", title: "4. Bằng khen UBND Tỉnh/Thành phố hoặc tương đương", subtext: "Hoạt động chính trị, cứu người: 5 đ/lần", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 5, minus: "" },
+      { id: "5_5", title: "5. Sinh viên 5 tốt cấp Trường, Đoàn viên tiêu biểu", subtext: "Minh chứng công nhận: 6 đ/lần", max: 6, maxLabel: "6 đ/lần", type: "per_time", unit: 6, minus: "" },
+      { id: "5_6", title: "6. Sinh viên 5 tốt cấp Thành/Trung ương, Sao Tháng Giêng", subtext: "Minh chứng công nhận: 10 đ/lần", max: 10, maxLabel: "10 đ/lần", type: "per_time", unit: 10, minus: "" },
+      { id: "5_7", title: "7. Đạt danh hiệu Đoàn viên ưu tú", subtext: "Được công nhận trong kỳ: 6 đ/lần", max: 6, maxLabel: "6 đ/lần", type: "per_time", unit: 6, minus: "" },
+      { id: "5_8", title: "8. Giấy khen tập thể của Đoàn", subtext: "Mỗi sinh viên trong tập thể được 2 điểm: 2 đ/SV", max: 2, maxLabel: "2 đ/SV", type: "fixed", unit: 1, minus: "" },
     ],
   },
 ];
@@ -127,7 +127,7 @@ export default function CongDRLPage() {
   const [itemProofs, setItemProofs] = useState<{ [key: string]: string }>({});
   const [uploadingItemId, setUploadingItemId] = useState<string | null>(null);
 
-  // Điểm tự chấm
+  // Điểm tự chấm thực tế
   const [scores, setScores] = useState<{ [key: string]: number }>({
     "1_1": 3, "2_1": 5, "2_2": 5, "2_3": 5, "2_4": 5, "2_5": 5, "2_6": 5, "2_7": 5, "2_8": 5,
     "3_1": 3, "3_2": 3, "4_1": 10, "5_1": 3,
@@ -218,16 +218,18 @@ export default function CongDRLPage() {
     checkSemesterStatus(sem);
   };
 
-  // Tính điểm tự động khi thay đổi số lần hoặc điểm cố định, tự khống chế Max
+  // Tính điểm chính xác theo số lần và khống chế Max
   const handleItemChange = (item: any, rawValue: number) => {
     if (!isSemesterOpen) return;
+    const inputVal = Math.max(0, rawValue || 0);
     let computedScore = 0;
+
     if (item.type === "per_time") {
-      const times = Math.max(0, rawValue || 0);
-      computedScore = Math.min(times * (item.unit || 1), item.max);
+      computedScore = Math.min(inputVal * (item.unit || 1), item.max);
     } else {
-      computedScore = Math.min(Math.max(0, rawValue || 0), item.max);
+      computedScore = Math.min(inputVal, item.max);
     }
+
     setScores((prev) => ({ ...prev, [item.id]: computedScore }));
   };
 
@@ -616,7 +618,7 @@ export default function CongDRLPage() {
                 PHIẾU ĐÁNH GIÁ ĐIỂM RÈN LUYỆN ({selectedSemester})
               </h2>
               <p className="text-xs text-slate-500 mt-1">
-                Các tiểu mục tính theo lần: Hệ thống sẽ tự động nhân số lần tham gia với điểm đơn vị (và tự khống chế tối đa theo quy định).
+                Các tiểu mục tính theo lần: Nhập số lần tham gia để hệ thống tự động cộng dồn điểm chính xác.
               </p>
             </div>
 
@@ -645,7 +647,6 @@ export default function CongDRLPage() {
                         <tbody className="divide-y divide-slate-100">
                           {section.items.map((item) => {
                             const currentScore = scores[item.id] !== undefined ? scores[item.id] : 0;
-                            // Nếu là per_time, tính ngược lại số lần (currentScore / unit)
                             const timesValue = item.type === "per_time" ? Math.round(currentScore / (item.unit || 1)) : currentScore;
 
                             return (
