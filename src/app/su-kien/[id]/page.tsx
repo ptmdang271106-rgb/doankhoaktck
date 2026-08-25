@@ -56,7 +56,7 @@ export default function ChiTietSuKienPage() {
                 href={`/dang-nhap?redirect=/su-kien/${id}`}
                 className="w-full sm:w-auto bg-[#EE6425] hover:bg-[#d85216] text-white text-xs sm:text-sm font-bold px-6 py-3 rounded-xl shadow-md transition-all active:scale-95 uppercase tracking-wider whitespace-nowrap text-center inline-block"
               >
-                👉 ĐĂNG KÝ THAM GIA NGAY
+                ĐĂNG KÝ THAM GIA NGAY!
               </Link>
             </div>
 
