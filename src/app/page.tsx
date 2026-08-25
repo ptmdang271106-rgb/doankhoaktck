@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
+
 export default function CTUTYouthPortal() {
   const [activeCategory, setActiveCategory] = useState("Tất cả");
   const [activeTabRank, setActiveTabRank] = useState("Nổi bật");
@@ -16,12 +17,12 @@ export default function CTUTYouthPortal() {
 
   return (
     <div className="min-h-screen bg-white text-[#333333] font-sans antialiased">
-      {/* 1. THANH ĐIỀU HƯỚNG TẦNG 1: LOGO NẰM CHÍNH TÂM TUYỆT ĐỐI */}
+      {/* 1. THANH ĐIỀU HƯỚNG TẦNG 1 */}
       <header className="border-b border-gray-100 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="h-20 grid grid-cols-12 items-center text-[13px] font-medium text-[#2C3E50]">
             
-            {/* Menu Trái (Chiếm 4 cột - Căn sang bên phải để ôm sát logo) */}
+            {/* Menu Trái */}
             <div className="col-span-4 hidden lg:flex items-center justify-end space-x-6 pr-4 whitespace-nowrap">
               <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1">
                 Giới thiệu <span className="text-[10px]">▼</span>
@@ -34,16 +35,18 @@ export default function CTUTYouthPortal() {
               </a>
             </div>
 
-            {/* LOGO CHÍNH THỨC NẰM CHÍNH GIỮA (Chiếm 4 cột - Tuyệt đối ở tâm) */}
+            {/* LOGO CHÍNH THỨC */}
             <div className="col-span-12 lg:col-span-4 flex items-center justify-center py-1">
-              <img
-                src="/logo-doankhoa.png"
-                alt="Tuổi trẻ Khoa Kỹ thuật Cơ khí - Trường Đại học Kỹ thuật - Công nghệ Cần Thơ"
-                className="h-10 sm:h-12 w-auto max-w-full object-contain block mx-auto"
-              />
+              <Link href="/">
+                <img
+                  src="/logodk.png"
+                  alt="Tuổi trẻ Khoa Kỹ thuật Cơ khí - Trường Đại học Kỹ thuật - Công nghệ Cần Thơ"
+                  className="h-10 sm:h-12 w-auto max-w-full object-contain block mx-auto cursor-pointer"
+                />
+              </Link>
             </div>
 
-            {/* Menu Phải (Chiếm 4 cột - Đã sửa lỗi đóng thẻ) */}
+            {/* Menu Phải */}
             <div className="col-span-4 hidden lg:flex items-center justify-start space-x-4 pl-4 whitespace-nowrap">
               <a href="#" className="hover:text-[#007A87] transition-colors">
                 Giao dịch điện tử
@@ -54,9 +57,14 @@ export default function CTUTYouthPortal() {
               <button className="bg-[#007A87] text-white px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-[#00606B] transition-colors">
                 Điểm danh
               </button>
-             <Link href="/tra-cuu" className="bg-[#00707b] text-white px-4 py-1.5 rounded-full font-bold">
-  Cổng ĐRL
-</Link>
+              
+              {/* Nút Cổng ĐRL chuyển sang trang /tra-cuu */}
+              <Link
+                href="/tra-cuu"
+                className="bg-[#00707b] hover:bg-[#005a63] text-white px-4 py-1.5 rounded-full font-bold transition-colors inline-block"
+              >
+                Cổng ĐRL
+              </Link>
             </div>
 
           </div>
@@ -66,9 +74,10 @@ export default function CTUTYouthPortal() {
         <div className="bg-[#F8FCFC] border-t border-b border-[#E6F4F4]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-center space-x-8 py-2.5 text-[13.5px] font-semibold text-[#007A87] overflow-x-auto whitespace-nowrap">
-             <Link href="/dang-ky" className="hover:text-[#004A52] transition-colors">
-  Hoạt động – Sự kiện Cơ khí
-</Link>
+              {/* Mục Hoạt động – Sự kiện Cơ khí chuyển sang trang /dang-ky */}
+              <Link href="/dang-ky" className="hover:text-[#004A52] transition-colors">
+                Hoạt động – Sự kiện Cơ khí
+              </Link>
               <a href="#" className="hover:text-[#004A52] transition-colors">Xem gì hôm nay</a>
               <a href="#" className="hover:text-[#004A52] transition-colors">Bản tin học thuật</a>
               <a href="#" className="hover:text-[#004A52] transition-colors">Mechanical Signal</a>
@@ -83,7 +92,7 @@ export default function CTUTYouthPortal() {
         <div className="w-full max-w-7xl mx-auto px-0 sm:px-4 lg:px-8 py-2 sm:py-4">
           <img
             src="/banner-ctut.png"
-            alt="Chương trình Chào đón Tân sinh viên Khóa 2026 - Khoa Kỹ thuật Cơ khí CTUT"
+            alt="Chương trình Chào đón Tân sinh viên - Khoa Kỹ thuật Cơ khí CTUT"
             className="w-full h-auto block rounded-none sm:rounded-lg shadow-sm"
           />
         </div>
@@ -235,9 +244,12 @@ export default function CTUTYouthPortal() {
             <div className="mt-6 bg-[#006674] text-white p-4 rounded-lg text-center space-y-2">
               <div className="text-xs font-bold uppercase tracking-wide">Cổng Dịch Vụ Sinh Viên</div>
               <p className="text-[11px] text-teal-100">Tra cứu kết quả rèn luyện & Check-in sự kiện bằng mã QR cá nhân</p>
-              <button className="w-full bg-[#E67E22] hover:bg-[#D35400] text-white text-xs font-bold py-2 rounded transition-colors uppercase">
-                Đăng nhập ngay
-              </button>
+              <Link
+                href="/tra-cuu"
+                className="w-full bg-[#E67E22] hover:bg-[#D35400] text-white text-xs font-bold py-2 rounded transition-colors uppercase inline-block"
+              >
+                Tra cứu ngay
+              </Link>
             </div>
           </div>
         </div>
