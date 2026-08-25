@@ -21,10 +21,18 @@ export default function CongDRLPage() {
   const [proofUrl, setProofUrl] = useState("");
   const [submittingProof, setSubmittingProof] = useState(false);
 
+  // Điểm tự chấm từng tiêu chí (Cho phép chỉnh sửa linh hoạt)
+  const [scoreM1, setScoreM1] = useState<number>(18);
+  const [scoreM2, setScoreM2] = useState<number>(25);
+  const [scoreM3, setScoreM3] = useState<number>(20);
+  const [scoreM4, setScoreM4] = useState<number>(22);
+  const [scoreM5, setScoreM5] = useState<number>(0);
+
   // Trạng thái phiếu ĐRL
-  const [drlScoreSelf, setDrlScoreSelf] = useState<number>(85);
   const [drlStatus, setDrlStatus] = useState<string>("Chưa nộp");
   const [finalScore, setFinalScore] = useState<number | null>(null);
+
+  const totalSelfScore = Number(scoreM1) + Number(scoreM2) + Number(scoreM3) + Number(scoreM4) + Number(scoreM5);
 
   useEffect(() => {
     const saved = localStorage.getItem("ctut_current_user");
@@ -40,7 +48,7 @@ export default function CongDRLPage() {
   const loadData = async (mssv: string) => {
     setLoading(true);
     try {
-      // 1. Lấy danh sách minh chứng & điểm danh hoạt động
+      // 1. Lấy danh sách minh chứng & điểm danh
       const { data: proofData } = await supabase
         .from("proofs")
         .select("*")
@@ -70,7 +78,7 @@ export default function CongDRLPage() {
   const handleUploadProof = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!proofTitle || !proofUrl) {
-      alert("Vui lòng điền đầy đủ tên hoạt động và đường link hình ảnh minh chứng!");
+      alert("Vui lòng điền đầy đủ tên hoạt động và đường link minh chứng!");
       return;
     }
 
@@ -111,12 +119,19 @@ export default function CongDRLPage() {
         mssv: currentUser.mssv,
         student_name: currentUser.fullName,
         student_class: currentUser.studentClass,
-        self_score: drlScoreSelf,
+        self_score: totalSelfScore,
+        score_m1: scoreM1,
+        score_m2: scoreM2,
+        score_m3: scoreM3,
+        score_m4: scoreM4,
+        score_m5: scoreM5,
         status: "Đã nộp - Chờ BCH Chi đoàn duyệt",
         submitted_at: new Date().toISOString(),
       };
 
-      await supabase.from("drl_submissions").upsert([submission], { onConflict: "mssv" });
+      const { error } = await supabase.from("drl_submissions").upsert([submission], { onConflict: "mssv" });
+      if (error) throw error;
+
       setDrlStatus("Đã nộp - Chờ BCH Chi đoàn duyệt");
       alert("Nộp phiếu ĐRL thành công!");
     } catch (err: any) {
@@ -130,43 +145,23 @@ export default function CongDRLPage() {
     <div className="min-h-screen bg-slate-50 py-8 px-4 sm:px-6 lg:px-8 font-sans text-slate-800">
       <div className="max-w-6xl mx-auto space-y-6">
 
-       {/* HEADER CHUẨN ĐẸP KHÔNG VỠ LAYOUT */}
-<div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
-  <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-    
-    {/* Banner Logo đã có sẵn chữ */}
-    <div className="flex items-center">
-      <img
-        src="/logo-doankhoa.png"
-        alt="Logo Đoàn Khoa Kỹ thuật Cơ khí"
-        className="h-14 sm:h-16 w-auto object-contain"
-      />
-    </div>
+        {/* HEADER CHUẨN: DÙNG DUY NHẤT ẢNH BANNER ĐÃ CÓ SẴN CHỮ */}
+        <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center">
+              <img
+                src="/logo-doankhoa.png"
+                alt="Logo Đoàn Khoa Kỹ thuật Cơ khí"
+                className="h-12 sm:h-14 w-auto object-contain"
+              />
+            </div>
 
-    {/* Tiêu đề Cổng */}
-    <div className="text-center md:text-left">
-      <h1 className="text-xl sm:text-2xl font-black text-[#004A52] tracking-tight uppercase">
-        CỔNG ĐIỂM RÈN LUYỆN
-      </h1>
-    </div>
-
-    {/* Nút về trang chủ */}
-    <Link
-      href="/"
-      className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition"
-    >
-      Về trang chủ
-    </Link>
-  </div>
-</div>
-            {/* Tiêu đề Cổng */}
             <div className="text-center md:text-left">
               <h1 className="text-xl sm:text-2xl font-black text-[#004A52] tracking-tight uppercase">
                 CỔNG ĐIỂM RÈN LUYỆN
               </h1>
             </div>
 
-            {/* Nút về trang chủ */}
             <Link
               href="/"
               className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition"
@@ -176,7 +171,7 @@ export default function CongDRLPage() {
           </div>
         </div>
 
-        {/* THÔNG TIN SINH VIÊN TỔNG QUAN */}
+        {/* THÔNG TIN TỔNG QUAN */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="md:col-span-2 bg-white rounded-3xl p-6 shadow-sm border border-slate-200 space-y-2">
             <div className="flex justify-between items-center border-b border-slate-100 pb-2">
@@ -206,15 +201,13 @@ export default function CongDRLPage() {
           </div>
         </div>
 
-        {/* 3 TAB CHỨC NĂNG CHÍNH */}
+        {/* 3 TAB CHỨC NĂNG */}
         <div className="bg-white rounded-3xl p-2 shadow-sm border border-slate-200">
           <div className="grid grid-cols-3 gap-2 text-center text-xs font-bold">
             <button
               onClick={() => setActiveTab("proof")}
               className={`py-3 rounded-2xl transition ${
-                activeTab === "proof"
-                  ? "bg-[#EE6425] text-white shadow"
-                  : "text-slate-600 hover:bg-slate-100"
+                activeTab === "proof" ? "bg-[#EE6425] text-white shadow" : "text-slate-600 hover:bg-slate-100"
               }`}
             >
               1. Nộp & Quản lý Minh chứng
@@ -222,9 +215,7 @@ export default function CongDRLPage() {
             <button
               onClick={() => setActiveTab("form")}
               className={`py-3 rounded-2xl transition ${
-                activeTab === "form"
-                  ? "bg-[#EE6425] text-white shadow"
-                  : "text-slate-600 hover:bg-slate-100"
+                activeTab === "form" ? "bg-[#EE6425] text-white shadow" : "text-slate-600 hover:bg-slate-100"
               }`}
             >
               2. Nộp Phiếu Điểm Rèn Luyện
@@ -232,9 +223,7 @@ export default function CongDRLPage() {
             <button
               onClick={() => setActiveTab("result")}
               className={`py-3 rounded-2xl transition ${
-                activeTab === "result"
-                  ? "bg-[#EE6425] text-white shadow"
-                  : "text-slate-600 hover:bg-slate-100"
+                activeTab === "result" ? "bg-[#EE6425] text-white shadow" : "text-slate-600 hover:bg-slate-100"
               }`}
             >
               3. Kết quả Điểm Rèn Luyện
@@ -242,10 +231,9 @@ export default function CongDRLPage() {
           </div>
         </div>
 
-        {/* ================= NỘI DUNG TAB 1: NỘP MINH CHỨNG ================= */}
+        {/* TAB 1: MINH CHỨNG */}
         {activeTab === "proof" && (
           <div className="space-y-6">
-            {/* Form nộp minh chứng ngoài khoa */}
             <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
               <h2 className="text-sm font-black text-[#004A52] uppercase mb-4">
                 Nộp minh chứng hoạt động ngoài khoa
@@ -314,7 +302,6 @@ export default function CongDRLPage() {
               </form>
             </div>
 
-            {/* Bảng danh sách minh chứng & lượt điểm danh tự động */}
             <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-sm font-black text-[#004A52] uppercase">
@@ -332,7 +319,7 @@ export default function CongDRLPage() {
                 <div className="text-center py-6 text-xs text-slate-400">Đang tải minh chứng...</div>
               ) : proofs.length === 0 ? (
                 <div className="text-center py-8 text-xs text-slate-400">
-                  Chưa có minh chứng hoặc lượt điểm danh nào. Hãy tham gia hoạt động hoặc nộp minh chứng ngoài khoa bên trên!
+                  Chưa có minh chứng hoặc lượt điểm danh nào.
                 </div>
               ) : (
                 <div className="overflow-x-auto">
@@ -383,7 +370,7 @@ export default function CongDRLPage() {
           </div>
         )}
 
-        {/* ================= NỘI DUNG TAB 2: NỘP PHIẾU ĐIỂM RÈN LUYỆN ================= */}
+        {/* TAB 2: PHIẾU ĐÁNH GIÁ (CHO PHÉP TỰ ĐIỀN ĐIỂM) */}
         {activeTab === "form" && (
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 space-y-6">
             <div className="border-b border-slate-100 pb-4">
@@ -391,60 +378,111 @@ export default function CongDRLPage() {
                 PHIẾU ĐÁNH GIÁ ĐIỂM RÈN LUYỆN HỌC KỲ
               </h2>
               <p className="text-xs text-slate-500 mt-1">
-                Dữ liệu minh chứng đã lưu sẽ tự động được đối chiếu vào từng mục. Sinh viên kiểm tra, tự chấm và bấm nộp cho BCH Chi đoàn.
+                Sinh viên kiểm tra minh chứng, nhập điểm tự đánh giá cho từng tiêu chí và bấm nộp cho BCH Chi đoàn.
               </p>
             </div>
 
-            {/* Bảng phiếu đánh giá từng tiêu chí */}
             <div className="space-y-4 text-xs">
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-                <div className="flex justify-between font-bold text-slate-800">
-                  <span>I. Đánh giá về ý thức tham gia học tập (Tối đa 20đ)</span>
-                  <span className="text-[#EE6425]">18 / 20đ</span>
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <span className="font-bold text-slate-800 block">I. Đánh giá về ý thức tham gia học tập (Tối đa 20đ)</span>
+                  <p className="text-[11px] text-slate-500">Minh chứng: Điểm danh học tập, không vi phạm quy chế thi cử.</p>
                 </div>
-                <p className="text-[11px] text-slate-500">Minh chứng: Điểm danh học tập, không vi phạm quy chế thi cử.</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-slate-500 font-bold">Điểm tự chấm:</span>
+                  <input
+                    type="number"
+                    min="0"
+                    max="20"
+                    value={scoreM1}
+                    onChange={(e) => setScoreM1(Number(e.target.value))}
+                    className="w-16 border border-slate-300 rounded-lg px-2 py-1 text-center font-bold text-[#EE6425] outline-none focus:border-[#EE6425]"
+                  />
+                  <span className="text-slate-400">/ 20đ</span>
+                </div>
               </div>
 
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-                <div className="flex justify-between font-bold text-slate-800">
-                  <span>II. Đánh giá về ý thức chấp hành nội quy, quy chế (Tối đa 25đ)</span>
-                  <span className="text-[#EE6425]">25 / 25đ</span>
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <span className="font-bold text-slate-800 block">II. Đánh giá về ý thức chấp hành nội quy, quy chế (Tối đa 25đ)</span>
+                  <p className="text-[11px] text-slate-500">Minh chứng: Chấp hành tốt quy định của Nhà trường và Pháp luật.</p>
                 </div>
-                <p className="text-[11px] text-slate-500">Minh chứng: Chấp hành tốt quy định của Nhà trường và Pháp luật.</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-slate-500 font-bold">Điểm tự chấm:</span>
+                  <input
+                    type="number"
+                    min="0"
+                    max="25"
+                    value={scoreM2}
+                    onChange={(e) => setScoreM2(Number(e.target.value))}
+                    className="w-16 border border-slate-300 rounded-lg px-2 py-1 text-center font-bold text-[#EE6425] outline-none focus:border-[#EE6425]"
+                  />
+                  <span className="text-slate-400">/ 25đ</span>
+                </div>
               </div>
 
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-                <div className="flex justify-between font-bold text-slate-800">
-                  <span>III. Đánh giá về ý thức tham gia hoạt động CT - XH, VH - VN - TT (Tối đa 20đ)</span>
-                  <span className="text-[#EE6425]">20 / 20đ</span>
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <span className="font-bold text-slate-800 block">III. Hoạt động CT - XH, VH - VN - TT (Tối đa 20đ)</span>
+                  <p className="text-[11px] text-slate-500">Minh chứng: Đã tham gia {proofs.length} hoạt động được ghi nhận.</p>
                 </div>
-                <p className="text-[11px] text-slate-500">
-                  Minh chứng kéo từ Tab 1: Đã tham gia {proofs.length} hoạt động được ghi nhận.
-                </p>
+                <div className="flex items-center gap-2">
+                  <span className="text-slate-500 font-bold">Điểm tự chấm:</span>
+                  <input
+                    type="number"
+                    min="0"
+                    max="20"
+                    value={scoreM3}
+                    onChange={(e) => setScoreM3(Number(e.target.value))}
+                    className="w-16 border border-slate-300 rounded-lg px-2 py-1 text-center font-bold text-[#EE6425] outline-none focus:border-[#EE6425]"
+                  />
+                  <span className="text-slate-400">/ 20đ</span>
+                </div>
               </div>
 
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-                <div className="flex justify-between font-bold text-slate-800">
-                  <span>IV. Đánh giá về phẩm chất công dân và quan hệ cộng đồng (Tối đa 25đ)</span>
-                  <span className="text-[#EE6425]">22 / 25đ</span>
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <span className="font-bold text-slate-800 block">IV. Phẩm chất công dân và quan hệ cộng đồng (Tối đa 25đ)</span>
+                  <p className="text-[11px] text-slate-500">Minh chứng: Tham gia giữ gìn vệ sinh, lối sống lành mạnh.</p>
                 </div>
-                <p className="text-[11px] text-slate-500">Minh chứng: Tham gia giữ gìn vệ sinh, lối sống lành mạnh.</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-slate-500 font-bold">Điểm tự chấm:</span>
+                  <input
+                    type="number"
+                    min="0"
+                    max="25"
+                    value={scoreM4}
+                    onChange={(e) => setScoreM4(Number(e.target.value))}
+                    className="w-16 border border-slate-300 rounded-lg px-2 py-1 text-center font-bold text-[#EE6425] outline-none focus:border-[#EE6425]"
+                  />
+                  <span className="text-slate-400">/ 25đ</span>
+                </div>
               </div>
 
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-                <div className="flex justify-between font-bold text-slate-800">
-                  <span>V. Ý thức tham gia công tác phụ trách lớp, đoàn thể (Tối đa 10đ)</span>
-                  <span className="text-[#EE6425]">0 / 10đ</span>
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <span className="font-bold text-slate-800 block">V. Ý thức tham gia công tác phụ trách lớp, đoàn thể (Tối đa 10đ)</span>
+                  <p className="text-[11px] text-slate-500">Minh chứng: Cán bộ Đoàn - Hội, Ban Cán sự lớp.</p>
                 </div>
-                <p className="text-[11px] text-slate-500">Minh chứng: Cán bộ Đoàn - Hội, Ban Cán sự lớp.</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-slate-500 font-bold">Điểm tự chấm:</span>
+                  <input
+                    type="number"
+                    min="0"
+                    max="10"
+                    value={scoreM5}
+                    onChange={(e) => setScoreM5(Number(e.target.value))}
+                    className="w-16 border border-slate-300 rounded-lg px-2 py-1 text-center font-bold text-[#EE6425] outline-none focus:border-[#EE6425]"
+                  />
+                  <span className="text-slate-400">/ 10đ</span>
+                </div>
               </div>
             </div>
 
-            {/* Tổng điểm tự chấm & nút nộp */}
             <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4">
               <div className="text-center sm:text-left">
                 <span className="text-xs text-slate-500 block">Tổng điểm sinh viên tự chấm:</span>
-                <span className="text-2xl font-black text-[#EE6425]">{drlScoreSelf} / 100 điểm</span>
+                <span className="text-2xl font-black text-[#EE6425]">{totalSelfScore} / 100 điểm</span>
               </div>
 
               <button
@@ -457,7 +495,7 @@ export default function CongDRLPage() {
           </div>
         )}
 
-        {/* ================= NỘI DUNG TAB 3: KẾT QUẢ ĐIỂM RÈN LUYỆN ================= */}
+        {/* TAB 3: KẾT QUẢ CHÍNH THỨC */}
         {activeTab === "result" && (
           <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-200 text-center space-y-4">
             <h2 className="text-base font-black text-[#004A52] uppercase">
@@ -466,10 +504,10 @@ export default function CongDRLPage() {
 
             <div className="py-6">
               <span className="text-5xl font-black text-[#EE6425]">
-                {finalScore !== null ? finalScore : drlScoreSelf}
+                {finalScore !== null ? finalScore : totalSelfScore}
               </span>
               <span className="block text-xs font-bold text-slate-500 mt-2">
-                Xếp loại: { (finalScore || drlScoreSelf) >= 90 ? "Xuất sắc" : (finalScore || drlScoreSelf) >= 80 ? "Tốt" : "Khá" }
+                Xếp loại: { (finalScore || totalSelfScore) >= 90 ? "Xuất sắc" : (finalScore || totalSelfScore) >= 80 ? "Tốt" : (finalScore || totalSelfScore) >= 65 ? "Khá" : "Trung bình" }
               </span>
             </div>
 
