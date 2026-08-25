@@ -532,7 +532,6 @@ const DRL_SECTIONS = [
   },
 ];
 
-// Danh sách tra cứu mức điểm tối đa cho từng mục dropdown
 const CATEGORY_MAX_POINTS: { [key: string]: number } = {
   "I.1. Điểm trung bình học tập tích lũy hệ 4": 5,
   "I.2. Chứng nhận lớp chuyên đề kỹ năng học tập": 3,
@@ -602,17 +601,21 @@ export default function CongDRLPage() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<"proof" | "form" | "result">("proof");
 
-  // Dữ liệu minh chứng & hoạt động
+  // Dữ liệu minh chứng
   const [proofs, setProofs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Form nộp minh chứng ngoài khoa
+  // Form nộp minh chứng Tab 1
   const [proofTitle, setProofTitle] = useState("");
   const [proofCategory, setProofCategory] = useState("I.1. Điểm trung bình học tập tích lũy hệ 4");
   const [proofPoints, setProofPoints] = useState<number>(5);
   const [proofUrl, setProofUrl] = useState("");
   const [submittingProof, setSubmittingProof] = useState(false);
   const [uploadingFile, setUploadingFile] = useState(false);
+
+  // Lưu link minh chứng cho từng tiểu mục của Tab 2: { "1_1": "https://...", "1_2": "..." }
+  const [itemProofs, setItemProofs] = useState<{ [key: string]: string }>({});
+  const [uploadingItemId, setUploadingItemId] = useState<string | null>(null);
 
   // Điểm tự chấm theo từng ID chi tiết { "1_1": 3, "2_1": 5, ... }
   const [scores, setScores] = useState<{ [key: string]: number }>({
@@ -654,7 +657,17 @@ export default function CongDRLPage() {
         .eq("mssv", mssv)
         .order("created_at", { ascending: false });
 
-      if (proofData) setProofs(proofData);
+      if (proofData) {
+        setProofs(proofData);
+        // Tự động nạp minh chứng vào từng tiểu mục nếu có
+        const proofMap: { [key: string]: string } = {};
+        proofData.forEach((p) => {
+          if (p.item_id && p.proof_url) {
+            proofMap[p.item_id] = p.proof_url;
+          }
+        });
+        setItemProofs((prev) => ({ ...proofMap, ...prev }));
+      }
 
       const { data: drlData } = await supabase
         .from("drl_submissions")
@@ -668,6 +681,9 @@ export default function CongDRLPage() {
         if (drlData.scores_detail) {
           setScores(drlData.scores_detail);
         }
+        if (drlData.proofs_detail) {
+          setItemProofs(drlData.proofs_detail);
+        }
       }
     } catch (e) {
       console.error(e);
@@ -675,7 +691,6 @@ export default function CongDRLPage() {
     setLoading(false);
   };
 
-  // Tự động điều chỉnh điểm tối đa theo mục khi đổi dropdown
   const handleCategoryChange = (cat: string) => {
     setProofCategory(cat);
     const maxVal = CATEGORY_MAX_POINTS[cat] || 10;
@@ -687,8 +702,8 @@ export default function CongDRLPage() {
     setScores((prev) => ({ ...prev, [itemId]: safeVal }));
   };
 
-  // Xử lý tải file trực tiếp lên Storage
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Upload file minh chứng chung Tab 1
+  const handleFileUploadTab1 = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -698,15 +713,12 @@ export default function CongDRLPage() {
       const fileName = `${currentUser.mssv}_${Date.now()}.${fileExt}`;
       const filePath = `proofs/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from("documents")
-        .upload(filePath, file);
+      const { error: uploadError } = await supabase.storage.from("documents").upload(filePath, file);
 
       if (uploadError) {
-        // Dự phòng nếu bucket chưa mở public thì tạo blob URL trực tiếp
         const localUrl = URL.createObjectURL(file);
         setProofUrl(localUrl);
-        alert("Đã chọn file thành công!");
+        alert("Đã chọn file đính kèm!");
       } else {
         const { data: urlData } = supabase.storage.from("documents").getPublicUrl(filePath);
         setProofUrl(urlData.publicUrl);
@@ -718,17 +730,63 @@ export default function CongDRLPage() {
     setUploadingFile(false);
   };
 
-  // Tính điểm tổng từng phần có khống chế tối đa
+  // Upload file minh chứng trực tiếp cho từng tiểu mục trong Tab 2
+  const handleFileUploadItem = async (itemId: string, itemTitle: string, itemMax: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingItemId(itemId);
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${currentUser.mssv}_${itemId}_${Date.now()}.${fileExt}`;
+      const filePath = `proofs/${fileName}`;
+
+      let uploadedUrl = "";
+      const { error: uploadError } = await supabase.storage.from("documents").upload(filePath, file);
+
+      if (uploadError) {
+        uploadedUrl = URL.createObjectURL(file);
+      } else {
+        const { data: urlData } = supabase.storage.from("documents").getPublicUrl(filePath);
+        uploadedUrl = urlData.publicUrl;
+      }
+
+      // 1. Cập nhật state minh chứng cho tiểu mục
+      setItemProofs((prev) => ({ ...prev, [itemId]: uploadedUrl }));
+
+      // 2. Tự động đồng bộ thêm một bản ghi vào danh sách minh chứng (Tab 1)
+      const newProof = {
+        mssv: currentUser.mssv,
+        student_name: currentUser.fullName,
+        student_class: currentUser.studentClass,
+        activity_title: itemTitle,
+        category: itemTitle,
+        item_id: itemId,
+        points: scores[itemId] || itemMax,
+        proof_url: uploadedUrl,
+        source: "Phiếu đánh giá ĐRL",
+        status: "Đã nạp theo phiếu",
+        created_at: new Date().toISOString(),
+      };
+
+      await supabase.from("proofs").insert([newProof]);
+      loadData(currentUser.mssv);
+      alert(`Đã nạp minh chứng cho mục "${itemTitle.slice(0, 30)}..." thành công!`);
+    } catch (err: any) {
+      alert("Lỗi tải file: " + err.message);
+    }
+    setUploadingItemId(null);
+  };
+
   const getSectionScore = (section: any) => {
     const rawSum = section.items.reduce((sum: number, it: any) => sum + (Number(scores[it.id]) || 0), 0);
     return Math.min(rawSum, section.maxPoints);
   };
 
-  // Tổng điểm toàn bộ 5 phần
   const grandTotalScore = DRL_SECTIONS.reduce((total, sec) => total + getSectionScore(sec), 0);
 
-  // Nộp minh chứng hoạt động ngoài khoa
-  const handleUploadProof = async (e: React.FormEvent) => {
+  // Nộp minh chứng từ form Tab 1
+  const handleUploadProofTab1 = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!proofTitle || !proofUrl) {
       alert("Vui lòng điền đầy đủ tên hoạt động và chọn tệp hoặc dán link minh chứng!");
@@ -774,6 +832,7 @@ export default function CongDRLPage() {
         student_class: currentUser.studentClass,
         self_score: grandTotalScore,
         scores_detail: scores,
+        proofs_detail: itemProofs,
         status: "Đã nộp - Chờ BCH Chi đoàn duyệt",
         submitted_at: new Date().toISOString(),
       };
@@ -782,7 +841,7 @@ export default function CongDRLPage() {
       if (error) throw error;
 
       setDrlStatus("Đã nộp - Chờ BCH Chi đoàn duyệt");
-      alert("Nộp phiếu đánh giá ĐRL thành công!");
+      alert("Nộp phiếu đánh giá ĐRL kèm minh chứng thành công!");
     } catch (err: any) {
       alert("Lỗi nộp phiếu: " + err.message);
     }
@@ -885,12 +944,11 @@ export default function CongDRLPage() {
         {/* ================= TAB 1: NỘP & QUẢN LÝ MINH CHỨNG ================= */}
         {activeTab === "proof" && (
           <div className="space-y-6">
-            {/* Form nộp minh chứng */}
             <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
               <h2 className="text-sm font-black text-[#004A52] uppercase mb-4">
                 Nộp minh chứng hoạt động ngoài khoa
               </h2>
-              <form onSubmit={handleUploadProof} className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <form onSubmit={handleUploadProofTab1} className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                 <div>
                   <label className="block font-bold text-slate-700 mb-1">Tên hoạt động / Sự kiện *</label>
                   <input
@@ -903,7 +961,6 @@ export default function CongDRLPage() {
                   />
                 </div>
 
-                {/* Dropdown danh mục */}
                 <div>
                   <label className="block font-bold text-slate-700 mb-1">Thuộc hạng mục tiêu chí *</label>
                   <select
@@ -989,7 +1046,6 @@ export default function CongDRLPage() {
                   </select>
                 </div>
 
-                {/* Ô điểm tự động giới hạn Max */}
                 <div>
                   <div className="flex justify-between items-center mb-1">
                     <label className="font-bold text-slate-700">Điểm cộng đề xuất *</label>
@@ -1010,7 +1066,6 @@ export default function CongDRLPage() {
                   />
                 </div>
 
-                {/* Ô minh chứng kèm Nút tải file */}
                 <div>
                   <label className="block font-bold text-slate-700 mb-1">
                     Link hình ảnh hoặc Tải file minh chứng *
@@ -1032,7 +1087,7 @@ export default function CongDRLPage() {
                       <input
                         type="file"
                         accept="image/*,.pdf"
-                        onChange={handleFileUpload}
+                        onChange={handleFileUploadTab1}
                         className="hidden"
                       />
                     </label>
@@ -1115,7 +1170,7 @@ export default function CongDRLPage() {
           </div>
         )}
 
-        {/* ================= TAB 2: PHIẾU ĐÁNH GIÁ (TIÊU MỤC + CHỮ NGHIÊNG NHỎ) ================= */}
+        {/* ================= TAB 2: PHIẾU ĐÁNH GIÁ CÓ Ô NỘP MINH CHỨNG TỪNG TIỂU MỤC ================= */}
         {activeTab === "form" && (
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 space-y-6">
             <div className="border-b border-slate-100 pb-4">
@@ -1123,7 +1178,7 @@ export default function CongDRLPage() {
                 PHIẾU ĐÁNH GIÁ ĐIỂM RÈN LUYỆN HỌC KỲ
               </h2>
               <p className="text-xs text-slate-500 mt-1">
-                Theo Quyết định số 147/QĐ-ĐHKTCN của Hiệu trưởng Trường Đại học Kỹ thuật - Công nghệ Cần Thơ[cite: 1].
+                Theo Quyết định số 147/QĐ-ĐHKTCN của Hiệu trưởng Trường Đại học Kỹ thuật - Công nghệ Cần Thơ. Sinh viên có thể nộp file/link minh chứng trực tiếp cho từng tiêu chí bên dưới.
               </p>
             </div>
 
@@ -1133,34 +1188,31 @@ export default function CongDRLPage() {
                 const sectionScore = getSectionScore(section);
                 return (
                   <div key={section.id} className="border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
-                    {/* Header từng phần */}
                     <div className="bg-slate-100 p-3.5 flex justify-between items-center text-xs font-black text-[#004A52]">
-                      <span>{section.title} (Điểm tối đa là {section.maxPoints} điểm)[cite: 1]</span>
+                      <span>{section.title} (Điểm tối đa là {section.maxPoints} điểm)</span>
                       <span className="bg-white px-3 py-1 rounded-xl border border-slate-200 text-[#EE6425]">
                         Tổng phần: {sectionScore} / {section.maxPoints} đ
                       </span>
                     </div>
 
-                    {/* Bảng tiêu chí */}
                     <div className="overflow-x-auto">
                       <table className="w-full text-left text-xs">
                         <thead>
                           <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold text-[11px]">
-                            <th className="py-2.5 px-4 w-3/5">Nội dung đánh giá</th>
-                            <th className="py-2.5 px-2 text-center w-28">Điểm Tối đa</th>
-                            <th className="py-2.5 px-2 text-center w-20">Điểm trừ</th>
-                            <th className="py-2.5 px-4 text-center w-28">SV Tự chấm</th>
+                            <th className="py-2.5 px-4 w-5/12">Nội dung đánh giá</th>
+                            <th className="py-2.5 px-2 text-center w-20">Điểm Tối đa</th>
+                            <th className="py-2.5 px-2 text-center w-16">Điểm trừ</th>
+                            <th className="py-2.5 px-2 text-center w-20">SV Tự chấm</th>
+                            <th className="py-2.5 px-4 text-center w-4/12">Minh chứng kèm theo</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                           {section.items.map((item) => (
                             <tr key={item.id} className="hover:bg-slate-50/80">
                               <td className="py-3 px-4 text-slate-700">
-                                {/* Đề mục chính */}
                                 <span className="font-bold block text-slate-800 leading-snug">
                                   {item.title}
                                 </span>
-                                {/* Dòng chữ nghiêng nhỏ cách chấm */}
                                 <span className="block text-[11px] italic text-slate-500 mt-1 leading-relaxed">
                                   {item.subtext}
                                 </span>
@@ -1171,7 +1223,7 @@ export default function CongDRLPage() {
                               <td className="py-3 px-2 text-center font-bold text-red-500 align-top pt-4">
                                 {item.minus || "-"}
                               </td>
-                              <td className="py-3 px-4 text-center align-top pt-3">
+                              <td className="py-3 px-2 text-center align-top pt-3">
                                 <input
                                   type="number"
                                   min="0"
@@ -1180,6 +1232,44 @@ export default function CongDRLPage() {
                                   onChange={(e) => handleScoreChange(item.id, Number(e.target.value), item.max)}
                                   className="w-16 border border-slate-300 rounded-lg px-2 py-1 text-center font-bold text-[#EE6425] outline-none focus:border-[#EE6425]"
                                 />
+                              </td>
+                              {/* CỘT NỘP MINH CHỨNG TRỰC TIẾP CHO TỪNG TIỂU MỤC */}
+                              <td className="py-3 px-4 align-top pt-3">
+                                <div className="flex items-center gap-1.5">
+                                  <input
+                                    type="text"
+                                    value={itemProofs[item.id] || ""}
+                                    onChange={(e) =>
+                                      setItemProofs((prev) => ({ ...prev, [item.id]: e.target.value }))
+                                    }
+                                    placeholder="Dán link Drive/ảnh..."
+                                    className="flex-1 border border-slate-300 rounded-lg px-2 py-1 text-[11px] outline-none focus:border-[#EE6425]"
+                                  />
+                                  <label className="cursor-pointer bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 px-2 py-1 rounded-lg flex items-center justify-center gap-1 text-[11px] font-bold transition flex-shrink-0">
+                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                    </svg>
+                                    <span>{uploadingItemId === item.id ? "Đang tải..." : "Tải tệp"}</span>
+                                    <input
+                                      type="file"
+                                      accept="image/*,.pdf"
+                                      onChange={(e) => handleFileUploadItem(item.id, item.title, item.max, e)}
+                                      className="hidden"
+                                    />
+                                  </label>
+                                </div>
+                                {itemProofs[item.id] && (
+                                  <div className="mt-1 text-right">
+                                    <a
+                                      href={itemProofs[item.id]}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="text-[10px] text-blue-600 hover:underline font-bold"
+                                    >
+                                      ✓ Đã có tệp đính kèm (Bấm xem)
+                                    </a>
+                                  </div>
+                                )}
                               </td>
                             </tr>
                           ))}
