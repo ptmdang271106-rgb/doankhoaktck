@@ -4,9 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-// Danh sách đầy đủ 100% các tiêu chí ĐRL theo QĐ 147/QĐ-ĐHKTCN
 export const EVENT_CRITERIA_OPTIONS = [
-  // I. HỌC TẬP
   { code: "I.1", label: "I.1 Điểm TB học tập tích lũy thang 4", max: 5 },
   { code: "I.2", label: "I.2 Giấy chứng nhận lớp kỹ năng học tập", max: 3 },
   { code: "I.3", label: "I.3 Hội thảo / Tọa đàm cấp Khoa, Trường", max: 3 },
@@ -20,7 +18,6 @@ export const EVENT_CRITERIA_OPTIONS = [
   { code: "I.11", label: "I.11 Thành viên CLB học thuật", max: 2 },
   { code: "I.12", label: "I.12 Các hoạt động học thuật khác", max: 3 },
 
-  // II. NỘI QUY - QUY CHẾ
   { code: "II.1", label: "II.1 Ý thức, thái độ trong học tập", max: 5 },
   { code: "II.2", label: "II.2 Chấp hành nội quy, quy chế Trường", max: 5 },
   { code: "II.3", label: "II.3 Chấp hành quy chế thi cử", max: 5 },
@@ -30,7 +27,6 @@ export const EVENT_CRITERIA_OPTIONS = [
   { code: "II.7", label: "II.7 Mặc đồng phục đúng quy định", max: 5 },
   { code: "II.8", label: "II.8 Sinh hoạt lớp với CVHT", max: 5 },
 
-  // III. PHONG TRÀO - CHÍNH TRỊ - XÃ HỘI
   { code: "III.1", label: "III.1 Hoạt động bắt buộc do Khoa/Trường tổ chức", max: 3 },
   { code: "III.2", label: "III.2 Đại hội Chi đoàn/Chi hội, sinh hoạt Chi đoàn", max: 3 },
   { code: "III.3", label: "III.3 Báo cáo chuyên đề do Trường tổ chức", max: 4 },
@@ -47,7 +43,6 @@ export const EVENT_CRITERIA_OPTIONS = [
   { code: "III.14", label: "III.14 Tập thể được khen thưởng phong trào", max: 1 },
   { code: "III.15", label: "III.15 Các hoạt động phong trào khác", max: 3 },
 
-  // IV. CỘNG ĐỒNG - TÌNH NGUYỆN
   { code: "IV.1", label: "IV.1 Chấp hành pháp luật Nhà nước", max: 10 },
   { code: "IV.2", label: "IV.2 Hành vi tốt, tinh thần sẻ chia, giúp đỡ người yếu thế", max: 5 },
   { code: "IV.3", label: "IV.3 Biểu dương, khen thưởng hoạt động xã hội ngoài trường", max: 5 },
@@ -67,7 +62,6 @@ export const EVENT_CRITERIA_OPTIONS = [
   { code: "IV.17", label: "IV.17 Chương trình Chào đón tân sinh viên", max: 5 },
   { code: "IV.18", label: "IV.18 Trách nhiệm xã hội & phát triển bền vững", max: 3 },
 
-  // V. CÁN BỘ LỚP & THÀNH TÍCH ĐẶC BIỆT
   { code: "V.1", label: "V.1 Tham gia tích cực phong trào Lớp, Đoàn, Hội", max: 3 },
   { code: "V.2", label: "V.2 Cán bộ Lớp/Đoàn/Hội hoàn thành tốt nhiệm vụ", max: 5 },
   { code: "V.3", label: "V.3 Sinh viên đạt giải học tập, NCKH", max: 7 },
@@ -118,9 +112,6 @@ export default function AdminDashboard() {
   const [events, setEvents] = useState<any[]>([]);
   const [registrations, setRegistrations] = useState<any[]>([]);
 
-  // State sinh viên
-  const [pasteData, setPasteData] = useState("");
-
   // State bài viết
   const [postTitle, setPostTitle] = useState("");
   const [postCategory, setPostCategory] = useState("Phong trào");
@@ -133,9 +124,15 @@ export default function AdminDashboard() {
   const [eventCategoryCode, setEventCategoryCode] = useState("III.8");
   const [eventPoints, setEventPoints] = useState<number>(4);
   const [eventTime, setEventTime] = useState("");
-  const [eventLocation, setEventLocation] = useState("Hội trường A - CTUET");
+  const [eventLocation, setEventLocation] = useState("Hội trường A - CTUT");
   const [eventDeadline, setEventDeadline] = useState("");
   const [eventDesc, setEventDesc] = useState("");
+
+  // State sinh viên
+  const [pasteData, setPasteData] = useState("");
+
+  // STATE POPUP MỞ MÃ QR ĐIỂM DANH (CHO MÁY CHIẾU)
+  const [activeQrEvent, setActiveQrEvent] = useState<any>(null);
 
   useEffect(() => {
     const userStr = localStorage.getItem("ctut_current_user");
@@ -156,16 +153,12 @@ export default function AdminDashboard() {
     setRegistrations(JSON.parse(localStorage.getItem("ctut_event_registrations") || "[]"));
   }, [router]);
 
-  // TỰ ĐỘNG CẬP NHẬT ĐIỂM KHI ADMIN CHỌN MỤC ĐRL
   const handleSelectCriteria = (selectedCode: string) => {
     setEventCategoryCode(selectedCode);
     const item = EVENT_CRITERIA_OPTIONS.find((c) => c.code === selectedCode);
-    if (item) {
-      setEventPoints(item.max);
-    }
+    if (item) setEventPoints(item.max);
   };
 
-  // TẠO SỰ KIỆN MỚI
   const handleAddEvent = (e: React.FormEvent) => {
     e.preventDefault();
     const criteriaItem = EVENT_CRITERIA_OPTIONS.find((c) => c.code === eventCategoryCode);
@@ -177,7 +170,6 @@ export default function AdminDashboard() {
       categoryCode: eventCategoryCode,
       categoryLabel: criteriaItem?.label || eventCategoryCode,
       points: Number(eventPoints),
-      pointsText: `+${eventPoints} ĐRL`,
       time: eventTime || "07:30 - Ngày 30/08/2026",
       location: eventLocation,
       deadline: eventDeadline || "23:59 - Ngày 29/08/2026",
@@ -193,7 +185,7 @@ export default function AdminDashboard() {
     setEventDesc("");
     setEventTime("");
     setEventDeadline("");
-    alert(`Đã đăng sự kiện thành công!\nÁp dụng: Mục ${eventCategoryCode} (+${eventPoints} ĐRL)`);
+    alert(`Đã tạo sự kiện thành công! Bạn có thể bấm "📲 Mở Mã QR Điểm Danh" để chiếu cho sinh viên.`);
   };
 
   const handleDeleteEvent = (id: string) => {
@@ -204,7 +196,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // XỬ LÝ SINH VIÊN
   const handleProcessPasteData = () => {
     if (!pasteData.trim()) return alert("Vui lòng dán dữ liệu!");
     const rows = pasteData.split(/\r\n|\n/).filter((r) => r.trim() !== "");
@@ -241,7 +232,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // XỬ LÝ BÀI VIẾT
   const handleCoverUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -292,7 +282,7 @@ export default function AdminDashboard() {
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl font-black text-[#004A52]">BẢNG ĐIỀU KHIỂN QUẢN TRỊ VIÊN</h1>
-            <p className="text-xs text-slate-500 mt-0.5">Quản lý bài viết, sự kiện & danh sách đăng ký của sinh viên</p>
+            <p className="text-xs text-slate-500 mt-0.5">Quản lý bài viết, sự kiện & Bật QR Code điểm danh</p>
           </div>
           <div className="flex items-center gap-3">
             <Link href="/" className="text-xs font-bold text-[#007A87] hover:underline">
@@ -320,7 +310,7 @@ export default function AdminDashboard() {
                 : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
             }`}
           >
-            🎯 Đăng & Quản lý Sự kiện ({events.length})
+            Đăng & Bật QR Điểm Danh ({events.length})
           </button>
           <button
             onClick={() => setActiveTab("posts")}
@@ -330,7 +320,7 @@ export default function AdminDashboard() {
                 : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
             }`}
           >
-            📝 Bài viết & Bản tin ({posts.length})
+            Bài viết & Bản tin ({posts.length})
           </button>
           <button
             onClick={() => setActiveTab("students")}
@@ -340,15 +330,16 @@ export default function AdminDashboard() {
                 : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
             }`}
           >
-            🎓 Quản lý Sinh viên ({students.length})
+            Quản lý Sinh viên ({students.length})
           </button>
         </div>
 
-        {/* TAB 1: SỰ KIỆN MỞ ĐĂNG KÝ (CÓ MỤC VÀ ĐIỂM ĐRL CHI TIẾT) */}
+        {/* TAB 1: SỰ KIỆN & NÚT BẬT MÃ QR ĐIỂM DANH */}
         {activeTab === "events" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* FORM TẠO SỰ KIỆN */}
             <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-              <h2 className="text-base font-bold text-[#004A52] mb-4">Tạo Sự Kiện Mới Cho Sinh Viên Đăng Ký</h2>
+              <h2 className="text-base font-bold text-[#004A52] mb-4">Tạo Sự Kiện Mới</h2>
               <form onSubmit={handleAddEvent} className="space-y-3.5">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Tên sự kiện / Hoạt động *</label>
@@ -363,7 +354,7 @@ export default function AdminDashboard() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Chuyên mục hiển thị *</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Chuyên mục *</label>
                   <select
                     value={eventCategory}
                     onChange={(e) => setEventCategory(e.target.value)}
@@ -376,54 +367,24 @@ export default function AdminDashboard() {
                   </select>
                 </div>
 
-                {/* Ô CHỌN MỤC ĐRL THEO QUY ĐỊNH */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Mục áp dụng Điểm Rèn Luyện (Theo QĐ 147) *
-                  </label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Mục Điểm Rèn Luyện (QĐ 147) *</label>
                   <select
                     value={eventCategoryCode}
                     onChange={(e) => handleSelectCriteria(e.target.value)}
                     className="w-full border border-slate-300 rounded-xl p-2.5 text-xs font-medium outline-none focus:border-[#EE6425]"
                   >
-                    <optgroup label="TIÊU CHÍ I: Ý THỨC HỌC TẬP (TỐI ĐA 20 ĐIỂM)">
-                      {EVENT_CRITERIA_OPTIONS.filter((c) => c.code.startsWith("I.")).map((c) => (
-                        <option key={c.code} value={c.code}>{c.label}</option>
-                      ))}
-                    </optgroup>
-
-                    <optgroup label="TIÊU CHÍ II: NỘI QUY & QUY CHẾ (TỐI ĐA 25 ĐIỂM)">
-                      {EVENT_CRITERIA_OPTIONS.filter((c) => c.code.startsWith("II.")).map((c) => (
-                        <option key={c.code} value={c.code}>{c.label}</option>
-                      ))}
-                    </optgroup>
-
-                    <optgroup label="TIÊU CHÍ III: PHONG TRÀO & CHÍNH TRỊ - XÃ HỘI (TỐI ĐA 20 ĐIỂM)">
-                      {EVENT_CRITERIA_OPTIONS.filter((c) => c.code.startsWith("III.")).map((c) => (
-                        <option key={c.code} value={c.code}>{c.label}</option>
-                      ))}
-                    </optgroup>
-
-                    <optgroup label="TIÊU CHÍ IV: QUAN HỆ CỘNG ĐỒNG & TÌNH NGUYỆN (TỐI ĐA 25 ĐIỂM)">
-                      {EVENT_CRITERIA_OPTIONS.filter((c) => c.code.startsWith("IV.")).map((c) => (
-                        <option key={c.code} value={c.code}>{c.label}</option>
-                      ))}
-                    </optgroup>
-
-                    <optgroup label="TIÊU CHÍ V: CÁN BỘ LỚP & THÀNH TÍCH ĐẶC BIỆT (TỐI ĐA 10 ĐIỂM)">
-                      {EVENT_CRITERIA_OPTIONS.filter((c) => c.code.startsWith("V.")).map((c) => (
-                        <option key={c.code} value={c.code}>{c.label}</option>
-                      ))}
-                    </optgroup>
+                    {EVENT_CRITERIA_OPTIONS.map((c) => (
+                      <option key={c.code} value={c.code}>{c.label}</option>
+                    ))}
                   </select>
                 </div>
 
-                {/* Ô NHẬP ĐIỂM CỘNG */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="block text-xs font-bold text-slate-700">Điểm rèn luyện cộng khi tham gia *</label>
+                    <label className="block text-xs font-bold text-slate-700">Điểm rèn luyện cộng *</label>
                     <span className="text-[11px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded">
-                      Tự động tính: +{eventPoints} ĐRL
+                      +{eventPoints} ĐRL
                     </span>
                   </div>
                   <input
@@ -433,7 +394,7 @@ export default function AdminDashboard() {
                     required
                     value={eventPoints}
                     onChange={(e) => setEventPoints(Number(e.target.value))}
-                    className="w-full border border-slate-300 rounded-xl px-3.5 py-2 text-xs font-bold text-[#EE6425] outline-none focus:border-[#EE6425]"
+                    className="w-full border border-slate-300 rounded-xl px-3.5 py-2 text-xs font-bold text-[#EE6425] outline-none"
                   />
                 </div>
 
@@ -473,17 +434,6 @@ export default function AdminDashboard() {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Mô tả tóm tắt nội dung</label>
-                  <textarea
-                    rows={3}
-                    value={eventDesc}
-                    onChange={(e) => setEventDesc(e.target.value)}
-                    placeholder="Mục đích chương trình, quyền lợi khi tham gia..."
-                    className="w-full border border-slate-300 rounded-xl p-3 text-xs outline-none focus:border-[#EE6425]"
-                  ></textarea>
-                </div>
-
                 <button
                   type="submit"
                   className="w-full bg-[#EE6425] hover:bg-[#d85216] text-white font-bold py-3 rounded-xl transition text-xs uppercase shadow tracking-wider"
@@ -493,65 +443,55 @@ export default function AdminDashboard() {
               </form>
             </div>
 
-            {/* DANH SÁCH SỰ KIỆN & LƯỢT ĐĂNG KÝ */}
+            {/* DANH SÁCH SỰ KIỆN + NÚT MỞ MÃ QR ĐIỂM DANH */}
             <div className="lg:col-span-7 space-y-6">
               <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                 <h2 className="text-base font-bold text-[#004A52] mb-3">Các sự kiện đang mở ({events.length})</h2>
                 {events.length === 0 ? (
-                  <p className="text-xs text-slate-400">Chưa có sự kiện nào được tạo.</p>
+                  <p className="text-xs text-slate-400">Chưa có sự kiện nào.</p>
                 ) : (
-                  <div className="divide-y divide-slate-100 space-y-3">
+                  <div className="divide-y divide-slate-100 space-y-4">
                     {events.map((ev) => (
-                      <div key={ev.id} className="pt-3 first:pt-0 flex justify-between items-start gap-4">
+                      <div key={ev.id} className="pt-4 first:pt-0 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                         <div>
-                          <div className="flex flex-wrap items-center gap-2">
+                          <div className="flex items-center gap-2">
                             <span className="text-[10px] font-bold text-[#007A87] bg-teal-50 px-2 py-0.5 rounded">
                               {ev.category}
                             </span>
-                            <span className="text-[10px] font-bold text-[#EE6425] bg-orange-50 border border-orange-200 px-2 py-0.5 rounded">
-                              Mục: {ev.categoryCode || "III.8"}
-                            </span>
-                            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
-                              +{ev.points || 4} ĐRL
+                            <span className="text-[10px] font-bold text-[#EE6425] bg-orange-50 px-2 py-0.5 rounded">
+                              Mục: {ev.categoryCode} (+{ev.points} ĐRL)
                             </span>
                           </div>
                           <h3 className="text-sm font-bold text-slate-800 mt-1">{ev.title}</h3>
                           <p className="text-xs text-slate-500 mt-0.5">⏰ {ev.time} • 📍 {ev.location}</p>
-                          <p className="text-[11px] text-red-500 font-semibold mt-0.5">⏳ Hạn: {ev.deadline}</p>
                         </div>
-                        <button
-                          onClick={() => handleDeleteEvent(ev.id)}
-                          className="text-red-500 hover:text-red-700 text-xs font-bold"
-                        >
-                          Xóa
-                        </button>
+
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {/* NÚT BẬT MÃ QR ĐIỂM DANH ĐỂ CHIẾU LÊN MÀN HÌNH */}
+                          <button
+                            onClick={() => setActiveQrEvent(ev)}
+                            className="bg-[#007A87] hover:bg-[#005a63] text-white font-bold text-xs px-3.5 py-2 rounded-xl transition shadow flex items-center gap-1.5"
+                          >
+                            <span></span> Bật Mã QR
+                          </button>
+                          <button
+                            onClick={() => handleDeleteEvent(ev.id)}
+                            className="text-red-500 hover:text-red-700 text-xs font-bold px-2 py-1"
+                          >
+                            Xóa
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
 
-              {/* DANH SÁCH SINH VIÊN ĐÃ ĐĂNG KÝ */}
+              {/* LƯỢT ĐĂNG KÝ */}
               <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm overflow-x-auto">
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-base font-bold text-[#004A52]">
-                    Danh sách sinh viên đã đăng ký tham gia ({registrations.length})
-                  </h2>
-                  {registrations.length > 0 && (
-                    <button
-                      onClick={() => {
-                        if (confirm("Xóa lịch sử đăng ký?")) {
-                          setRegistrations([]);
-                          localStorage.removeItem("ctut_event_registrations");
-                        }
-                      }}
-                      className="text-xs text-red-500 hover:underline font-bold"
-                    >
-                      Xóa tất cả
-                    </button>
-                  )}
-                </div>
-
+                <h2 className="text-base font-bold text-[#004A52] mb-3">
+                  Danh sách sinh viên đã đăng ký tham gia ({registrations.length})
+                </h2>
                 {registrations.length === 0 ? (
                   <p className="text-xs text-slate-400">Chưa có sinh viên nào đăng ký.</p>
                 ) : (
@@ -561,8 +501,7 @@ export default function AdminDashboard() {
                         <th className="p-2.5">MSSV</th>
                         <th className="p-2.5">Họ tên</th>
                         <th className="p-2.5">Lớp</th>
-                        <th className="p-2.5">Sự kiện tham gia</th>
-                        <th className="p-2.5">Thời gian ĐK</th>
+                        <th className="p-2.5">Sự kiện</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -572,7 +511,6 @@ export default function AdminDashboard() {
                           <td className="p-2.5 font-medium text-slate-800">{r.fullName}</td>
                           <td className="p-2.5 text-slate-600">{r.studentClass}</td>
                           <td className="p-2.5 text-[#EE6425] font-semibold">{r.eventTitle}</td>
-                          <td className="p-2.5 text-slate-400 text-[11px]">{r.createdAt}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -596,7 +534,6 @@ export default function AdminDashboard() {
                     required
                     value={postTitle}
                     onChange={(e) => setPostTitle(e.target.value)}
-                    placeholder="VD: Hội nghị Khoa học Cơ khí 2026..."
                     className="w-full border border-slate-300 rounded-xl px-3.5 py-2 text-sm outline-none focus:border-[#EE6425]"
                   />
                 </div>
@@ -719,6 +656,56 @@ export default function AdminDashboard() {
           </div>
         )}
       </div>
+
+      {/* POPUP MÀN HÌNH MÁY CHIẾU: MÃ QR CODE ĐIỂM DANH SỰ KIỆN */}
+      {activeQrEvent && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-xl w-full p-8 shadow-2xl border-4 border-[#EE6425] text-center animate-in fade-in zoom-in duration-200">
+            <div className="flex justify-between items-center mb-4">
+              <span className="bg-orange-100 text-[#EE6425] font-black text-xs px-3 py-1 rounded-full uppercase">
+                MÀN HÌNH TRÌNH CHIẾU ĐIỂM DANH
+              </span>
+              <button
+                onClick={() => setActiveQrEvent(null)}
+                className="text-slate-400 hover:text-slate-700 text-xl font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <h2 className="text-xl sm:text-2xl font-black text-[#004A52] leading-snug">
+              {activeQrEvent.title}
+            </h2>
+            <p className="text-xs text-slate-500 mt-1">
+              Mục ĐRL: <strong>{activeQrEvent.categoryCode}</strong> • Điểm cộng: <strong>+{activeQrEvent.points} Điểm</strong>
+            </p>
+
+            {/* HÌNH ẢNH MÃ QR ĐIỂM DANH TỰ ĐỘNG SINH RA THEO ID SỰ KIỆN */}
+            <div className="my-6 p-4 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-300 inline-block shadow-inner">
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(
+                  activeQrEvent.id
+                )}`}
+                alt="QR Code Điểm danh"
+                className="w-56 h-56 sm:w-64 sm:h-64 mx-auto rounded-xl"
+              />
+            </div>
+
+            <div className="space-y-1 text-xs text-slate-600 bg-slate-50 p-3 rounded-xl">
+              <p><strong>Địa điểm:</strong> {activeQrEvent.location}</p>
+              <p><strong>Thời gian:</strong> {activeQrEvent.time}</p>
+              <p className="text-[#007A87] font-bold">Mã Check-in dự phòng: <code className="font-mono text-sm text-[#EE6425]">{activeQrEvent.id}</code></p>
+            </div>
+
+            <button
+              onClick={() => setActiveQrEvent(null)}
+              className="mt-6 w-full bg-[#004A52] hover:bg-[#00343a] text-white font-bold py-3 rounded-xl text-xs uppercase"
+            >
+              Đóng màn hình điểm danh
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
