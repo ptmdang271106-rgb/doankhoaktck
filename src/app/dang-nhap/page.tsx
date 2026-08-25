@@ -57,7 +57,7 @@ function AuthForm() {
       className="h-12 sm:h-14 w-auto max-w-[280px] sm:max-w-[320px] object-contain mx-auto"
     />
   </Link>
-  <h1 className="text-2xl sm:text-[26px] font-black text-[#004A52] tracking-tight">
+  <h1 className="text-2xl sm:text-[26px] font-extrabold text-[#004A52] tracking-tight">
     CỔNG DỊCH VỤ SINH VIÊN
   </h1>
 </div>
