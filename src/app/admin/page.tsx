@@ -434,7 +434,7 @@ export default function AdminDashboard() {
           </button>
         </div>
 
-        {/* ================= TAB 1: QUAN LY SINH VIEN ================= */}
+        {/* TAB 1: QUAN LY SINH VIEN */}
         {activeTab === "students" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-5 bg-white p-5 rounded-2xl border border-emerald-500/30 bg-emerald-50/20 shadow-sm">
@@ -512,7 +512,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* ================= TAB 2: SU KIEN ================= */}
+        {/* TAB 2: SU KIEN */}
         {activeTab === "events" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
@@ -734,7 +734,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* ================= TAB 3: BAI VIET ================= */}
+        {/* TAB 3: BAI VIET */}
         {activeTab === "posts" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
