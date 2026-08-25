@@ -77,18 +77,24 @@ export default function CTUTYouthPortal() {
         <div className="w-full px-4 sm:px-6 lg:px-10">
           <div className="h-24 grid grid-cols-12 items-center text-[13px] font-medium text-[#2C3E50]">
             
-            {/* MENU TRÁI */}
-            <div className="col-span-4 hidden lg:flex items-center justify-start space-x-3 whitespace-nowrap">
-              <button className="bg-[#007A87] hover:bg-[#00606B] text-white px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors shadow-sm">
-                Điểm danh
-              </button>
-              
-              <Link
-                href="/tra-cuu"
-                className="bg-[#00707b] hover:bg-[#005a63] text-white px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors inline-block shadow-sm"
-              >
-                Cổng ĐRL
-              </Link>
+            {/* MENU TRÁI: ĐIỂM DANH ĐÃ ĐƯỢC KẾT NỐI VÀO TRANG /diem-danh */}
+<div className="col-span-4 hidden lg:flex items-center justify-start space-x-3 whitespace-nowrap">
+  <Link
+    href="/diem-danh"
+    className="bg-[#007A87] hover:bg-[#00606B] text-white px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors shadow-sm inline-block"
+  >
+    Điểm danh
+  </Link>
+  
+  <Link
+    href="/tra-cuu"
+    className="bg-[#00707b] hover:bg-[#005a63] text-white px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors inline-block shadow-sm"
+  >
+    Cổng ĐRL
+  </Link>
+  
+  {/* Các mục còn lại giữ nguyên... */}
+</div>
 
               <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1 text-xs font-semibold pl-1">
                 Giới thiệu <span className="text-[9px]">▼</span>
