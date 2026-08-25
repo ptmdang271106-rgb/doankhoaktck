@@ -32,67 +32,67 @@ export default function CTUTYouthPortal() {
 
   return (
     <div className="min-h-screen bg-white text-[#333333] font-sans antialiased">
-      {/* 1. THANH ĐIỀU HƯỚNG TẦNG 1 */}
-      <header className="border-b border-gray-100 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="h-20 grid grid-cols-12 items-center text-[13px] font-medium text-[#2C3E50]">
+      {/* 1. THANH ĐIỀU HƯỚNG TẦNG 1: FULL MÀN HÌNH - LOGO CANH GIỮA TO RÕ - 2 BÊN KỊCH GÓC */}
+      <header className="border-b border-gray-100 bg-white sticky top-0 z-40">
+        <div className="w-full px-4 sm:px-8 lg:px-12">
+          <div className="h-24 flex items-center justify-between relative text-[13px] font-medium text-[#2C3E50]">
             
-            {/* MENU TRÁI: Điểm danh + Cổng ĐRL + Giới thiệu + Chi đoàn/Chi hội + Hỗ trợ SV */}
-            <div className="col-span-5 hidden lg:flex items-center justify-start space-x-3 pr-2 whitespace-nowrap">
-              <button className="bg-[#007A87] text-white px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-[#00606B] transition-colors shadow-sm">
+            {/* MENU TRÁI: DÁN SÁT MÉP TRÁI */}
+            <div className="hidden lg:flex items-center space-x-3.5 whitespace-nowrap z-10">
+              <button className="bg-[#007A87] hover:bg-[#00606B] text-white px-4 py-2 rounded-full text-xs font-bold transition-colors shadow-sm">
                 Điểm danh
               </button>
               
               <Link
                 href="/tra-cuu"
-                className="bg-[#00707b] hover:bg-[#005a63] text-white px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors inline-block shadow-sm"
+                className="bg-[#00707b] hover:bg-[#005a63] text-white px-4 py-2 rounded-full text-xs font-bold transition-colors inline-block shadow-sm"
               >
                 Cổng ĐRL
               </Link>
 
-              <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1 text-xs">
+              <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1 text-[13px] font-semibold pl-1">
                 Giới thiệu <span className="text-[10px]">▼</span>
               </a>
 
-              <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1 text-xs">
+              <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1 text-[13px] font-semibold">
                 Chi đoàn / Chi hội <span className="text-[10px]">▼</span>
               </a>
 
-              <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1 text-xs">
+              <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1 text-[13px] font-semibold">
                 Hỗ trợ sinh viên <span className="text-[10px]">▼</span>
               </a>
             </div>
 
-            {/* LOGO CHÍNH THỨC Ở CHÍNH GIỮA (file logo-doankhoa.png) */}
-            <div className="col-span-12 lg:col-span-2 flex items-center justify-center py-1">
+            {/* LOGO NẰM CHÍNH TÂM TUYỆT ĐỐI CỦA MÀN HÌNH - TO RÕ NÉT */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
               <Link href="/">
                 <img
                   src="/logo-doankhoa.png"
                   alt="Tuổi trẻ Khoa Kỹ thuật Cơ khí - Trường Đại học Kỹ thuật - Công nghệ Cần Thơ"
-                  className="h-10 sm:h-12 w-auto max-w-full object-contain block mx-auto cursor-pointer"
+                  className="h-14 sm:h-16 md:h-20 w-auto max-w-[320px] sm:max-w-[420px] md:max-w-[500px] object-contain block mx-auto cursor-pointer transition-transform hover:scale-105"
                 />
               </Link>
             </div>
 
-            {/* MENU PHẢI: Giao dịch điện tử + Văn phòng điện tử + Nút Đăng nhập */}
-            <div className="col-span-5 hidden lg:flex items-center justify-end space-x-4 pl-2 whitespace-nowrap">
-              <a href="#" className="hover:text-[#007A87] transition-colors text-xs">
+            {/* MENU PHẢI: DÁN SÁT MÉP PHẢI (CHUYỂN SANG /dang-nhap) */}
+            <div className="hidden lg:flex items-center space-x-5 whitespace-nowrap z-10">
+              <a href="#" className="hover:text-[#007A87] transition-colors text-[13px] font-semibold">
                 Giao dịch điện tử
               </a>
               
-              <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1 text-xs">
+              <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1 text-[13px] font-semibold">
                 Văn phòng điện tử <span className="text-[10px]">▼</span>
               </a>
 
               {currentUser ? (
-                <div className="flex items-center gap-2 bg-orange-50 border border-orange-200 px-3 py-1 rounded-full">
+                <div className="flex items-center gap-2 bg-orange-50 border border-orange-200 px-3.5 py-1.5 rounded-full shadow-sm">
                   <span className="text-xs font-bold text-[#EE6425]">
                     👤 {currentUser.fullName || currentUser.mssv}
                   </span>
                   {currentUser.role === "admin" && (
                     <Link
                       href="/admin"
-                      className="bg-[#007A87] text-white text-[10px] font-bold px-2 py-0.5 rounded-full hover:bg-[#005a63]"
+                      className="bg-[#007A87] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full hover:bg-[#005a63]"
                     >
                       Quản trị
                     </Link>
@@ -107,7 +107,7 @@ export default function CTUTYouthPortal() {
               ) : (
                 <Link
                   href="/dang-nhap"
-                  className="bg-[#EE6425] hover:bg-[#d85216] text-white px-4 py-1.5 rounded-full text-xs font-bold transition-colors inline-block shadow-sm"
+                  className="bg-[#EE6425] hover:bg-[#d85216] text-white px-5 py-2 rounded-full text-xs font-bold transition-all inline-block shadow-md hover:shadow-lg active:scale-95"
                 >
                   Đăng nhập
                 </Link>
@@ -119,8 +119,8 @@ export default function CTUTYouthPortal() {
 
         {/* 2. THANH MENU PHỤ TẦNG 2 */}
         <div className="bg-[#F8FCFC] border-t border-b border-[#E6F4F4]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-center space-x-8 py-2.5 text-[13.5px] font-semibold text-[#007A87] overflow-x-auto whitespace-nowrap">
+          <div className="w-full px-4 sm:px-8 lg:px-12">
+            <div className="flex justify-center space-x-10 py-2.5 text-[13.5px] font-semibold text-[#007A87] overflow-x-auto whitespace-nowrap">
               <Link href="/dang-ky" className="hover:text-[#004A52] transition-colors">
                 Hoạt động – Sự kiện Cơ khí
               </Link>
@@ -133,7 +133,7 @@ export default function CTUTYouthPortal() {
         </div>
       </header>
 
-      {/* 3. BANNER */}
+      {/* 3. BANNER CHÀO ĐÓN TÂN SINH VIÊN */}
       <section className="w-full bg-[#0A2540] flex justify-center items-center">
         <div className="w-full max-w-7xl mx-auto px-0 sm:px-4 lg:px-8 py-2 sm:py-4">
           <img
@@ -144,7 +144,7 @@ export default function CTUTYouthPortal() {
         </div>
       </section>
 
-      {/* 4. KHỐI NỘI DUNG CHÍNH */}
+      {/* 4. KHỐI NỘI DUNG: ĐỌC GÌ HÔM NAY VÀ BỘ LỌC */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="flex flex-col md:flex-row md:items-center justify-between border-b-2 border-gray-100 pb-4 gap-4">
           <h2 className="text-2xl font-bold text-[#006674] tracking-tight">
@@ -168,6 +168,7 @@ export default function CTUTYouthPortal() {
           </div>
         </div>
 
+        {/* 5. KHU VỰC BÀI VIẾT (GRID CHÍNH + CỘT PHỤ BÊN PHẢI) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-6">
           {/* Cột chính (8 cột) */}
           <div className="lg:col-span-8 space-y-6">
@@ -307,7 +308,7 @@ export default function CTUTYouthPortal() {
             ĐOÀN KHOA KỸ THUẬT CƠ KHÍ – TRƯỜNG ĐẠI HỌC KỸ THUẬT - CÔNG NGHỆ CẦN THƠ
           </div>
           <div>Địa chỉ: 256 Nguyễn Văn Cừ, Quận Ninh Kiều, Thành phố Cần Thơ</div>
-          <div className="text-gray-500 text-[11px]">Bản quyền © 2026 Phạm Thái Minh Đăng.</div>
+          <div className="text-gray-500 text-[11px]">Bản quyền © 2026 CTUT Mechanical Youth Portal.</div>
         </div>
       </footer>
     </div>
