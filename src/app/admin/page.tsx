@@ -101,7 +101,7 @@ export function generateCtuetEmail(fullName: string, mssv: string): string {
 
 export default function AdminDashboard() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"events" | "posts" | "students">("events");
+  const [activeTab, setActiveTab] = useState<"events" | "posts" | "students">("students");
   const [students, setStudents] = useState<any[]>([]);
   const [posts, setPosts] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
@@ -160,6 +160,77 @@ export default function AdminDashboard() {
     fetchAllData();
   }, [router]);
 
+  // ================= QUẢN LÝ SINH VIÊN (THÊM, XÓA TỪNG NGƯỜI, XÓA TẤT CẢ) =================
+
+  // 1. Nhập danh sách từ Excel
+  const handleProcessPasteData = async () => {
+    if (!pasteData.trim()) return alert("Vui lòng dán dữ liệu!");
+    const rows = pasteData.split(/\r\n|\n/).filter((r) => r.trim() !== "");
+    const imported: any[] = [];
+
+    for (const row of rows) {
+      const cols = row.split(/\t|,/).map((c) => c.trim().replace(/^"|"$/g, ""));
+      if (cols.length >= 2 && cols[0] && !cols[0].toLowerCase().includes("mssv")) {
+        const mssv = cols[0].replace(/\s+/g, "").toUpperCase();
+        const full_name = cols[1];
+        const student_class = cols[2] || "CNKT Tự động hóa K2024";
+        const password = mssv.slice(-3);
+        const email = generateCtuetEmail(full_name, mssv);
+
+        imported.push({
+          mssv,
+          full_name,
+          email,
+          student_class,
+          password,
+        });
+      }
+    }
+
+    if (imported.length > 0) {
+      const { error } = await supabase.from("students").upsert(imported, { onConflict: "mssv" });
+      if (error) {
+        alert("Lỗi khi lưu danh sách: " + error.message);
+      } else {
+        alert(`Đã thêm thành công ${imported.length} sinh viên lên Cloud!`);
+        fetchAllData();
+        setPasteData("");
+      }
+    }
+  };
+
+  // 2. Xóa từng sinh viên theo MSSV
+  const handleDeleteSingleStudent = async (mssv: string, name: string) => {
+    if (confirm(`Bạn có chắc muốn xóa sinh viên [${name} - ${mssv}] khỏi danh sách cho phép?`)) {
+      const { error } = await supabase.from("students").delete().eq("mssv", mssv);
+      if (error) {
+        alert("Lỗi khi xóa: " + error.message);
+      } else {
+        setStudents(students.filter((s) => s.mssv !== mssv));
+      }
+    }
+  };
+
+  // 3. Xóa tất cả danh sách sinh viên
+  const handleDeleteAllStudents = async () => {
+    if (students.length === 0) return alert("Danh sách hiện đang trống!");
+    
+    const confirm1 = confirm("⚠️ CẢNH BÁO: Bạn có chắc chắn muốn XÓA TOÀN BỘ danh sách sinh viên?");
+    if (confirm1) {
+      const confirm2 = confirm("Hành động này không thể hoàn tác! Bạn có muốn tiếp tục?");
+      if (confirm2) {
+        const { error } = await supabase.from("students").delete().neq("id", 0);
+        if (error) {
+          alert("Lỗi khi xóa tất cả: " + error.message);
+        } else {
+          setStudents([]);
+          alert("Đã xóa sạch toàn bộ danh sách sinh viên!");
+        }
+      }
+    }
+  };
+
+  // ================= QUẢN LÝ SỰ KIỆN =================
   const handleSelectCriteria = (selectedCode: string) => {
     setEventCategoryCode(selectedCode);
     const item = EVENT_CRITERIA_OPTIONS.find((c) => c.code === selectedCode);
@@ -179,7 +250,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // THÊM SỰ KIỆN LÊN SUPABASE
   const handleAddEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     const criteriaItem = EVENT_CRITERIA_OPTIONS.find((c) => c.code === eventCategoryCode);
@@ -204,7 +274,7 @@ export default function AdminDashboard() {
     if (error) {
       alert("Lỗi khi thêm sự kiện: " + error.message);
     } else {
-      alert("Đã lưu sự kiện lên cơ sở dữ liệu đám mây thành công!");
+      alert("Đã lưu sự kiện lên hệ thống!");
       fetchAllData();
       setEventTitle("");
       setEventDesc("");
@@ -220,43 +290,7 @@ export default function AdminDashboard() {
     }
   };
 
-  // NHẬP DANH SÁCH SINH VIÊN LÊN SUPABASE
-  const handleProcessPasteData = async () => {
-    if (!pasteData.trim()) return alert("Vui lòng dán dữ liệu!");
-    const rows = pasteData.split(/\r\n|\n/).filter((r) => r.trim() !== "");
-    const imported: any[] = [];
-
-    for (const row of rows) {
-      const cols = row.split(/\t|,/).map((c) => c.trim().replace(/^"|"$/g, ""));
-      if (cols.length >= 2 && cols[0] && !cols[0].toLowerCase().includes("mssv")) {
-        const mssv = cols[0].replace(/\s+/g, "");
-        const full_name = cols[1];
-        const student_class = cols[2] || "CNKT Tự động hóa K2024";
-        const password = mssv.slice(-3);
-        const email = generateCtuetEmail(full_name, mssv);
-
-        imported.push({
-          mssv,
-          full_name,
-          email,
-          student_class,
-          password,
-        });
-      }
-    }
-
-    if (imported.length > 0) {
-      const { error } = await supabase.from("students").upsert(imported, { onConflict: "mssv" });
-      if (error) {
-        alert("Lỗi khi lưu danh sách sinh viên: " + error.message);
-      } else {
-        alert(`Đã lưu ${imported.length} sinh viên lên Cloud Supabase thành công!`);
-        fetchAllData();
-        setPasteData("");
-      }
-    }
-  };
-
+  // ================= QUẢN LÝ BÀI VIẾT =================
   const handleCoverUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -295,7 +329,7 @@ export default function AdminDashboard() {
     if (error) {
       alert("Lỗi khi đăng bài: " + error.message);
     } else {
-      alert("Đã đăng bài viết lên đám mây thành công!");
+      alert("Đã xuất bản bài viết thành công!");
       fetchAllData();
       setPostTitle("");
       setPostCoverImage("");
@@ -310,7 +344,7 @@ export default function AdminDashboard() {
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl font-black text-[#004A52]">BẢNG ĐIỀU KHIỂN QUẢN TRỊ VIÊN (SUPABASE CLOUD)</h1>
-            <p className="text-xs text-slate-500 mt-0.5">Dữ liệu tự động đồng bộ Realtime giữa Điện thoại và Máy tính</p>
+            <p className="text-xs text-slate-500 mt-0.5">Quản lý đồng bộ Realtime: Sinh viên, Sự kiện & Bài viết</p>
           </div>
           <div className="flex items-center gap-3">
             <Link href="/" className="text-xs font-bold text-[#007A87] hover:underline">
@@ -331,6 +365,16 @@ export default function AdminDashboard() {
         {/* TABS */}
         <div className="flex flex-wrap gap-2 mb-6">
           <button
+            onClick={() => setActiveTab("students")}
+            className={`px-5 py-2.5 rounded-xl font-bold text-sm transition ${
+              activeTab === "students"
+                ? "bg-[#EE6425] text-white shadow"
+                : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
+            }`}
+          >
+            Quản lý Sinh viên ({students.length})
+          </button>
+          <button
             onClick={() => setActiveTab("events")}
             className={`px-5 py-2.5 rounded-xl font-bold text-sm transition ${
               activeTab === "events"
@@ -350,19 +394,85 @@ export default function AdminDashboard() {
           >
             Bài Viết ({posts.length})
           </button>
-          <button
-            onClick={() => setActiveTab("students")}
-            className={`px-5 py-2.5 rounded-xl font-bold text-sm transition ${
-              activeTab === "students"
-                ? "bg-[#EE6425] text-white shadow"
-                : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
-            }`}
-          >
-            Danh Sách Sinh Viên ({students.length})
-          </button>
         </div>
 
-        {/* TAB 1: SỰ KIỆN */}
+        {/* TAB 1: QUẢN LÝ SINH VIÊN (CÓ NÚT XÓA TỪNG NGƯỜI & XÓA TẤT CẢ) */}
+        {activeTab === "students" && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="lg:col-span-5 bg-white p-5 rounded-2xl border border-emerald-500/30 bg-emerald-50/20 shadow-sm">
+              <h3 className="text-sm font-bold text-emerald-800 mb-1">📋 Dán danh sách sinh viên từ Excel</h3>
+              <p className="text-[11px] text-slate-500 mb-2">Quét chọn (MSSV, Họ tên, Lớp) từ file Excel rồi dán vào đây:</p>
+              <textarea
+                rows={6}
+                value={pasteData}
+                onChange={(e) => setPasteData(e.target.value)}
+                placeholder="CNDT2411081	Phạm Thái Minh Đăng	CNKT Tự động hóa K2024"
+                className="w-full border border-emerald-300 rounded-xl p-3 text-xs font-mono bg-white outline-none"
+              ></textarea>
+              <button
+                type="button"
+                onClick={handleProcessPasteData}
+                className="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition text-xs uppercase shadow"
+              >
+                ✓ Lưu danh sách sinh viên lên Cloud
+              </button>
+            </div>
+
+            <div className="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm overflow-x-auto">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-2 border-b border-slate-100">
+                <h2 className="text-base font-bold text-[#004A52]">
+                  Danh sách sinh viên được cấp quyền ({students.length})
+                </h2>
+                {students.length > 0 && (
+                  <button
+                    onClick={handleDeleteAllStudents}
+                    className="bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold px-3 py-1.5 rounded-lg border border-red-200 transition"
+                  >
+                    🗑️ Xóa tất cả danh sách
+                  </button>
+                )}
+              </div>
+
+              {students.length === 0 ? (
+                <div className="py-12 text-center text-xs text-slate-400 border border-dashed border-slate-200 rounded-xl">
+                  Chưa có sinh viên nào trong danh sách. Hãy dán từ Excel vào bảng bên trái.
+                </div>
+              ) : (
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                    <tr>
+                      <th className="p-2.5">MSSV</th>
+                      <th className="p-2.5">Họ và tên</th>
+                      <th className="p-2.5">Lớp</th>
+                      <th className="p-2.5">Mật khẩu</th>
+                      <th className="p-2.5 text-center">Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {students.map((s, idx) => (
+                      <tr key={idx} className="hover:bg-slate-50">
+                        <td className="p-2.5 font-bold text-[#007A87]">{s.mssv}</td>
+                        <td className="p-2.5 font-medium text-slate-800">{s.full_name}</td>
+                        <td className="p-2.5 text-slate-600">{s.student_class}</td>
+                        <td className="p-2.5 font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded inline-block my-1">{s.password}</td>
+                        <td className="p-2.5 text-center">
+                          <button
+                            onClick={() => handleDeleteSingleStudent(s.mssv, s.full_name)}
+                            className="text-red-500 hover:text-red-700 font-bold hover:underline"
+                          >
+                            Xóa
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 2: SỰ KIỆN & GHIM GPS */}
         {activeTab === "events" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
@@ -528,7 +638,7 @@ export default function AdminDashboard() {
                             onClick={() => setActiveQrEvent(ev)}
                             className="bg-[#007A87] hover:bg-[#005a63] text-white font-bold text-xs px-3.5 py-2 rounded-xl transition shadow flex items-center gap-1.5"
                           >
-                            <span></span> Bật Mã QR
+                            <span>📲</span> Bật Mã QR
                           </button>
                           <button onClick={() => handleDeleteEvent(ev.id)} className="text-red-500 hover:text-red-700 text-xs font-bold px-2 py-1">
                             Xóa
@@ -570,7 +680,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* TAB 2: BÀI VIẾT */}
+        {/* TAB 3: BÀI VIẾT */}
         {activeTab === "posts" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
@@ -625,52 +735,6 @@ export default function AdminDashboard() {
                   </div>
                 ))}
               </div>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 3: SINH VIÊN */}
-        {activeTab === "students" && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div className="lg:col-span-5 bg-white p-5 rounded-2xl border border-emerald-500/30 bg-emerald-50/20 shadow-sm">
-              <h3 className="text-sm font-bold text-emerald-800 mb-1">Dán trực tiếp từ bảng Excel</h3>
-              <textarea
-                rows={6}
-                value={pasteData}
-                onChange={(e) => setPasteData(e.target.value)}
-                placeholder="CNDT2411081	Phạm Thái Minh Đăng	CNKT Tự động hóa K2024"
-                className="w-full border border-emerald-300 rounded-xl p-3 text-xs font-mono bg-white outline-none"
-              ></textarea>
-              <button
-                type="button"
-                onClick={handleProcessPasteData}
-                className="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs uppercase"
-              >
-                Lưu danh sách sinh viên lên Cloud
-              </button>
-            </div>
-            <div className="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm overflow-x-auto">
-              <h2 className="text-base font-bold text-[#004A52] mb-3">Danh sách sinh viên ({students.length})</h2>
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
-                  <tr>
-                    <th className="p-2.5">MSSV</th>
-                    <th className="p-2.5">Họ và tên</th>
-                    <th className="p-2.5">Lớp</th>
-                    <th className="p-2.5">Mật khẩu</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {students.map((s, idx) => (
-                    <tr key={idx} className="hover:bg-slate-50">
-                      <td className="p-2.5 font-bold text-[#007A87]">{s.mssv}</td>
-                      <td className="p-2.5 font-medium text-slate-800">{s.full_name}</td>
-                      <td className="p-2.5 text-slate-600">{s.student_class}</td>
-                      <td className="p-2.5 font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded inline-block my-1">{s.password}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
             </div>
           </div>
         )}
