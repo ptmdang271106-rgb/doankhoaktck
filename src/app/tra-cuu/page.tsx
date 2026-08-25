@@ -5,62 +5,307 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-// Cấu trúc bảng tiêu chí đánh giá ĐRL chuẩn CTUET
+// Dữ liệu tiêu chí đầy đủ chuẩn Quyết định 147/QĐ-ĐHKTCN
 const DRL_SECTIONS = [
   {
     id: "sec1",
     title: "I. Đánh giá về ý thức tham gia học tập",
     maxPoints: 20,
     items: [
-      { id: "1_1", text: "1. Điểm trung bình học tập tích lũy hệ 4 (TB: 2đ, Khá: 3đ, Giỏi: 4đ, Xuất sắc: 5đ)", max: 5, maxLabel: "5 đ/kỳ", minus: "" },
-      { id: "1_2", text: "2. Giấy chứng nhận tham gia học các lớp kỹ năng học tập", max: 3, maxLabel: "3 đ/kỳ", minus: "" },
-      { id: "1_3", text: "3. Hội thảo / Tọa đàm Khoa hoặc Trường (Trực tiếp: 3đ, Online: 1đ)", max: 3, maxLabel: "3 đ/lần", minus: "" },
-      { id: "1_4", text: "4. Cuộc thi học thuật cấp Khoa/Trường (Cổ vũ: 1đ, BTC: 2đ, Tham gia: 3đ, Giải: 4-7đ)", max: 7, maxLabel: "7 đ/lần", minus: "" },
-      { id: "1_5", text: "5. Cuộc thi học thuật bên ngoài Trường (Cổ vũ: 2đ, BTC: 3đ, Tham gia: 4đ, Giải: 5-8đ)", max: 8, maxLabel: "8 đ/lần", minus: "" },
-      { id: "1_6", text: "6. Báo cáo khoa học cấp Khoa (TB: 3đ, Khá: 4đ, Tốt: 6đ, Xuất sắc: 8đ)", max: 8, maxLabel: "8 đ/lần", minus: "" },
-      { id: "1_7", text: "7. Đề tài NCKH cấp Trường (TB: 5đ, Khá: 6đ, Tốt: 8đ, Xuất sắc: 10đ)", max: 10, maxLabel: "10 đ/lần", minus: "" },
-      { id: "1_8", text: "8. Viết bài báo khoa học (Kỷ yếu: 5đ, Tạp chí: 8đ)", max: 8, maxLabel: "8 đ/lần", minus: "" },
-      { id: "1_9", text: "9. Cuộc thi khởi nghiệp cấp Trường (Cổ vũ: 1đ, BTC: 2đ, Tham gia: 3đ, Giải: 4-7đ)", max: 7, maxLabel: "7 đ/lần", minus: "" },
-      { id: "1_10", text: "10. Cuộc thi khởi nghiệp bên ngoài Trường (Cổ vũ: 2đ, BTC: 3đ, Tham gia: 4đ, Giải: 5-8đ)", max: 8, maxLabel: "8 đ/lần", minus: "" },
-      { id: "1_11", text: "11. Thành viên CLB học thuật cấp Khoa/Trường", max: 2, maxLabel: "2 đ/kỳ", minus: "" },
-      { id: "1_12", text: "12. Các hoạt động học tập khác (Trực tiếp: 3đ, Trực tuyến: 1đ)", max: 3, maxLabel: "3 đ/lần", minus: "" },
+      {
+        id: "1_1",
+        title: "1. Sinh viên có điểm trung bình học tập tích lũy với thang điểm 4",
+        subtext: "Loại Trung bình (2.0 - 2.49): 2 điểm | Loại Khá (2.5 - 3.19): 3 điểm | Loại Giỏi (3.2 - 3.59): 4 điểm | Loại Xuất sắc (3.6 - 4.0): 5 điểm",
+        max: 5,
+        maxLabel: "5 đ/học kỳ",
+        minus: "",
+      },
+      {
+        id: "1_2",
+        title: "2. Có giấy chứng nhận tham gia học các lớp chuyên đề kỹ năng học tập trong và ngoài Trường",
+        subtext: "Sinh viên có minh chứng (giấy xác nhận, giấy chứng nhận, giấy khen, bằng khen, ...)",
+        max: 3,
+        maxLabel: "3 đ/học kỳ",
+        minus: "",
+      },
+      {
+        id: "1_3",
+        title: "3. Hội thảo hoặc Tọa đàm do Khoa hoặc Trường tổ chức",
+        subtext: "Tham gia trực tiếp: 3 đ/lần | Tham gia trực tuyến: 1 đ/lần",
+        max: 3,
+        maxLabel: "3 đ/lần",
+        minus: "",
+      },
+      {
+        id: "1_4",
+        title: "4. Các cuộc thi học thuật cấp Khoa hoặc Trường tổ chức trực tiếp hoặc trực tuyến",
+        subtext: "Tham dự / Cổ vũ: 1 đ/lần | Ban tổ chức: 2 đ/lần | Tham gia: 3 đ/lần | Đạt giải Khuyến khích, giải phụ: 4 đ/lần | Đạt giải Nhì, Ba: 5 đ/lần | Đạt giải Nhất: 6 đ/lần | Đạt giải Đặc biệt: 7 đ/lần",
+        max: 7,
+        maxLabel: "7 đ/lần",
+        minus: "",
+      },
+      {
+        id: "1_5",
+        title: "5. Các cuộc thi học thuật do các đơn vị bên ngoài trường tổ chức",
+        subtext: "Tham dự / Cổ vũ: 2 đ/lần | Ban tổ chức: 3 đ/lần | Tham gia: 4 đ/lần | Đạt giải Khuyến khích, giải phụ: 5 đ/lần | Đạt giải Nhì, Ba: 6 đ/lần | Đạt giải Nhất: 7 đ/lần | Đạt giải Đặc biệt: 8 đ/lần",
+        max: 8,
+        maxLabel: "8 đ/lần",
+        minus: "",
+      },
+      {
+        id: "1_6",
+        title: "6. Báo cáo khoa học cấp Khoa",
+        subtext: "Đề tài đạt loại Trung bình: 3 đ/lần | Đề tài đạt loại Khá: 4 đ/lần | Đề tài đạt loại Tốt: 6 đ/lần | Đề tài đạt loại Xuất sắc: 8 đ/lần",
+        max: 8,
+        maxLabel: "8 đ/lần",
+        minus: "",
+      },
+      {
+        id: "1_7",
+        title: "7. Tham gia đề tài Nghiên cứu khoa học Trường (không tính bài tập, tiểu luận, đồ án môn học, luận văn …)",
+        subtext: "Đề tài đạt loại Trung bình: 5 đ/lần | Đề tài đạt loại Khá: 6 đ/lần | Đề tài đạt loại Tốt: 8 đ/lần | Đề tài đạt loại Xuất sắc: 10 đ/lần",
+        max: 10,
+        maxLabel: "10 đ/lần",
+        minus: "",
+      },
+      {
+        id: "1_8",
+        title: "8. Viết bài báo khoa học trong và ngoài Trường",
+        subtext: "Được đăng trên kỷ yếu, bản tin: 5 đ/lần | Được đăng trên tạp chí khoa học: 8 đ/lần",
+        max: 8,
+        maxLabel: "8 đ/lần",
+        minus: "",
+      },
+      {
+        id: "1_9",
+        title: "9. Các cuộc thi khởi nghiệp do Trường tổ chức",
+        subtext: "Tham dự / Cổ vũ: 1 đ/lần | Ban tổ chức: 2 đ/lần | Tham gia: 3 đ/lần | Giải Khuyến khích, giải phụ: 4 đ/lần | Giải Nhì, Ba: 5 đ/lần | Giải Nhất: 6 đ/lần | Giải Đặc biệt: 7 đ/lần",
+        max: 7,
+        maxLabel: "7 đ/lần",
+        minus: "",
+      },
+      {
+        id: "1_10",
+        title: "10. Các cuộc thi khởi nghiệp do đơn vị ngoài Trường tổ chức",
+        subtext: "Tham dự / Cổ vũ: 2 đ/lần | Ban tổ chức: 3 đ/lần | Tham gia: 4 đ/lần | Giải Khuyến khích, giải phụ: 5 đ/lần | Giải Nhì, Ba: 6 đ/lần | Giải Nhất: 7 đ/lần | Giải Đặc biệt: 8 đ/lần",
+        max: 8,
+        maxLabel: "8 đ/lần",
+        minus: "",
+      },
+      {
+        id: "1_11",
+        title: "11. Thành viên các câu lạc bộ học thuật cấp Khoa, Trường",
+        subtext: "Sinh viên có minh chứng (giấy xác nhận, giấy chứng nhận, giấy khen, bằng khen, ...)",
+        max: 2,
+        maxLabel: "2 đ/học kỳ",
+        minus: "",
+      },
+      {
+        id: "1_12",
+        title: "12. Các hoạt động học tập khác",
+        subtext: "Tham gia trực tiếp: 3 đ/lần | Tham gia trực tuyến: 1 đ/lần",
+        max: 3,
+        maxLabel: "3 đ/lần",
+        minus: "",
+      },
     ],
   },
   {
     id: "sec2",
-    title: "II. Ý thức chấp hành nội quy, quy chế và các quy định của Nhà trường",
+    title: "II. Đánh giá về ý thức chấp hành nội quy, quy chế và các quy định của Nhà trường",
     maxPoints: 25,
     items: [
-      { id: "2_1", text: "1. Ý thức, thái độ học tập (Đi học đầy đủ +5đ; Nghỉ K.phép -3đ/b; Muộn/Bỏ tiết -1đ; Cấm thi -5đ)", max: 5, maxLabel: "5 đ/kỳ", minus: "-5 đ" },
-      { id: "2_2", text: "2. Chấp hành tốt nội quy, quy chế trường (+5đ; Kỷ luật -5đ)", max: 5, maxLabel: "5 đ/kỳ", minus: "-5 đ" },
-      { id: "2_3", text: "3. Thực hiện tốt quy chế khi tham gia các kỳ thi (+5đ; Vi phạm -5đ)", max: 5, maxLabel: "5 đ/kỳ", minus: "-5 đ" },
-      { id: "2_4", text: "4. Chấp hành quy định của Thư viện (+5đ; Vi phạm -5đ)", max: 5, maxLabel: "5 đ/kỳ", minus: "-5 đ" },
-      { id: "2_5", text: "5. Chấp hành quy định phòng học, phòng máy, xưởng (+5đ; Vi phạm -5đ)", max: 5, maxLabel: "5 đ/kỳ", minus: "-5 đ" },
-      { id: "2_6", text: "6. Thực hiện đăng ký ngoại trú đúng hạn (+5đ; Không đăng ký -5đ)", max: 5, maxLabel: "5 đ/kỳ", minus: "-5 đ" },
-      { id: "2_7", text: "7. Mặc đồng phục đúng quy định (+5đ; Vi phạm -5đ)", max: 5, maxLabel: "5 đ/kỳ", minus: "-5 đ" },
-      { id: "2_8", text: "8. Sinh hoạt lớp với Cố vấn học tập (+5đ; Vắng không phép -5đ)", max: 5, maxLabel: "5 đ/kỳ", minus: "-5 đ" },
+      {
+        id: "2_1",
+        title: "1. Sinh viên có ý thức, thái độ trong học tập",
+        subtext: "Đi học đầy đủ, đúng giờ, nghiêm túc: +5 điểm | Mỗi buổi nghỉ học không phép: -3 điểm | Đi muộn (3 lần): -1 điểm | Bỏ tiết (3 lần): -1 điểm | Bị cấm thi: -5 điểm",
+        max: 5,
+        maxLabel: "5 đ/học kỳ",
+        minus: "-5 đ",
+      },
+      {
+        id: "2_2",
+        title: "2. Sinh viên có ý thức chấp hành tốt, đầy đủ các nội quy, quy chế và các quy định của Nhà trường",
+        subtext: "Chấp hành tốt: +5 điểm | Điểm trừ khi có quyết định kỷ luật: -5 điểm",
+        max: 5,
+        maxLabel: "5 đ/học kỳ",
+        minus: "-5 đ",
+      },
+      {
+        id: "2_3",
+        title: "3. Sinh viên thực hiện tốt quy chế khi tham gia các kỳ thi, cuộc thi",
+        subtext: "Thực hiện tốt: +5 điểm | Điểm trừ khi có quyết định kỷ luật: -5 điểm",
+        max: 5,
+        maxLabel: "5 đ/học kỳ",
+        minus: "-5 đ",
+      },
+      {
+        id: "2_4",
+        title: "4. Chấp hành quy định của thư viện",
+        subtext: "Chấp hành tốt: +5 điểm | Điểm trừ khi có quyết định kỷ luật: -5 điểm",
+        max: 5,
+        maxLabel: "5 đ/học kỳ",
+        minus: "-5 đ",
+      },
+      {
+        id: "2_5",
+        title: "5. Chấp hành quy định của phòng học, phòng máy, phòng thực hành",
+        subtext: "Chấp hành tốt: +5 điểm | Điểm trừ khi có quyết định kỷ luật: -5 điểm",
+        max: 5,
+        maxLabel: "5 đ/học kỳ",
+        minus: "-5 đ",
+      },
+      {
+        id: "2_6",
+        title: "6. Thực hiện đăng ký ngoại trú",
+        subtext: "Thực hiện đầy đủ, đúng hạn: +5 điểm | Không thực hiện: -5 điểm",
+        max: 5,
+        maxLabel: "5 đ/học kỳ",
+        minus: "-5 đ",
+      },
+      {
+        id: "2_7",
+        title: "7. Mặc đồng phục đúng quy định",
+        subtext: "Thực hiện đúng quy định: +5 điểm | Điểm trừ khi vi phạm: -5 điểm",
+        max: 5,
+        maxLabel: "5 đ/học kỳ",
+        minus: "-5 đ",
+      },
+      {
+        id: "2_8",
+        title: "8. Sinh hoạt lớp với Cố vấn học tập",
+        subtext: "Tham gia đầy đủ: +5 điểm | Không sinh hoạt lớp không có lý do: -5 điểm",
+        max: 5,
+        maxLabel: "5 đ/học kỳ",
+        minus: "-5 đ",
+      },
     ],
   },
   {
     id: "sec3",
-    title: "III. Ý thức tham gia hoạt động chính trị, XH, VH-VN-TT, phòng chống tệ nạn",
+    title: "III. Đánh giá về ý thức tham gia các hoạt động chính trị, xã hội, văn hóa, văn nghệ, thể thao, phòng chống tội phạm và các tệ nạn xã hội",
     maxPoints: 20,
     items: [
-      { id: "3_1", text: "1. Hoạt động bắt buộc do Khoa/Trường tổ chức (+3đ/lần; Vắng -3đ/lần)", max: 3, maxLabel: "3 đ/lần", minus: "-3 đ/lần" },
-      { id: "3_2", text: "2. Đại hội Chi Đoàn/Chi Hội; sinh hoạt Chi Đoàn (+3đ/lần; Vắng -3đ/lần)", max: 3, maxLabel: "3 đ/lần", minus: "-3 đ/lần" },
-      { id: "3_3", text: "3. Báo cáo chuyên đề Trường tổ chức (Cổ vũ: 1đ, BTC: 2đ, Tham gia: 4đ)", max: 4, maxLabel: "4 đ/lần", minus: "" },
-      { id: "3_4", text: "4. Ngoại khóa/Cuộc thi cấp CLB, Khoa, Trường (Cổ vũ: 1đ, BTC: 2đ, Tham gia: 3đ, Giải: 4-7đ)", max: 7, maxLabel: "7 đ/lần", minus: "" },
-      { id: "3_5", text: "5. Ngoại khóa/Cuộc thi cấp Thành phố trở lên (Cổ vũ: 1đ, BTC: 3đ, Tham gia: 4đ, Giải: 5-8đ)", max: 8, maxLabel: "8 đ/lần", minus: "" },
-      { id: "3_6", text: "6. Được kết nạp Đoàn trong học kỳ", max: 5, maxLabel: "5 đ/kỳ", minus: "" },
-      { id: "3_7", text: "7. Được kết nạp Đảng trong học kỳ", max: 8, maxLabel: "8 đ/kỳ", minus: "" },
-      { id: "3_8", text: "8. Phong trào do Đoàn/Hội điều động (Tham gia: 2đ, BTC: 4đ)", max: 4, maxLabel: "4 đ/lần", minus: "" },
-      { id: "3_9", text: "9. Thành viên CLB, Đội, Nhóm thuộc Đoàn Thanh niên - Hội Sinh viên", max: 2, maxLabel: "2 đ/kỳ", minus: "" },
-      { id: "3_10", text: "10. Hoạt động 'Học tập các bài lý luận chính trị'", max: 4, maxLabel: "4 đ/lần", minus: "" },
-      { id: "3_11", text: "11. Đền ơn đáp nghĩa, Thắp nến tri ân", max: 3, maxLabel: "3 đ/lần", minus: "" },
-      { id: "3_12", text: "12. Hoạt động lao động tình nguyện tại Trường", max: 3, maxLabel: "3 đ/lần", minus: "" },
-      { id: "3_13", text: "13. Được khen thưởng phong trào (Giấy khen: 5đ, Bằng khen: 7đ)", max: 7, maxLabel: "7 đ/lần", minus: "" },
-      { id: "3_14", text: "14. Tập thể được khen thưởng trong phong trào", max: 1, maxLabel: "1 đ/lần", minus: "" },
-      { id: "3_15", text: "15. Các hoạt động phong trào khác (Trực tiếp: 3đ, Online: 1đ)", max: 3, maxLabel: "3 đ/lần", minus: "" },
+      {
+        id: "3_1",
+        title: "1. Hoạt động bắt buộc do Khoa hoặc Trường tổ chức",
+        subtext: "Tham gia đầy đủ: +3 đ/lần | Vắng không lý do: -3 đ/lần",
+        max: 3,
+        maxLabel: "3 đ/lần",
+        minus: "-3 đ/lần",
+      },
+      {
+        id: "3_2",
+        title: "2. Đại hội Chi Đoàn / Chi Hội; sinh hoạt Chi Đoàn / Chi Hội",
+        subtext: "Tham gia đầy đủ: +3 đ/lần | Vắng không lý do: -3 đ/lần",
+        max: 3,
+        maxLabel: "3 đ/lần",
+        minus: "-3 đ/lần",
+      },
+      {
+        id: "3_3",
+        title: "3. Báo cáo chuyên đề do Trường tổ chức trực tiếp hoặc trực tuyến",
+        subtext: "Tham dự / Cổ vũ: 1 đ/lần | Ban tổ chức: 2 đ/lần | Tham gia: 4 đ/lần",
+        max: 4,
+        maxLabel: "4 đ/lần",
+        minus: "",
+      },
+      {
+        id: "3_4",
+        title: "4. Hoạt động ngoại khóa hoặc các cuộc thi do các Câu lạc bộ, Khoa, Trường hoặc đơn vị ngoài Trường tổ chức trực tiếp hoặc trực tuyến",
+        subtext: "Tham dự / Cổ vũ: 1 đ/lần | Ban tổ chức: 2 đ/lần | Tham gia: 3 đ/lần | Giải Khuyến khích, giải phụ: 4 đ/lần | Giải Nhì, Ba: 5 đ/lần | Giải Nhất: 6 đ/lần | Giải Đặc biệt: 7 đ/lần",
+        max: 7,
+        maxLabel: "7 đ/lần",
+        minus: "",
+      },
+      {
+        id: "3_5",
+        title: "5. Hoạt động ngoại khóa hoặc các cuộc thi từ cấp Thành phố trở lên",
+        subtext: "Tham dự / Cổ vũ: 1 đ/lần | Ban tổ chức: 3 đ/lần | Tham gia: 4 đ/lần | Giải Khuyến khích, giải phụ: 5 đ/lần | Giải Nhì, Ba: 6 đ/lần | Giải Nhất: 7 đ/lần | Giải Đặc biệt: 8 đ/lần",
+        max: 8,
+        maxLabel: "8 đ/lần",
+        minus: "",
+      },
+      {
+        id: "3_6",
+        title: "6. Được kết nạp Đoàn",
+        subtext: "Chỉ được cộng một lần vào học kỳ kết nạp: 5 điểm",
+        max: 5,
+        maxLabel: "5 đ",
+        minus: "",
+      },
+      {
+        id: "3_7",
+        title: "7. Được kết nạp Đảng",
+        subtext: "Chỉ được cộng một lần vào học kỳ kết nạp: 8 điểm",
+        max: 8,
+        maxLabel: "8 đ",
+        minus: "",
+      },
+      {
+        id: "3_8",
+        title: "8. Các hoạt động, phong trào do các đơn vị, Đoàn, Hội điều động",
+        subtext: "Tham gia: 2 đ/lần | Ban tổ chức: 4 đ/lần",
+        max: 4,
+        maxLabel: "4 đ/lần",
+        minus: "",
+      },
+      {
+        id: "3_9",
+        title: "9. Thành viên các Câu lạc bộ, đội, nhóm thuộc Đoàn Thanh niên, Hội Sinh viên",
+        subtext: "Sinh viên có minh chứng (giấy xác nhận, giấy chứng nhận, quyết định công nhận, ...)",
+        max: 2,
+        maxLabel: "2 đ/học kỳ",
+        minus: "",
+      },
+      {
+        id: "3_10",
+        title: "10. Hoạt động 'Học tập các bài lý luận chính trị'",
+        subtext: "Sinh viên tham gia và hoàn thành bài kiểm tra: 4 đ/lần",
+        max: 4,
+        maxLabel: "4 đ/lần",
+        minus: "",
+      },
+      {
+        id: "3_11",
+        title: "11. Hoạt động đền ơn đáp nghĩa, Thắp nến tri ân",
+        subtext: "Tham gia các hoạt động kỷ niệm, viếng nghĩa trang: 3 đ/lần",
+        max: 3,
+        maxLabel: "3 đ/lần",
+        minus: "",
+      },
+      {
+        id: "3_12",
+        title: "12. Hoạt động lao động tình nguyện tại Trường",
+        subtext: "Tham gia vệ sinh khuôn viên, dọn dẹp giảng đường, xưởng: 3 đ/lần",
+        max: 3,
+        maxLabel: "3 đ/lần",
+        minus: "",
+      },
+      {
+        id: "3_13",
+        title: "13. Được khen thưởng trong các hoạt động phong trào",
+        subtext: "Giấy khen hoặc tương đương: 5 đ/lần | Bằng khen hoặc tương đương: 7 đ/lần",
+        max: 7,
+        maxLabel: "7 đ/lần",
+        minus: "",
+      },
+      {
+        id: "3_14",
+        title: "14. Tập thể được khen thưởng trong các hoạt động phong trào",
+        subtext: "Mỗi sinh viên trong tập thể được 1 điểm khi có giấy khen tập thể: 1 đ/lần",
+        max: 1,
+        maxLabel: "1 đ/lần",
+        minus: "",
+      },
+      {
+        id: "3_15",
+        title: "15. Các hoạt động phong trào khác",
+        subtext: "Tham gia trực tiếp: 3 đ/lần | Tham gia trực tuyến: 1 đ/lần",
+        max: 3,
+        maxLabel: "3 đ/lần",
+        minus: "",
+      },
     ],
   },
   {
@@ -68,39 +313,221 @@ const DRL_SECTIONS = [
     title: "IV. Đánh giá về ý thức công dân trong quan hệ cộng đồng",
     maxPoints: 25,
     items: [
-      { id: "4_1", text: "1. Chấp hành pháp luật, an toàn giao thông (+10đ; Công an báo về: -5đ)", max: 10, maxLabel: "10 đ/lần", minus: "-5 đ/lần" },
-      { id: "4_2", text: "2. Hành vi tốt, giúp đỡ người yếu thế có giấy chứng nhận từ cấp xã/trường", max: 5, maxLabel: "5 đ/lần", minus: "" },
-      { id: "4_3", text: "3. Khen thưởng hoạt động xã hội cộng đồng ngoài trường", max: 5, maxLabel: "5 đ/lần", minus: "" },
-      { id: "4_4", text: "4. Chương trình Giao lưu các CLB, Đội, Nhóm (Tham gia: 3đ, BTC: 5đ)", max: 5, maxLabel: "5 đ/lần", minus: "" },
-      { id: "4_5", text: "5. Tham gia hỗ trợ 'Tư vấn tuyển sinh'", max: 5, maxLabel: "5 đ/lần", minus: "" },
-      { id: "4_6", text: "6. Tham gia hỗ trợ Công tác nhập học tân sinh viên", max: 5, maxLabel: "5 đ/lần", minus: "" },
-      { id: "4_7", text: "7. Tham gia hỗ trợ Khám sức khỏe sinh viên đầu khóa", max: 5, maxLabel: "5 đ/lần", minus: "" },
-      { id: "4_8", text: "8. Tham gia hỗ trợ Ngày hội việc làm", max: 5, maxLabel: "5 đ/lần", minus: "" },
-      { id: "4_9", text: "9. Tham gia hỗ trợ Lễ Tốt nghiệp", max: 5, maxLabel: "5 đ/lần", minus: "" },
-      { id: "4_10", text: "10. Tham gia hỗ trợ Công tác kiểm tra hồ sơ sinh viên", max: 5, maxLabel: "5 đ/lần", minus: "" },
-      { id: "4_11", text: "11. Tham gia phiên giao dịch việc làm (Tư vấn: 1đ, Cà phê VL: 2đ, Khu vực: 3đ)", max: 3, maxLabel: "3 đ/lần", minus: "" },
-      { id: "4_12", text: "12. Hiến máu tình nguyện (Tham gia hiến máu: 10đ, BTC: 5đ)", max: 10, maxLabel: "10 đ/lần", minus: "" },
-      { id: "4_13", text: "13. Chương trình 'Xuân tình nguyện' (Tham gia: 4đ, BTC: 5đ)", max: 5, maxLabel: "5 đ/lần", minus: "" },
-      { id: "4_14", text: "14. Chiến dịch tình nguyện 'Mùa hè xanh' (Tham gia: 5đ, BTC: 7đ)", max: 7, maxLabel: "7 đ/lần", minus: "" },
-      { id: "4_15", text: "15. Chương trình 'Ngày Chủ nhật xanh' (Tham gia: 3đ, BTC: 5đ)", max: 5, maxLabel: "5 đ/lần", minus: "" },
-      { id: "4_16", text: "16. Chương trình 'Thứ Bảy tình nguyện' (Tham gia: 3đ, BTC: 5đ)", max: 5, maxLabel: "5 đ/lần", minus: "" },
-      { id: "4_17", text: "17. Chương trình 'Chào đón tân sinh viên' (Tham gia: 3đ, BTC: 5đ)", max: 5, maxLabel: "5 đ/lần", minus: "" },
-      { id: "4_18", text: "18. Hoạt động trách nhiệm xã hội, phát triển bền vững (Trực tiếp: 3đ, Online: 1đ)", max: 3, maxLabel: "3 đ/lần", minus: "" },
+      {
+        id: "4_1",
+        title: "1. Sinh viên chấp hành luật pháp, các quy định của Nhà nước và không có thông báo do công an hoặc các đơn vị khác gửi về Trường",
+        subtext: "Chấp hành tốt: +10 đ/lần | Có hành vi chưa tốt, có văn bản thông báo của công an: -5 đ/lần",
+        max: 10,
+        maxLabel: "10 đ/lần",
+        minus: "-5 đ/lần",
+      },
+      {
+        id: "4_2",
+        title: "2. Sinh viên có hành vi tốt, có tinh thần sẻ chia, giúp đỡ người yếu thế được ghi nhận bằng văn bản",
+        subtext: "Ghi nhận bằng văn bản (giấy khen, giấy chứng nhận, quyết định, ...) từ cấp xã, phường hoặc cấp trường trở lên: 5 đ/lần",
+        max: 5,
+        maxLabel: "5 đ/lần",
+        minus: "",
+      },
+      {
+        id: "4_3",
+        title: "3. Sinh viên được biểu dương, khen thưởng về tham gia các hoạt động xã hội và cộng đồng ngoài trường",
+        subtext: "Được ghi nhận bằng văn bản từ cấp xã, phường hoặc từ cấp trường trở lên: 5 đ/lần",
+        max: 5,
+        maxLabel: "5 đ/lần",
+        minus: "",
+      },
+      {
+        id: "4_4",
+        title: "4. Giao lưu chương trình 'Giao lưu các câu lạc bộ, đội, nhóm trực thuộc'",
+        subtext: "Tham gia: 3 đ/lần | Ban tổ chức: 5 đ/lần",
+        max: 5,
+        maxLabel: "5 đ/lần",
+        minus: "",
+      },
+      {
+        id: "4_5",
+        title: "5. Chương trình 'Tư vấn tuyển sinh'",
+        subtext: "Tham gia hỗ trợ ban tư vấn tuyển sinh: 5 đ/lần",
+        max: 5,
+        maxLabel: "5 đ/lần",
+        minus: "",
+      },
+      {
+        id: "4_6",
+        title: "6. Công tác nhập học",
+        subtext: "Tham gia hỗ trợ làm thủ tục nhập học cho tân sinh viên: 5 đ/lần",
+        max: 5,
+        maxLabel: "5 đ/lần",
+        minus: "",
+      },
+      {
+        id: "4_7",
+        title: "7. Công tác khám sức khỏe sinh viên đầu khóa",
+        subtext: "Tham gia hỗ trợ công tác khám sức khỏe: 5 đ/lần",
+        max: 5,
+        maxLabel: "5 đ/lần",
+        minus: "",
+      },
+      {
+        id: "4_8",
+        title: "8. Công tác Ngày hội việc làm",
+        subtext: "Tham gia hỗ trợ tổ chức ngày hội việc làm: 5 đ/lần",
+        max: 5,
+        maxLabel: "5 đ/lần",
+        minus: "",
+      },
+      {
+        id: "4_9",
+        title: "9. Công tác tổ chức Lễ Tốt nghiệp",
+        subtext: "Tham gia phục vụ, hỗ trợ công tác Lễ tốt nghiệp: 5 đ/lần",
+        max: 5,
+        maxLabel: "5 đ/lần",
+        minus: "",
+      },
+      {
+        id: "4_10",
+        title: "10. Công tác kiểm tra hồ sơ sinh viên",
+        subtext: "Tham gia hỗ trợ kiểm tra, rà soát hồ sơ sinh viên: 5 đ/lần",
+        max: 5,
+        maxLabel: "5 đ/lần",
+        minus: "",
+      },
+      {
+        id: "4_11",
+        title: "11. Tham gia các phiên giao dịch việc làm",
+        subtext: "Tư vấn tại góc việc làm, cà phê việc làm tại Trường: 1 đ/lần | Cà phê việc làm tại TT DVVL: 2 đ/lần | Phiên giao dịch việc làm khu vực: 3 đ/lần",
+        max: 3,
+        maxLabel: "3 đ/lần",
+        minus: "",
+      },
+      {
+        id: "4_12",
+        title: "12. Hiến máu tình nguyện",
+        subtext: "Trực tiếp tham gia hiến máu: 10 đ/lần | Ban tổ chức: 5 đ/lần",
+        max: 10,
+        maxLabel: "10 đ/lần",
+        minus: "",
+      },
+      {
+        id: "4_13",
+        title: "13. Chương trình 'Xuân tình nguyện'",
+        subtext: "Tham gia: 4 đ/lần | Ban tổ chức: 5 đ/lần",
+        max: 5,
+        maxLabel: "5 đ/lần",
+        minus: "",
+      },
+      {
+        id: "4_14",
+        title: "14. Chiến dịch tình nguyện 'Mùa hè xanh'",
+        subtext: "Tham gia: 5 đ/lần | Ban tổ chức: 7 đ/lần",
+        max: 7,
+        maxLabel: "7 đ/lần",
+        minus: "",
+      },
+      {
+        id: "4_15",
+        title: "15. Chương trình 'Ngày Chủ nhật xanh'",
+        subtext: "Tham gia: 3 đ/lần | Ban tổ chức: 5 đ/lần",
+        max: 5,
+        maxLabel: "5 đ/lần",
+        minus: "",
+      },
+      {
+        id: "4_16",
+        title: "16. Chương trình 'Thứ Bảy tình nguyện'",
+        subtext: "Tham gia: 3 đ/lần | Ban tổ chức: 5 đ/lần",
+        max: 5,
+        maxLabel: "5 đ/lần",
+        minus: "",
+      },
+      {
+        id: "4_17",
+        title: "17. Chương trình 'Chào đón tân sinh viên'",
+        subtext: "Tham gia: 3 đ/lần | Ban tổ chức: 5 đ/lần",
+        max: 5,
+        maxLabel: "5 đ/lần",
+        minus: "",
+      },
+      {
+        id: "4_18",
+        title: "18. Tham gia các hoạt động thực hiện trách nhiệm xã hội và phát triển bền vững",
+        subtext: "Tham gia trực tiếp: 3 đ/lần | Tham gia trực tuyến: 1 đ/lần",
+        max: 3,
+        maxLabel: "3 đ/lần",
+        minus: "",
+      },
     ],
   },
   {
     id: "sec5",
-    title: "V. Ý thức và kết quả khi tham gia công tác cán bộ lớp, Đoàn thể hoặc thành tích đặc biệt",
+    title: "V. Đánh giá về ý thức và kết quả khi tham gia công tác cán bộ lớp, các đoàn thể, tổ chức trong Nhà trường hoặc người học đạt được thành tích đặc biệt trong học tập, rèn luyện",
     maxPoints: 10,
     items: [
-      { id: "5_1", text: "1. Tham gia tích cực phong trào Lớp, Đoàn, Hội (+1đ/hoạt động)", max: 3, maxLabel: "3 đ/kỳ", minus: "" },
-      { id: "5_2", text: "2. Hoàn thành tốt nhiệm vụ cán bộ (Lớp trưởng/Chủ nhiệm CLB: 5đ; Phó: 4đ; BCH/Tổ: 3đ)", max: 5, maxLabel: "5 đ/kỳ", minus: "" },
-      { id: "5_3", text: "3. Đạt giải NCKH/Học thuật (Cấp TP: 3-6đ, Cấp Toàn quốc: 4-7đ)", max: 7, maxLabel: "7 đ/lần", minus: "" },
-      { id: "5_4", text: "4. Bằng khen UBND Tỉnh/Thành phố về thành tích đột xuất, cứu người, trật tự xã hội", max: 5, maxLabel: "5 đ/lần", minus: "" },
-      { id: "5_5", text: "5. Sinh viên 5 tốt cấp Trường, Thanh niên tiên tiến làm theo lời Bác", max: 6, maxLabel: "6 đ/lần", minus: "" },
-      { id: "5_6", text: "6. Sinh viên 5 tốt cấp Thành / Toàn quốc, giải thưởng Sao Tháng Giêng", max: 10, maxLabel: "10 đ/lần", minus: "" },
-      { id: "5_7", text: "7. Đạt danh hiệu Đoàn viên ưu tú", max: 6, maxLabel: "6 đ/lần", minus: "" },
-      { id: "5_8", text: "8. Giấy khen tập thể của Đoàn (Mỗi SV trong chi đoàn được 2đ)", max: 2, maxLabel: "2 đ/SV", minus: "" },
+      {
+        id: "5_1",
+        title: "1. Tham gia tích cực vào phong trào của Lớp, Đoàn, Hội sinh viên và các công tác đoàn thể xã hội khác",
+        subtext: "Cộng 1 điểm/hoạt động (Tối đa 3 điểm) có xác nhận của Đoàn, Hội cấp trên hoặc xác nhận của Cố vấn học tập",
+        max: 3,
+        maxLabel: "3 đ/học kỳ",
+        minus: "",
+      },
+      {
+        id: "5_2",
+        title: "2. Phát huy vai trò và hoàn thành tốt nhiệm vụ người cán bộ Chi đoàn, Lớp, Câu lạc bộ, đội, nhóm",
+        subtext: "UVBCH Đoàn Trường, UVBCH Hội Sinh viên, Chủ nhiệm CLB, Lớp trưởng: 5 đ/học kỳ | Phó chủ nhiệm CLB, Đội trưởng/Đội phó cấp Trường: 4 đ/học kỳ | UVBCH Chi đoàn, UV Chi hội, Đội tự quản: 3 đ/học kỳ",
+        max: 5,
+        maxLabel: "5 đ/học kỳ",
+        minus: "",
+      },
+      {
+        id: "5_3",
+        title: "3. Sinh viên đạt giải về học tập, Nghiên cứu khoa học",
+        subtext: "Cấp Thành phố, Khu vực (Khuyến khích: 3đ, Ba: 4đ, Nhì: 5đ, Nhất: 6đ) | Cấp Toàn quốc (Khuyến khích: 4đ, Ba: 5đ, Nhì: 6đ, Nhất: 7đ)",
+        max: 7,
+        maxLabel: "7 đ/lần",
+        minus: "",
+      },
+      {
+        id: "5_4",
+        title: "4. Sinh viên được tặng Bằng khen của UBND Tỉnh, Thành phố (hoặc tương đương) về các hoạt động chính trị, văn hóa - xã hội, thể thao, phòng chống tệ nạn xã hội, giữ gìn trật tự xã hội, cứu người …",
+        subtext: "Có quyết định khen thưởng hoặc Bằng khen: 5 đ/lần",
+        max: 5,
+        maxLabel: "5 đ/lần",
+        minus: "",
+      },
+      {
+        id: "5_5",
+        title: "5. Sinh viên đạt danh hiệu Sinh viên 5 tốt cấp Trường, Đoàn viên tiêu biểu, Thanh niên tiên tiến làm theo lời Bác, giải thưởng tình nguyện của năm … hoặc các danh hiệu khác",
+        subtext: "Có giấy chứng nhận hoặc quyết định công nhận: 6 đ/lần",
+        max: 6,
+        maxLabel: "6 đ/lần",
+        minus: "",
+      },
+      {
+        id: "5_6",
+        title: "6. Sinh viên đạt danh hiệu Sinh viên 5 tốt cấp Thành, Trung ương, giải thưởng Sao Tháng Giêng",
+        subtext: "Có giấy chứng nhận hoặc quyết định công nhận: 10 đ/lần",
+        max: 10,
+        maxLabel: "10 đ/lần",
+        minus: "",
+      },
+      {
+        id: "5_7",
+        title: "7. Đạt danh hiệu Đoàn viên ưu tú",
+        subtext: "Được công nhận danh hiệu Đoàn viên ưu tú trong học kỳ: 6 đ/lần",
+        max: 6,
+        maxLabel: "6 đ/lần",
+        minus: "",
+      },
+      {
+        id: "5_8",
+        title: "8. Giấy khen tập thể của Đoàn được trao cho những tập thể có thành tích xuất sắc, tiêu biểu, hoàn thành tốt các nhiệm vụ của Đoàn",
+        subtext: "Mỗi sinh viên trong tập thể được 2 điểm khi có giấy khen tập thể: 2 đ/SV",
+        max: 2,
+        maxLabel: "2 đ/SV",
+        minus: "",
+      },
     ],
   },
 ];
@@ -110,18 +537,18 @@ export default function CongDRLPage() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<"proof" | "form" | "result">("proof");
 
-  // Danh sách minh chứng
+  // Dữ liệu minh chứng & hoạt động
   const [proofs, setProofs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Form nộp minh chứng
+  // Form nộp minh chứng ngoài khoa
   const [proofTitle, setProofTitle] = useState("");
-  const [proofCategory, setProofCategory] = useState("I. Học tập, NCKH & Kỹ năng");
+  const [proofCategory, setProofCategory] = useState("I.1. Sinh viên có điểm trung bình học tập tích lũy với thang điểm 4");
   const [proofPoints, setProofPoints] = useState<number>(3);
   const [proofUrl, setProofUrl] = useState("");
   const [submittingProof, setSubmittingProof] = useState(false);
 
-  // Điểm tự chấm cho từng tiêu chí chi tiết { "1_1": 5, "2_1": 5, ... }
+  // Điểm tự chấm theo từng ID chi tiết { "1_1": 3, "2_1": 5, ... }
   const [scores, setScores] = useState<{ [key: string]: number }>({
     "1_1": 3,
     "2_1": 5,
@@ -155,6 +582,7 @@ export default function CongDRLPage() {
   const loadData = async (mssv: string) => {
     setLoading(true);
     try {
+      // 1. Lấy danh sách minh chứng & điểm danh
       const { data: proofData } = await supabase
         .from("proofs")
         .select("*")
@@ -163,6 +591,7 @@ export default function CongDRLPage() {
 
       if (proofData) setProofs(proofData);
 
+      // 2. Lấy tình trạng phiếu ĐRL đã nộp
       const { data: drlData } = await supabase
         .from("drl_submissions")
         .select("*")
@@ -187,20 +616,20 @@ export default function CongDRLPage() {
     setScores((prev) => ({ ...prev, [itemId]: safeVal }));
   };
 
-  // Tính điểm từng phần có khống chế max
+  // Tính điểm tổng cho từng phần theo quy định khống chế tối đa
   const getSectionScore = (section: any) => {
     const rawSum = section.items.reduce((sum: number, it: any) => sum + (Number(scores[it.id]) || 0), 0);
     return Math.min(rawSum, section.maxPoints);
   };
 
-  // Tổng điểm rèn luyện toàn bộ 5 phần (Max 100)
+  // Tổng điểm toàn bộ 5 phần (Tối đa 100 điểm)
   const grandTotalScore = DRL_SECTIONS.reduce((total, sec) => total + getSectionScore(sec), 0);
 
-  // Nộp minh chứng ngoài khoa
+  // Nộp minh chứng hoạt động ngoài khoa
   const handleUploadProof = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!proofTitle || !proofUrl) {
-      alert("Vui lòng nhập tên hoạt động và link minh chứng!");
+      alert("Vui lòng điền đầy đủ tên hoạt động và đường link hình ảnh minh chứng!");
       return;
     }
 
@@ -222,7 +651,7 @@ export default function CongDRLPage() {
       const { error } = await supabase.from("proofs").insert([newProof]);
       if (error) throw error;
 
-      alert("Nộp minh chứng thành công! Đã gửi đến BCH Chi đoàn thẩm định.");
+      alert("Nộp minh chứng thành công! Đã chuyển thông tin đến BCH Chi đoàn thẩm định.");
       setProofTitle("");
       setProofUrl("");
       loadData(currentUser.mssv);
@@ -232,9 +661,9 @@ export default function CongDRLPage() {
     setSubmittingProof(false);
   };
 
-  // Nộp phiếu ĐRL hoàn chỉnh
+  // Nộp toàn bộ phiếu ĐRL về BCH Chi đoàn
   const handleSubmitDRLForm = async () => {
-    if (!confirm(`Bạn có chắc chắn muốn nộp Phiếu ĐRL với tổng điểm tự đánh giá là ${grandTotalScore}/100 điểm về BCH Chi đoàn?`)) return;
+    if (!confirm(`Bạn có chắc chắn muốn nộp Phiếu đánh giá Điểm Rèn Luyện với tổng điểm tự chấm là ${grandTotalScore}/100 điểm về BCH Chi đoàn?`)) return;
 
     try {
       const submission = {
@@ -263,7 +692,7 @@ export default function CongDRLPage() {
     <div className="min-h-screen bg-slate-50 py-8 px-4 sm:px-6 lg:px-8 font-sans text-slate-800">
       <div className="max-w-6xl mx-auto space-y-6">
 
-        {/* HEADER ĐÃ XÓA CHỮ DƯ & ẢNH BANNER CHUẨN */}
+        {/* HEADER CHUẨN BANNER LOGO */}
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center">
@@ -349,9 +778,10 @@ export default function CongDRLPage() {
           </div>
         </div>
 
-        {/* ================= TAB 1: MINH CHỨNG ================= */}
+        {/* ================= TAB 1: NỘP & QUẢN LÝ MINH CHỨNG ================= */}
         {activeTab === "proof" && (
           <div className="space-y-6">
+            {/* Form nộp minh chứng */}
             <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
               <h2 className="text-sm font-black text-[#004A52] uppercase mb-4">
                 Nộp minh chứng hoạt động ngoài khoa
@@ -369,18 +799,89 @@ export default function CongDRLPage() {
                   />
                 </div>
 
+                {/* Dropdown phân cấp từng mục rõ ràng */}
                 <div>
                   <label className="block font-bold text-slate-700 mb-1">Thuộc hạng mục tiêu chí *</label>
                   <select
                     value={proofCategory}
                     onChange={(e) => setProofCategory(e.target.value)}
-                    className="w-full border border-slate-300 rounded-xl px-4 py-2.5 outline-none focus:border-[#EE6425]"
+                    className="w-full border border-slate-300 rounded-xl px-4 py-2.5 outline-none focus:border-[#EE6425] bg-white text-slate-700"
                   >
-                    <option>I. Học tập, NCKH & Kỹ năng</option>
-                    <option>II. Chấp hành Nội quy, Quy chế</option>
-                    <option>III. Hoạt động CT-XH, Văn thể mỹ, Đoàn - Hội</option>
-                    <option>IV. Ý thức công dân, Tình nguyện & Cộng đồng</option>
-                    <option>V. Cán bộ lớp & Thành tích đặc biệt</option>
+                    <optgroup label="I. Đánh giá về ý thức tham gia học tập">
+                      <option>I.1. Điểm trung bình học tập tích lũy hệ 4</option>
+                      <option>I.2. Chứng nhận lớp chuyên đề kỹ năng học tập</option>
+                      <option>I.3. Hội thảo hoặc Tọa đàm Khoa/Trường</option>
+                      <option>I.4. Cuộc thi học thuật cấp Khoa hoặc Trường</option>
+                      <option>I.5. Cuộc thi học thuật bên ngoài Trường</option>
+                      <option>I.6. Báo cáo khoa học cấp Khoa</option>
+                      <option>I.7. Đề tài Nghiên cứu khoa học Trường</option>
+                      <option>I.8. Viết bài báo khoa học trong và ngoài Trường</option>
+                      <option>I.9. Cuộc thi khởi nghiệp do Trường tổ chức</option>
+                      <option>I.10. Cuộc thi khởi nghiệp đơn vị ngoài tổ chức</option>
+                      <option>I.11. Thành viên CLB học thuật cấp Khoa, Trường</option>
+                      <option>I.12. Các hoạt động học tập khác</option>
+                    </optgroup>
+
+                    <optgroup label="II. Ý thức chấp hành nội quy, quy chế">
+                      <option>II.1. Ý thức, thái độ trong học tập</option>
+                      <option>II.2. Chấp hành nội quy, quy chế Nhà trường</option>
+                      <option>II.3. Thực hiện quy chế kỳ thi, cuộc thi</option>
+                      <option>II.4. Chấp hành quy định của thư viện</option>
+                      <option>II.5. Chấp hành quy định phòng học, xưởng thực hành</option>
+                      <option>II.6. Thực hiện đăng ký ngoại trú</option>
+                      <option>II.7. Mặc đồng phục đúng quy định</option>
+                      <option>II.8. Sinh hoạt lớp với Cố vấn học tập</option>
+                    </optgroup>
+
+                    <optgroup label="III. Hoạt động chính trị, XH, VH-VN-TT, phong trào">
+                      <option>III.1. Hoạt động bắt buộc do Khoa/Trường tổ chức</option>
+                      <option>III.2. Đại hội Chi Đoàn/Chi Hội, sinh hoạt Chi Đoàn</option>
+                      <option>III.3. Báo cáo chuyên đề do Trường tổ chức</option>
+                      <option>III.4. Ngoại khóa/Cuộc thi cấp CLB, Khoa, Trường</option>
+                      <option>III.5. Ngoại khóa/Cuộc thi cấp Thành phố trở lên</option>
+                      <option>III.6. Được kết nạp Đoàn</option>
+                      <option>III.7. Được kết nạp Đảng</option>
+                      <option>III.8. Hoạt động do đơn vị, Đoàn, Hội điều động</option>
+                      <option>III.9. Thành viên CLB/Đội/Nhóm Đoàn - Hội</option>
+                      <option>III.10. Hoạt động Học tập các bài lý luận chính trị</option>
+                      <option>III.11. Đền ơn đáp nghĩa, Thắp nến tri ân</option>
+                      <option>III.12. Hoạt động lao động tình nguyện tại Trường</option>
+                      <option>III.13. Khen thưởng cá nhân trong hoạt động phong trào</option>
+                      <option>III.14. Tập thể được khen thưởng phong trào</option>
+                      <option>III.15. Các hoạt động phong trào khác</option>
+                    </optgroup>
+
+                    <optgroup label="IV. Ý thức công dân trong quan hệ cộng đồng">
+                      <option>IV.1. Chấp hành luật pháp, quy định Nhà nước</option>
+                      <option>IV.2. Giúp đỡ người yếu thế, hành vi tốt có xác nhận</option>
+                      <option>IV.3. Biểu dương, khen thưởng hoạt động xã hội ngoài trường</option>
+                      <option>IV.4. Giao lưu các CLB, Đội, Nhóm trực thuộc</option>
+                      <option>IV.5. Chương trình Tư vấn tuyển sinh</option>
+                      <option>IV.6. Công tác nhập học tân sinh viên</option>
+                      <option>IV.7. Khám sức khỏe sinh viên đầu khóa</option>
+                      <option>IV.8. Công tác Ngày hội việc làm</option>
+                      <option>IV.9. Công tác tổ chức Lễ Tốt nghiệp</option>
+                      <option>IV.10. Công tác kiểm tra hồ sơ sinh viên</option>
+                      <option>IV.11. Tham gia các phiên giao dịch việc làm</option>
+                      <option>IV.12. Hiến máu tình nguyện</option>
+                      <option>IV.13. Chương trình Xuân tình nguyện</option>
+                      <option>IV.14. Chiến dịch tình nguyện Mùa hè xanh</option>
+                      <option>IV.15. Chương trình Ngày Chủ nhật xanh</option>
+                      <option>IV.16. Chương trình Thứ Bảy tình nguyện</option>
+                      <option>IV.17. Chương trình Chào đón tân sinh viên</option>
+                      <option>IV.18. Hoạt động trách nhiệm xã hội, phát triển bền vững</option>
+                    </optgroup>
+
+                    <optgroup label="V. Cán bộ lớp, Đoàn thể & Thành tích đặc biệt">
+                      <option>V.1. Tham gia tích cực phong trào Lớp, Đoàn, Hội</option>
+                      <option>V.2. Hoàn thành tốt nhiệm vụ cán bộ Lớp, Chi đoàn, CLB</option>
+                      <option>V.3. Sinh viên đạt giải học tập, Nghiên cứu khoa học</option>
+                      <option>V.4. Bằng khen UBND Tỉnh/Thành phố hoặc tương đương</option>
+                      <option>V.5. Sinh viên 5 tốt cấp Trường, Đoàn viên tiêu biểu</option>
+                      <option>V.6. Sinh viên 5 tốt cấp Thành/TW, giải thưởng Sao Tháng Giêng</option>
+                      <option>V.7. Đạt danh hiệu Đoàn viên ưu tú</option>
+                      <option>V.8. Giấy khen tập thể của Đoàn</option>
+                    </optgroup>
                   </select>
                 </div>
 
@@ -397,7 +898,7 @@ export default function CongDRLPage() {
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Link hình ảnh / Minh chứng *</label>
+                  <label className="block font-bold text-slate-700 mb-1">Link hình ảnh / File minh chứng *</label>
                   <input
                     type="url"
                     required
@@ -414,16 +915,17 @@ export default function CongDRLPage() {
                     disabled={submittingProof}
                     className="w-full bg-[#EE6425] hover:bg-[#d85216] text-white font-bold py-3 rounded-xl transition shadow"
                   >
-                    {submittingProof ? "Đang gửi..." : "Tải lên & Gửi minh chứng cho BCH Chi đoàn"}
+                    {submittingProof ? "Đang gửi duyệt..." : "Tải lên & Gửi minh chứng cho BCH Chi đoàn"}
                   </button>
                 </div>
               </form>
             </div>
 
+            {/* Bảng danh sách minh chứng */}
             <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-sm font-black text-[#004A52] uppercase">
-                  Danh sách minh chứng & Điểm danh ({proofs.length})
+                  Danh sách minh chứng & Điểm danh đã lưu ({proofs.length})
                 </h2>
                 <Link
                   href="/diem-danh"
@@ -437,19 +939,19 @@ export default function CongDRLPage() {
                 <div className="text-center py-6 text-xs text-slate-400">Đang tải minh chứng...</div>
               ) : proofs.length === 0 ? (
                 <div className="text-center py-8 text-xs text-slate-400">
-                  Chưa có minh chứng hoặc lượt điểm danh nào.
+                  Chưa có minh chứng hoặc lượt điểm danh nào. Hãy tham gia hoạt động hoặc nộp minh chứng ngoài khoa bên trên!
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead>
                       <tr className="border-b border-slate-200 text-slate-400 font-bold uppercase text-[10px]">
-                        <th className="py-2.5">Hoạt động</th>
-                        <th className="py-2.5">Hạng mục</th>
+                        <th className="py-2.5">Hoạt động / Sự kiện</th>
+                        <th className="py-2.5">Hạng mục tiêu chí</th>
                         <th className="py-2.5">Điểm</th>
                         <th className="py-2.5">Nguồn</th>
                         <th className="py-2.5">Trạng thái</th>
-                        <th className="py-2.5 text-right">Xem</th>
+                        <th className="py-2.5 text-right">Minh chứng</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -469,7 +971,7 @@ export default function CongDRLPage() {
                           <td className="py-3 text-right">
                             {p.proof_url && (
                               <a href={p.proof_url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline font-bold">
-                                Link ảnh
+                                Xem link ảnh
                               </a>
                             )}
                           </td>
@@ -483,39 +985,39 @@ export default function CongDRLPage() {
           </div>
         )}
 
-        {/* ================= TAB 2: PHIẾU ĐÁNH GIÁ ĐẦY ĐỦ TỪNG MỤC CHUẨN FILE EXCEL ================= */}
+        {/* ================= TAB 2: PHIẾU ĐÁNH GIÁ ĐẦY ĐỦ TIÊU CHÍ (ĐỀ MỤC + CHỮ NGHIÊNG NHỎ) ================= */}
         {activeTab === "form" && (
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 space-y-6">
             <div className="border-b border-slate-100 pb-4">
               <h2 className="text-base font-black text-[#004A52] uppercase">
-                PHIẾU ĐÁNH GIÁ ĐIỂM RÈN LUYỆN HỌC KỲ (THEO QUYẾT ĐỊNH 147/QĐ-ĐHKTCN)
+                PHIẾU ĐÁNH GIÁ ĐIỂM RÈN LUYỆN HỌC KỲ
               </h2>
               <p className="text-xs text-slate-500 mt-1">
-                Sinh viên điền điểm tự đánh giá cho từng dòng tiêu chí. Hệ thống tự động tính điểm từng phần theo mức khống chế tối đa.
+                Theo Quyết định số 147/QĐ-ĐHKTCN của Hiệu trưởng Trường Đại học Kỹ thuật - Công nghệ Cần Thơ.
               </p>
             </div>
 
-            {/* BẢNG TỪNG PHẦN CHI TIẾT */}
+            {/* BẢNG CHI TIẾT 5 PHẦN */}
             <div className="space-y-6">
               {DRL_SECTIONS.map((section) => {
                 const sectionScore = getSectionScore(section);
                 return (
                   <div key={section.id} className="border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
-                    {/* TIÊU ĐỀ PHẦN & TỔNG ĐIỂM PHẦN */}
+                    {/* Header từng phần */}
                     <div className="bg-slate-100 p-3.5 flex justify-between items-center text-xs font-black text-[#004A52]">
-                      <span>{section.title}</span>
+                      <span>{section.title} (Điểm tối đa là {section.maxPoints} điểm)</span>
                       <span className="bg-white px-3 py-1 rounded-xl border border-slate-200 text-[#EE6425]">
                         Tổng phần: {sectionScore} / {section.maxPoints} đ
                       </span>
                     </div>
 
-                    {/* BẢNG CHI TIẾT TIÊU CHÍ */}
+                    {/* Bảng tiêu chí */}
                     <div className="overflow-x-auto">
                       <table className="w-full text-left text-xs">
                         <thead>
                           <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold text-[11px]">
                             <th className="py-2.5 px-4 w-3/5">Nội dung đánh giá</th>
-                            <th className="py-2.5 px-2 text-center w-24">Điểm Tối đa</th>
+                            <th className="py-2.5 px-2 text-center w-28">Điểm Tối đa</th>
                             <th className="py-2.5 px-2 text-center w-20">Điểm trừ</th>
                             <th className="py-2.5 px-4 text-center w-28">SV Tự chấm</th>
                           </tr>
@@ -523,16 +1025,23 @@ export default function CongDRLPage() {
                         <tbody className="divide-y divide-slate-100">
                           {section.items.map((item) => (
                             <tr key={item.id} className="hover:bg-slate-50/80">
-                              <td className="py-2.5 px-4 text-slate-700 font-medium leading-relaxed">
-                                {item.text}
+                              <td className="py-3 px-4 text-slate-700">
+                                {/* Đề mục chính */}
+                                <span className="font-bold block text-slate-800 leading-snug">
+                                  {item.title}
+                                </span>
+                                {/* Dòng chữ nghiêng nhỏ cách chấm */}
+                                <span className="block text-[11px] italic text-slate-500 mt-1 leading-relaxed">
+                                  {item.subtext}
+                                </span>
                               </td>
-                              <td className="py-2.5 px-2 text-center font-bold text-slate-600">
+                              <td className="py-3 px-2 text-center font-bold text-slate-600 align-top pt-4">
                                 {item.maxLabel}
                               </td>
-                              <td className="py-2.5 px-2 text-center font-bold text-red-500">
+                              <td className="py-3 px-2 text-center font-bold text-red-500 align-top pt-4">
                                 {item.minus || "-"}
                               </td>
-                              <td className="py-2.5 px-4 text-center">
+                              <td className="py-3 px-4 text-center align-top pt-3">
                                 <input
                                   type="number"
                                   min="0"
@@ -552,7 +1061,7 @@ export default function CongDRLPage() {
               })}
             </div>
 
-            {/* TỔNG KẾT VÀ NỘP PHIẾU */}
+            {/* Tổng điểm và Nộp phiếu */}
             <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4 bg-orange-50/50 p-4 rounded-2xl">
               <div>
                 <span className="text-xs text-slate-500 block">TỔNG ĐIỂM RÈN LUYỆN TOÀN BỘ 5 PHẦN:</span>
