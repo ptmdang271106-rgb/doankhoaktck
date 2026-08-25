@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-
+import Link from "next/link";
 export default function CTUTYouthPortal() {
   const [activeCategory, setActiveCategory] = useState("Tất cả");
   const [activeTabRank, setActiveTabRank] = useState("Nổi bật");
@@ -54,9 +54,9 @@ export default function CTUTYouthPortal() {
               <button className="bg-[#007A87] text-white px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-[#00606B] transition-colors">
                 Điểm danh
               </button>
-              <button className="bg-[#007A87] text-white px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-[#00606B] transition-colors">
-                Cổng ĐRL
-              </button>
+             <Link href="/tra-cuu" className="bg-[#00707b] text-white px-4 py-1.5 rounded-full font-bold">
+  Cổng ĐRL
+</Link>
             </div>
 
           </div>
@@ -66,7 +66,9 @@ export default function CTUTYouthPortal() {
         <div className="bg-[#F8FCFC] border-t border-b border-[#E6F4F4]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-center space-x-8 py-2.5 text-[13.5px] font-semibold text-[#007A87] overflow-x-auto whitespace-nowrap">
-              <a href="#" className="hover:text-[#004A52] transition-colors">Hoạt động – Sự kiện Cơ khí</a>
+             <Link href="/dang-ky" className="hover:text-[#004A52] transition-colors">
+  Hoạt động – Sự kiện Cơ khí
+</Link>
               <a href="#" className="hover:text-[#004A52] transition-colors">Xem gì hôm nay</a>
               <a href="#" className="hover:text-[#004A52] transition-colors">Bản tin học thuật</a>
               <a href="#" className="hover:text-[#004A52] transition-colors">Mechanical Signal</a>
