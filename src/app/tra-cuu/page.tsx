@@ -5,101 +5,102 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
+// Dữ liệu tiêu chí đầy đủ chuẩn Quyết định 147/QĐ-ĐHKTCN
 const DRL_SECTIONS = [
   {
     id: "sec1",
     title: "I. Đánh giá về ý thức tham gia học tập",
     maxPoints: 20,
     items: [
-      { id: "1_1", title: "1. Sinh viên có điểm trung bình học tập tích lũy với thang điểm 4", subtext: "Loại Trung bình: 2đ | Khá: 3đ | Giỏi: 4đ | Xuất sắc: 5đ", max: 5, maxLabel: "5 đ/kỳ", minus: "" },
-      { id: "1_2", title: "2. Giấy chứng nhận tham gia lớp kỹ năng học tập", subtext: "Có giấy xác nhận, chứng nhận, giấy khen", max: 3, maxLabel: "3 đ/kỳ", minus: "" },
-      { id: "1_3", title: "3. Hội thảo / Tọa đàm Khoa hoặc Trường", subtext: "Trực tiếp: 3đ | Trực tuyến: 1đ", max: 3, maxLabel: "3 đ/lần", minus: "" },
-      { id: "1_4", title: "4. Cuộc thi học thuật cấp Khoa/Trường", subtext: "Cổ vũ: 1đ | BTC: 2đ | Tham gia: 3đ | Giải: 4-7đ", max: 7, maxLabel: "7 đ/lần", minus: "" },
-      { id: "1_5", title: "5. Cuộc thi học thuật ngoài Trường", subtext: "Cổ vũ: 2đ | BTC: 3đ | Tham gia: 4đ | Giải: 5-8đ", max: 8, maxLabel: "8 đ/lần", minus: "" },
-      { id: "1_6", title: "6. Báo cáo khoa học cấp Khoa", subtext: "TB: 3đ | Khá: 4đ | Tốt: 6đ | Xuất sắc: 8đ", max: 8, maxLabel: "8 đ/lần", minus: "" },
-      { id: "1_7", title: "7. Đề tài Nghiên cứu khoa học Trường", subtext: "TB: 5đ | Khá: 6đ | Tốt: 8đ | Xuất sắc: 10đ", max: 10, maxLabel: "10 đ/lần", minus: "" },
-      { id: "1_8", title: "8. Viết bài báo khoa học", subtext: "Kỷ yếu: 5đ | Tạp chí: 8đ", max: 8, maxLabel: "8 đ/lần", minus: "" },
-      { id: "1_9", title: "9. Cuộc thi khởi nghiệp cấp Trường", subtext: "Cổ vũ: 1đ | BTC: 2đ | Tham gia: 3đ | Giải: 4-7đ", max: 7, maxLabel: "7 đ/lần", minus: "" },
-      { id: "1_10", title: "10. Cuộc thi khởi nghiệp ngoài Trường", subtext: "Cổ vũ: 2đ | BTC: 3đ | Tham gia: 4đ | Giải: 5-8đ", max: 8, maxLabel: "8 đ/lần", minus: "" },
-      { id: "1_11", title: "11. Thành viên CLB học thuật cấp Khoa/Trường", subtext: "Minh chứng thành viên CLB", max: 2, maxLabel: "2 đ/kỳ", minus: "" },
-      { id: "1_12", title: "12. Các hoạt động học tập khác", subtext: "Trực tiếp: 3đ | Trực tuyến: 1đ", max: 3, maxLabel: "3 đ/lần", minus: "" },
+      { id: "1_1", title: "1. Điểm trung bình học tập tích lũy thang điểm 4", subtext: "Loại Trung bình: 2đ | Khá: 3đ | Giỏi: 4đ | Xuất sắc: 5đ", max: 5, maxLabel: "5 đ/kỳ", type: "fixed", minus: "" },
+      { id: "1_2", title: "2. Giấy chứng nhận tham gia lớp kỹ năng học tập", subtext: "Có giấy xác nhận, chứng nhận, giấy khen", max: 3, maxLabel: "3 đ/kỳ", type: "fixed", minus: "" },
+      { id: "1_3", title: "3. Hội thảo hoặc Tọa đàm do Khoa hoặc Trường tổ chức", subtext: "Trực tiếp: 3 đ/lần | Trực tuyến: 1 đ/lần (Nhập số lần tham gia)", max: 3, maxLabel: "3 đ/lần", type: "per_time", unit: 3, minus: "" },
+      { id: "1_4", title: "4. Cuộc thi học thuật cấp Khoa hoặc Trường", subtext: "Cổ vũ: 1đ | BTC: 2đ | Tham gia: 3đ | Giải: 4-7đ (Nhập số lần)", max: 7, maxLabel: "7 đ/lần", type: "per_time", unit: 3, minus: "" },
+      { id: "1_5", title: "5. Cuộc thi học thuật do đơn vị bên ngoài trường tổ chức", subtext: "Cổ vũ: 2đ | BTC: 3đ | Tham gia: 4đ | Giải: 5-8đ (Nhập số lần)", max: 8, maxLabel: "8 đ/lần", type: "per_time", unit: 4, minus: "" },
+      { id: "1_6", title: "6. Báo cáo khoa học cấp Khoa", subtext: "TB: 3đ | Khá: 4đ | Tốt: 6đ | Xuất sắc: 8đ (Nhập số lần)", max: 8, maxLabel: "8 đ/lần", type: "per_time", unit: 4, minus: "" },
+      { id: "1_7", title: "7. Tham gia đề tài NCKH cấp Trường", subtext: "TB: 5đ | Khá: 6đ | Tốt: 8đ | Xuất sắc: 10đ (Nhập số lần)", max: 10, maxLabel: "10 đ/lần", type: "per_time", unit: 5, minus: "" },
+      { id: "1_8", title: "8. Viết bài báo khoa học trong và ngoài Trường", subtext: "Kỷ yếu: 5đ | Tạp chí: 8đ (Nhập số lần)", max: 8, maxLabel: "8 đ/lần", type: "per_time", unit: 5, minus: "" },
+      { id: "1_9", title: "9. Cuộc thi khởi nghiệp do Trường tổ chức", subtext: "Cổ vũ: 1đ | BTC: 2đ | Tham gia: 3đ | Giải: 4-7đ (Nhập số lần)", max: 7, maxLabel: "7 đ/lần", type: "per_time", unit: 3, minus: "" },
+      { id: "1_10", title: "10. Cuộc thi khởi nghiệp đơn vị ngoài Trường", subtext: "Cổ vũ: 2đ | BTC: 3đ | Tham gia: 4đ | Giải: 5-8đ (Nhập số lần)", max: 8, maxLabel: "8 đ/lần", type: "per_time", unit: 4, minus: "" },
+      { id: "1_11", title: "11. Thành viên các câu lạc bộ học thuật cấp Khoa, Trường", subtext: "Minh chứng thành viên", max: 2, maxLabel: "2 đ/kỳ", type: "fixed", minus: "" },
+      { id: "1_12", title: "12. Các hoạt động học tập khác", subtext: "Trực tiếp: 3 đ/lần | Trực tuyến: 1 đ/lần (Nhập số lần)", max: 3, maxLabel: "3 đ/lần", type: "per_time", unit: 3, minus: "" },
     ],
   },
   {
     id: "sec2",
-    title: "II. Ý thức chấp hành nội quy, quy chế Nhà trường",
+    title: "II. Ý thức chấp hành nội quy, quy chế và các quy định của Nhà trường",
     maxPoints: 25,
     items: [
-      { id: "2_1", title: "1. Ý thức, thái độ học tập", subtext: "Đi học đủ: +5đ | Nghỉ K.phép: -3đ | Muộn/Bỏ tiết: -1đ | Cấm thi: -5đ", max: 5, maxLabel: "5 đ/kỳ", minus: "-5 đ" },
-      { id: "2_2", title: "2. Chấp hành tốt nội quy, quy chế trường", subtext: "Chấp hành tốt: +5đ | Kỷ luật: -5đ", max: 5, maxLabel: "5 đ/kỳ", minus: "-5 đ" },
-      { id: "2_3", title: "3. Thực hiện tốt quy chế thi", subtext: "Thực hiện tốt: +5đ | Vi phạm: -5đ", max: 5, maxLabel: "5 đ/kỳ", minus: "-5 đ" },
-      { id: "2_4", title: "4. Chấp hành quy định Thư viện", subtext: "Chấp hành tốt: +5đ | Vi phạm: -5đ", max: 5, maxLabel: "5 đ/kỳ", minus: "-5 đ" },
-      { id: "2_5", title: "5. Chấp hành quy định phòng học, xưởng", subtext: "Chấp hành tốt: +5đ | Vi phạm: -5đ", max: 5, maxLabel: "5 đ/kỳ", minus: "-5 đ" },
-      { id: "2_6", title: "6. Thực hiện đăng ký ngoại trú", subtext: "Thực hiện đúng hạn: +5đ | Không làm: -5đ", max: 5, maxLabel: "5 đ/kỳ", minus: "-5 đ" },
-      { id: "2_7", title: "7. Mặc đồng phục đúng quy định", subtext: "Thực hiện đúng: +5đ | Vi phạm: -5đ", max: 5, maxLabel: "5 đ/kỳ", minus: "-5 đ" },
-      { id: "2_8", title: "8. Sinh hoạt lớp với Cố vấn học tập", subtext: "Tham gia đủ: +5đ | Vắng không phép: -5đ", max: 5, maxLabel: "5 đ/kỳ", minus: "-5 đ" },
+      { id: "2_1", title: "1. Ý thức, thái độ trong học tập", subtext: "Đi học đủ: +5đ | Nghỉ không phép: -3đ | Muộn/Bỏ tiết: -1đ | Cấm thi: -5đ", max: 5, maxLabel: "5 đ/kỳ", type: "fixed", minus: "-5 đ" },
+      { id: "2_2", title: "2. Chấp hành tốt nội quy, quy chế Nhà trường", subtext: "Chấp hành tốt: +5đ | Kỷ luật: -5đ", max: 5, maxLabel: "5 đ/kỳ", type: "fixed", minus: "-5 đ" },
+      { id: "2_3", title: "3. Thực hiện tốt quy chế thi cử", subtext: "Thực hiện tốt: +5đ | Vi phạm: -5đ", max: 5, maxLabel: "5 đ/kỳ", type: "fixed", minus: "-5 đ" },
+      { id: "2_4", title: "4. Chấp hành quy định của thư viện", subtext: "Chấp hành tốt: +5đ | Vi phạm: -5đ", max: 5, maxLabel: "5 đ/kỳ", type: "fixed", minus: "-5 đ" },
+      { id: "2_5", title: "5. Chấp hành quy định phòng học, máy, xưởng", subtext: "Chấp hành tốt: +5đ | Vi phạm: -5đ", max: 5, maxLabel: "5 đ/kỳ", type: "fixed", minus: "-5 đ" },
+      { id: "2_6", title: "6. Thực hiện đăng ký ngoại trú", subtext: "Đăng ký đúng hạn: +5đ | Không làm: -5đ", max: 5, maxLabel: "5 đ/kỳ", type: "fixed", minus: "-5 đ" },
+      { id: "2_7", title: "7. Mặc đồng phục đúng quy định", subtext: "Thực hiện đúng: +5đ | Vi phạm: -5đ", max: 5, maxLabel: "5 đ/kỳ", type: "fixed", minus: "-5 đ" },
+      { id: "2_8", title: "8. Sinh hoạt lớp với Cố vấn học tập", subtext: "Tham gia đủ: +5đ | Vắng không phép: -5đ", max: 5, maxLabel: "5 đ/kỳ", type: "fixed", minus: "-5 đ" },
     ],
   },
   {
     id: "sec3",
-    title: "III. Hoạt động chính trị, XH, VH-VN-TT, phong trào",
+    title: "III. Hoạt động chính trị, xã hội, văn hóa, văn nghệ, thể thao, phòng chống tội phạm",
     maxPoints: 20,
     items: [
-      { id: "3_1", title: "1. Hoạt động bắt buộc do Khoa/Trường tổ chức", subtext: "Tham gia: +3đ | Vắng: -3đ", max: 3, maxLabel: "3 đ/lần", minus: "-3 đ/lần" },
-      { id: "3_2", title: "2. Đại hội / Sinh hoạt Chi Đoàn - Chi Hội", subtext: "Tham gia: +3đ | Vắng: -3đ", max: 3, maxLabel: "3 đ/lần", minus: "-3 đ/lần" },
-      { id: "3_3", title: "3. Báo cáo chuyên đề Trường tổ chức", subtext: "Cổ vũ: 1đ | BTC: 2đ | Tham gia: 4đ", max: 4, maxLabel: "4 đ/lần", minus: "" },
-      { id: "3_4", title: "4. Hoạt động/Cuộc thi CLB, Khoa, Trường", subtext: "Cổ vũ: 1đ | BTC: 2đ | Tham gia: 3đ | Giải: 4-7đ", max: 7, maxLabel: "7 đ/lần", minus: "" },
-      { id: "3_5", title: "5. Hoạt động/Cuộc thi cấp Thành phố trở lên", subtext: "Cổ vũ: 1đ | BTC: 3đ | Tham gia: 4đ | Giải: 5-8đ", max: 8, maxLabel: "8 đ/lần", minus: "" },
-      { id: "3_6", title: "6. Được kết nạp Đoàn trong kỳ", subtext: "Cộng 1 lần vào kỳ kết nạp: 5đ", max: 5, maxLabel: "5 đ", minus: "" },
-      { id: "3_7", title: "7. Được kết nạp Đảng trong kỳ", subtext: "Cộng 1 lần vào kỳ kết nạp: 8đ", max: 8, maxLabel: "8 đ", minus: "" },
-      { id: "3_8", title: "8. Hoạt động do Đoàn/Hội điều động", subtext: "Tham gia: 2đ | BTC: 4đ", max: 4, maxLabel: "4 đ/lần", minus: "" },
-      { id: "3_9", title: "9. Thành viên CLB, Đội, Nhóm Đoàn - Hội", subtext: "Minh chứng thành viên", max: 2, maxLabel: "2 đ/kỳ", minus: "" },
-      { id: "3_10", title: "10. Học tập các bài lý luận chính trị", subtext: "Hoàn thành bài kiểm tra: 4đ", max: 4, maxLabel: "4 đ/lần", minus: "" },
-      { id: "3_11", title: "11. Đền ơn đáp nghĩa, Thắp nến tri ân", subtext: "Viếng nghĩa trang, tri ân: 3đ", max: 3, maxLabel: "3 đ/lần", minus: "" },
-      { id: "3_12", title: "12. Lao động tình nguyện tại Trường", subtext: "Dọn dẹp giảng đường, xưởng: 3đ", max: 3, maxLabel: "3 đ/lần", minus: "" },
-      { id: "3_13", title: "13. Khen thưởng phong trào", subtext: "Giấy khen: 5đ | Bằng khen: 7đ", max: 7, maxLabel: "7 đ/lần", minus: "" },
-      { id: "3_14", title: "14. Tập thể được khen thưởng phong trào", subtext: "Mỗi SV trong tập thể: 1đ", max: 1, maxLabel: "1 đ/lần", minus: "" },
-      { id: "3_15", title: "15. Hoạt động phong trào khác", subtext: "Trực tiếp: 3đ | Online: 1đ", max: 3, maxLabel: "3 đ/lần", minus: "" },
+      { id: "3_1", title: "1. Hoạt động bắt buộc do Khoa hoặc Trường tổ chức", subtext: "Tham gia: +3 đ/lần | Vắng không lý do: -3 đ/lần (Nhập số lần)", max: 3, maxLabel: "3 đ/lần", type: "per_time", unit: 3, minus: "-3 đ/lần" },
+      { id: "3_2", title: "2. Đại hội Chi Đoàn/Chi Hội; sinh hoạt Chi Đoàn", subtext: "Tham gia: +3 đ/lần | Vắng không lý do: -3 đ/lần (Nhập số lần)", max: 3, maxLabel: "3 đ/lần", type: "per_time", unit: 3, minus: "-3 đ/lần" },
+      { id: "3_3", title: "3. Báo cáo chuyên đề do Trường tổ chức", subtext: "Cổ vũ: 1đ | BTC: 2đ | Tham gia: 4 đ/lần (Nhập số lần)", max: 4, maxLabel: "4 đ/lần", type: "per_time", unit: 4, minus: "" },
+      { id: "3_4", title: "4. Hoạt động ngoại khóa/Cuộc thi CLB, Khoa, Trường", subtext: "Cổ vũ: 1đ | BTC: 2đ | Tham gia: 3đ | Giải: 4-7 đ/lần (Nhập số lần)", max: 7, maxLabel: "7 đ/lần", type: "per_time", unit: 3, minus: "" },
+      { id: "3_5", title: "5. Hoạt động ngoại khóa/Cuộc thi cấp Thành phố trở lên", subtext: "Cổ vũ: 1đ | BTC: 3đ | Tham gia: 4đ | Giải: 5-8 đ/lần (Nhập số lần)", max: 8, maxLabel: "8 đ/lần", type: "per_time", unit: 4, minus: "" },
+      { id: "3_6", title: "6. Được kết nạp Đoàn", subtext: "Cộng 1 lần vào kỳ kết nạp: 5đ", max: 5, maxLabel: "5 đ", type: "fixed", minus: "" },
+      { id: "3_7", title: "7. Được kết nạp Đảng", subtext: "Cộng 1 lần vào kỳ kết nạp: 8đ", max: 8, maxLabel: "8 đ", type: "fixed", minus: "" },
+      { id: "3_8", title: "8. Hoạt động, phong trào do đơn vị, Đoàn, Hội điều động", subtext: "Tham gia: 2 đ/lần | BTC: 4 đ/lần (Nhập số lần)", max: 4, maxLabel: "4 đ/lần", type: "per_time", unit: 2, minus: "" },
+      { id: "3_9", title: "9. Thành viên các Câu lạc bộ, đội, nhóm Đoàn - Hội", subtext: "Minh chứng thành viên", max: 2, maxLabel: "2 đ/kỳ", type: "fixed", minus: "" },
+      { id: "3_10", title: "10. Hoạt động 'Học tập các bài lý luận chính trị'", subtext: "Hoàn thành bài kiểm tra: 4 đ/lần (Nhập số lần)", max: 4, maxLabel: "4 đ/lần", type: "per_time", unit: 4, minus: "" },
+      { id: "3_11", title: "11. Hoạt động đền ơn đáp nghĩa, Thắp nến tri ân", subtext: "Tham gia hoạt động: 3 đ/lần (Nhập số lần)", max: 3, maxLabel: "3 đ/lần", type: "per_time", unit: 3, minus: "" },
+      { id: "3_12", title: "12. Hoạt động lao động tình nguyện tại Trường", subtext: "Vệ sinh, dọn giảng đường: 3 đ/lần (Nhập số lần)", max: 3, maxLabel: "3 đ/lần", type: "per_time", unit: 3, minus: "" },
+      { id: "3_13", title: "13. Được khen thưởng trong các hoạt động phong trào", subtext: "Giấy khen: 5đ | Bằng khen: 7 đ/lần (Nhập số lần)", max: 7, maxLabel: "7 đ/lần", type: "per_time", unit: 5, minus: "" },
+      { id: "3_14", title: "14. Tập thể được khen thưởng trong phong trào", subtext: "Mỗi SV trong tập thể: 1 đ/lần (Nhập số lần)", max: 1, maxLabel: "1 đ/lần", type: "per_time", unit: 1, minus: "" },
+      { id: "3_15", title: "15. Các hoạt động phong trào khác", subtext: "Trực tiếp: 3 đ/lần | Online: 1 đ/lần (Nhập số lần)", max: 3, maxLabel: "3 đ/lần", type: "per_time", unit: 3, minus: "" },
     ],
   },
   {
     id: "sec4",
-    title: "IV. Ý thức công dân trong quan hệ cộng đồng",
+    title: "IV. Đánh giá về ý thức công dân trong quan hệ cộng đồng",
     maxPoints: 25,
     items: [
-      { id: "4_1", title: "1. Chấp hành luật pháp, quy định Nhà nước", subtext: "Chấp hành tốt: +10đ | Công an báo về: -5đ", max: 10, maxLabel: "10 đ/lần", minus: "-5 đ/lần" },
-      { id: "4_2", title: "2. Hành vi tốt, giúp đỡ người yếu thế", subtext: "Giấy khen/chứng nhận cấp xã/trường: 5đ", max: 5, maxLabel: "5 đ/lần", minus: "" },
-      { id: "4_3", title: "3. Khen thưởng hoạt động xã hội ngoài trường", subtext: "Minh chứng khen thưởng: 5đ", max: 5, maxLabel: "5 đ/lần", minus: "" },
-      { id: "4_4", title: "4. Giao lưu các CLB, Đội, Nhóm trực thuộc", subtext: "Tham gia: 3đ | BTC: 5đ", max: 5, maxLabel: "5 đ/lần", minus: "" },
-      { id: "4_5", title: "5. Chương trình Tư vấn tuyển sinh", subtext: "Hỗ trợ tư vấn tuyển sinh: 5đ", max: 5, maxLabel: "5 đ/lần", minus: "" },
-      { id: "4_6", title: "6. Công tác nhập học tân sinh viên", subtext: "Hỗ trợ làm thủ tục: 5đ", max: 5, maxLabel: "5 đ/lần", minus: "" },
-      { id: "4_7", title: "7. Khám sức khỏe sinh viên đầu khóa", subtext: "Hỗ trợ khám sức khỏe: 5đ", max: 5, maxLabel: "5 đ/lần", minus: "" },
-      { id: "4_8", title: "8. Công tác Ngày hội việc làm", subtext: "Hỗ trợ ngày hội: 5đ", max: 5, maxLabel: "5 đ/lần", minus: "" },
-      { id: "4_9", title: "9. Công tác tổ chức Lễ Tốt nghiệp", subtext: "Hỗ trợ lễ tốt nghiệp: 5đ", max: 5, maxLabel: "5 đ/lần", minus: "" },
-      { id: "4_10", title: "10. Công tác kiểm tra hồ sơ sinh viên", subtext: "Hỗ trợ rà soát hồ sơ: 5đ", max: 5, maxLabel: "5 đ/lần", minus: "" },
-      { id: "4_11", title: "11. Tham gia phiên giao dịch việc làm", subtext: "Tư vấn: 1đ | Cà phê VL: 2đ | Khu vực: 3đ", max: 3, maxLabel: "3 đ/lần", minus: "" },
-      { id: "4_12", title: "12. Hiến máu tình nguyện", subtext: "Trực tiếp hiến máu: 10đ | BTC: 5đ", max: 10, maxLabel: "10 đ/lần", minus: "" },
-      { id: "4_13", title: "13. Chương trình Xuân tình nguyện", subtext: "Tham gia: 4đ | BTC: 5đ", max: 5, maxLabel: "5 đ/lần", minus: "" },
-      { id: "4_14", title: "14. Chiến dịch tình nguyện Mùa hè xanh", subtext: "Tham gia: 5đ | BTC: 7đ", max: 7, maxLabel: "7 đ/lần", minus: "" },
-      { id: "4_15", title: "15. Chương trình Ngày Chủ nhật xanh", subtext: "Tham gia: 3đ | BTC: 5đ", max: 5, maxLabel: "5 đ/lần", minus: "" },
-      { id: "4_16", title: "16. Chương trình Thứ Bảy tình nguyện", subtext: "Tham gia: 3đ | BTC: 5đ", max: 5, maxLabel: "5 đ/lần", minus: "" },
-      { id: "4_17", title: "17. Chương trình Chào đón tân sinh viên", subtext: "Tham gia: 3đ | BTC: 5đ", max: 5, maxLabel: "5 đ/lần", minus: "" },
-      { id: "4_18", title: "18. Hoạt động trách nhiệm xã hội, bền vững", subtext: "Trực tiếp: 3đ | Online: 1đ", max: 3, maxLabel: "3 đ/lần", minus: "" },
+      { id: "4_1", title: "1. Chấp hành luật pháp, quy định Nhà nước", subtext: "Chấp hành tốt: +10đ | Công an báo về: -5đ", max: 10, maxLabel: "10 đ/lần", type: "fixed", minus: "-5 đ/lần" },
+      { id: "4_2", title: "2. Giúp đỡ người yếu thế được ghi nhận bằng văn bản", subtext: "Cấp xã/trường trở lên: 5 đ/lần (Nhập số lần)", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 5, minus: "" },
+      { id: "4_3", title: "3. Khen thưởng hoạt động xã hội ngoài trường", subtext: "Ghi nhận từ cấp xã/trường: 5 đ/lần (Nhập số lần)", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 5, minus: "" },
+      { id: "4_4", title: "4. Giao lưu các Câu lạc bộ, Đội, Nhóm trực thuộc", subtext: "Tham gia: 3đ | BTC: 5 đ/lần (Nhập số lần)", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 3, minus: "" },
+      { id: "4_5", title: "5. Chương trình 'Tư vấn tuyển sinh'", subtext: "Hỗ trợ ban tư vấn: 5 đ/lần (Nhập số lần)", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 5, minus: "" },
+      { id: "4_6", title: "6. Công tác nhập học", subtext: "Hỗ trợ làm thủ tục nhập học: 5 đ/lần (Nhập số lần)", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 5, minus: "" },
+      { id: "4_7", title: "7. Khám sức khỏe sinh viên đầu khóa", subtext: "Hỗ trợ khám sức khỏe: 5 đ/lần (Nhập số lần)", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 5, minus: "" },
+      { id: "4_8", title: "8. Công tác Ngày hội việc làm", subtext: "Hỗ trợ tổ chức: 5 đ/lần (Nhập số lần)", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 5, minus: "" },
+      { id: "4_9", title: "9. Công tác tổ chức Lễ Tốt nghiệp", subtext: "Hỗ trợ Lễ tốt nghiệp: 5 đ/lần (Nhập số lần)", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 5, minus: "" },
+      { id: "4_10", title: "10. Công tác kiểm tra hồ sơ sinh viên", subtext: "Hỗ trợ rà soát hồ sơ: 5 đ/lần (Nhập số lần)", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 5, minus: "" },
+      { id: "4_11", title: "11. Tham gia các phiên giao dịch việc làm", subtext: "Tư vấn: 1đ | Cà phê VL: 2đ | Khu vực: 3 đ/lần (Nhập số lần)", max: 3, maxLabel: "3 đ/lần", type: "per_time", unit: 2, minus: "" },
+      { id: "4_12", title: "12. Hiến máu tình nguyện", subtext: "Trực tiếp hiến máu: 10đ | BTC: 5 đ/lần (Nhập số lần)", max: 10, maxLabel: "10 đ/lần", type: "per_time", unit: 10, minus: "" },
+      { id: "4_13", title: "13. Chương trình 'Xuân tình nguyện'", subtext: "Tham gia: 4đ | BTC: 5 đ/lần (Nhập số lần)", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 4, minus: "" },
+      { id: "4_14", title: "14. Chiến dịch tình nguyện 'Mùa hè xanh'", subtext: "Tham gia: 5đ | BTC: 7 đ/lần (Nhập số lần)", max: 7, maxLabel: "7 đ/lần", type: "per_time", unit: 5, minus: "" },
+      { id: "4_15", title: "15. Chương trình 'Ngày Chủ nhật xanh'", subtext: "Tham gia: 3đ | BTC: 5 đ/lần (Nhập số lần)", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 3, minus: "" },
+      { id: "4_16", title: "16. Chương trình 'Thứ Bảy tình nguyện'", subtext: "Tham gia: 3đ | BTC: 5 đ/lần (Nhập số lần)", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 3, minus: "" },
+      { id: "4_17", title: "17. Chương trình 'Chào đón tân sinh viên'", subtext: "Tham gia: 3đ | BTC: 5 đ/lần (Nhập số lần)", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 3, minus: "" },
+      { id: "4_18", title: "18. Hoạt động trách nhiệm xã hội, phát triển bền vững", subtext: "Trực tiếp: 3 đ/lần | Trực tuyến: 1 đ/lần (Nhập số lần)", max: 3, maxLabel: "3 đ/lần", type: "per_time", unit: 3, minus: "" },
     ],
   },
   {
     id: "sec5",
-    title: "V. Cán bộ lớp, Đoàn thể & Thành tích đặc biệt",
+    title: "V. Ý thức và kết quả khi tham gia công tác cán bộ lớp, các đoàn thể hoặc thành tích đặc biệt",
     maxPoints: 10,
     items: [
-      { id: "5_1", title: "1. Tham gia tích cực phong trào Lớp, Đoàn, Hội", subtext: "+1đ/hoạt động (Tối đa 3đ)", max: 3, maxLabel: "3 đ/kỳ", minus: "" },
-      { id: "5_2", title: "2. Hoàn thành tốt nhiệm vụ cán bộ", subtext: "Lớp trưởng/Chủ nhiệm CLB: 5đ | Phó: 4đ | BCH/Tổ: 3đ", max: 5, maxLabel: "5 đ/kỳ", minus: "" },
-      { id: "5_3", title: "3. Sinh viên đạt giải học thuật, NCKH", subtext: "Cấp TP: 3-6đ | Toàn quốc: 4-7đ", max: 7, maxLabel: "7 đ/lần", minus: "" },
-      { id: "5_4", title: "4. Bằng khen UBND Tỉnh/Thành phố", subtext: "Khen thưởng đột xuất, cứu người: 5đ", max: 5, maxLabel: "5 đ/lần", minus: "" },
-      { id: "5_5", title: "5. SV 5 tốt cấp Trường, Thanh niên tiên tiến", subtext: "Minh chứng công nhận: 6đ", max: 6, maxLabel: "6 đ/lần", minus: "" },
-      { id: "5_6", title: "6. SV 5 tốt cấp Thành/TW, Sao Tháng Giêng", subtext: "Minh chứng công nhận: 10đ", max: 10, maxLabel: "10 đ/lần", minus: "" },
-      { id: "5_7", title: "7. Đạt danh hiệu Đoàn viên ưu tú", subtext: "Công nhận trong kỳ: 6đ", max: 6, maxLabel: "6 đ/lần", minus: "" },
-      { id: "5_8", title: "8. Giấy khen tập thể của Đoàn", subtext: "Mỗi SV trong tập thể: 2đ", max: 2, maxLabel: "2 đ/SV", minus: "" },
+      { id: "5_1", title: "1. Tham gia tích cực vào phong trào của Lớp, Đoàn, Hội", subtext: "+1 điểm/hoạt động (Tối đa 3 điểm)", max: 3, maxLabel: "3 đ/kỳ", type: "per_time", unit: 1, minus: "" },
+      { id: "5_2", title: "2. Hoàn thành tốt nhiệm vụ người cán bộ Lớp, Chi đoàn, CLB", subtext: "Lớp trưởng/Chủ nhiệm: 5đ | Phó: 4đ | UVBCH/Tổ: 3 đ/kỳ", max: 5, maxLabel: "5 đ/kỳ", type: "fixed", minus: "" },
+      { id: "5_3", title: "3. Sinh viên đạt giải về học tập, Nghiên cứu khoa học", subtext: "Cấp TP: 3-6đ | Toàn quốc: 4-7 đ/lần (Nhập số lần)", max: 7, maxLabel: "7 đ/lần", type: "per_time", unit: 4, minus: "" },
+      { id: "5_4", title: "4. Bằng khen UBND Tỉnh/Thành phố hoặc tương đương", subtext: "Hoạt động chính trị, cứu người: 5 đ/lần (Nhập số lần)", max: 5, maxLabel: "5 đ/lần", type: "per_time", unit: 5, minus: "" },
+      { id: "5_5", title: "5. Sinh viên 5 tốt cấp Trường, Đoàn viên tiêu biểu", subtext: "Minh chứng công nhận: 6 đ/lần (Nhập số lần)", max: 6, maxLabel: "6 đ/lần", type: "per_time", unit: 6, minus: "" },
+      { id: "5_6", title: "6. Sinh viên 5 tốt cấp Thành/Trung ương, Sao Tháng Giêng", subtext: "Minh chứng công nhận: 10 đ/lần (Nhập số lần)", max: 10, maxLabel: "10 đ/lần", type: "per_time", unit: 10, minus: "" },
+      { id: "5_7", title: "7. Đạt danh hiệu Đoàn viên ưu tú", subtext: "Được công nhận trong kỳ: 6 đ/lần (Nhập số lần)", max: 6, maxLabel: "6 đ/lần", type: "per_time", unit: 6, minus: "" },
+      { id: "5_8", title: "8. Giấy khen tập thể của Đoàn", subtext: "Mỗi sinh viên trong tập thể được 2 điểm: 2 đ/SV", max: 2, maxLabel: "2 đ/SV", type: "fixed", minus: "" },
     ],
   },
 ];
@@ -109,16 +110,13 @@ export default function CongDRLPage() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<"proof" | "form" | "result">("proof");
 
-  // Quản lý học kỳ
   const [semesters, setSemesters] = useState<any[]>([]);
   const [selectedSemester, setSelectedSemester] = useState<string>("hk1_2026_2027");
   const [isSemesterOpen, setIsSemesterOpen] = useState<boolean>(true);
 
-  // Dữ liệu minh chứng
   const [proofs, setProofs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Form Tab 1
   const [proofTitle, setProofTitle] = useState("");
   const [proofCategory, setProofCategory] = useState("I.1. Điểm trung bình học tập tích lũy hệ 4");
   const [proofPoints, setProofPoints] = useState<number>(5);
@@ -126,7 +124,6 @@ export default function CongDRLPage() {
   const [submittingProof, setSubmittingProof] = useState(false);
   const [uploadingFile, setUploadingFile] = useState(false);
 
-  // Tab 2
   const [itemProofs, setItemProofs] = useState<{ [key: string]: string }>({});
   const [uploadingItemId, setUploadingItemId] = useState<string | null>(null);
 
@@ -139,7 +136,6 @@ export default function CongDRLPage() {
   const [drlStatus, setDrlStatus] = useState<string>("Chưa nộp");
   const [finalScore, setFinalScore] = useState<number | null>(null);
 
-  // Load danh sách học kỳ
   useEffect(() => {
     const fetchSemesters = async () => {
       const { data } = await supabase.from("drl_semesters").select("*").order("created_at", { ascending: false });
@@ -178,7 +174,6 @@ export default function CongDRLPage() {
   const loadData = async (mssv: string, semesterId: string) => {
     setLoading(true);
     try {
-      // 1. Lọc minh chứng theo đúng học kỳ
       const { data: proofData } = await supabase
         .from("proofs")
         .select("*")
@@ -195,7 +190,6 @@ export default function CongDRLPage() {
         setItemProofs(proofMap);
       }
 
-      // 2. Lọc phiếu ĐRL theo đúng học kỳ
       const { data: drlData } = await supabase
         .from("drl_submissions")
         .select("*")
@@ -224,10 +218,17 @@ export default function CongDRLPage() {
     checkSemesterStatus(sem);
   };
 
-  const handleScoreChange = (itemId: string, val: number, maxVal: number) => {
+  // Tính điểm tự động khi thay đổi số lần hoặc điểm cố định, tự khống chế Max
+  const handleItemChange = (item: any, rawValue: number) => {
     if (!isSemesterOpen) return;
-    const safeVal = Math.min(Math.max(0, val || 0), maxVal);
-    setScores((prev) => ({ ...prev, [itemId]: safeVal }));
+    let computedScore = 0;
+    if (item.type === "per_time") {
+      const times = Math.max(0, rawValue || 0);
+      computedScore = Math.min(times * (item.unit || 1), item.max);
+    } else {
+      computedScore = Math.min(Math.max(0, rawValue || 0), item.max);
+    }
+    setScores((prev) => ({ ...prev, [item.id]: computedScore }));
   };
 
   const handleFileUploadTab1 = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -303,10 +304,7 @@ export default function CongDRLPage() {
 
   const handleUploadProofTab1 = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isSemesterOpen) {
-      alert("Học kỳ này đã đóng cổng đánh giá, không thể nộp thêm!");
-      return;
-    }
+    if (!isSemesterOpen) return;
 
     setSubmittingProof(true);
     try {
@@ -336,10 +334,7 @@ export default function CongDRLPage() {
   };
 
   const handleSubmitDRLForm = async () => {
-    if (!isSemesterOpen) {
-      alert("Học kỳ này đã kết thúc thời gian đánh giá!");
-      return;
-    }
+    if (!isSemesterOpen) return;
 
     try {
       const submission = {
@@ -394,14 +389,14 @@ export default function CongDRLPage() {
           </div>
         </div>
 
-        {/* THANH CHỌN HỌC KỲ VÀ THÔNG BÁO THỜI HẠN */}
+        {/* HỌC KỲ */}
         <div className="bg-white rounded-3xl p-4 shadow-sm border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-slate-700 whitespace-nowrap">Đang xem học kỳ:</span>
             <select
               value={selectedSemester}
               onChange={(e) => handleSelectSemester(e.target.value)}
-              className="border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-[#004A52] outline-none focus:border-[#EE6425] bg-slate-50"
+              className="border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-[#004A52] outline-none bg-slate-50"
             >
               {semesters.map((s) => (
                 <option key={s.id} value={s.id}>
@@ -425,7 +420,7 @@ export default function CongDRLPage() {
           </div>
         </div>
 
-        {/* THÔNG TIN TỔNG QUAN */}
+        {/* THÔNG TIN */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="md:col-span-2 bg-white rounded-3xl p-6 shadow-sm border border-slate-200 space-y-2">
             <div className="flex justify-between items-center border-b border-slate-100 pb-2">
@@ -455,7 +450,7 @@ export default function CongDRLPage() {
           </div>
         </div>
 
-        {/* 3 TAB */}
+        {/* TABS */}
         <div className="bg-white rounded-3xl p-2 shadow-sm border border-slate-200">
           <div className="grid grid-cols-3 gap-2 text-center text-xs font-bold">
             <button
@@ -501,7 +496,7 @@ export default function CongDRLPage() {
                       required
                       value={proofTitle}
                       onChange={(e) => setProofTitle(e.target.value)}
-                      placeholder="VD: Hiến máu tình nguyện đợt 1..."
+                      placeholder="VD: Hiến máu tình nguyện..."
                       className="w-full border border-slate-300 rounded-xl px-4 py-2.5 outline-none focus:border-[#EE6425]"
                     />
                   </div>
@@ -513,7 +508,7 @@ export default function CongDRLPage() {
                       onChange={(e) => setProofCategory(e.target.value)}
                       className="w-full border border-slate-300 rounded-xl px-4 py-2.5 outline-none focus:border-[#EE6425] bg-white text-slate-700"
                     >
-                      <option>I.1. Điểm trung bình học tập tích lũy hệ 4</option>
+                      <option>I.3. Hội thảo hoặc Tọa đàm do Khoa hoặc Trường tổ chức</option>
                       <option>I.4. Cuộc thi học thuật cấp Khoa hoặc Trường</option>
                       <option>III.1. Hoạt động bắt buộc do Khoa/Trường tổ chức</option>
                       <option>IV.12. Hiến máu tình nguyện</option>
@@ -530,7 +525,7 @@ export default function CongDRLPage() {
                       max="10"
                       value={proofPoints}
                       onChange={(e) => setProofPoints(Number(e.target.value))}
-                      className="w-full border border-slate-300 rounded-xl px-4 py-2.5 font-bold text-[#EE6425] outline-none focus:border-[#EE6425]"
+                      className="w-full border border-slate-300 rounded-xl px-4 py-2.5 font-bold text-[#EE6425] outline-none"
                     />
                   </div>
 
@@ -569,13 +564,8 @@ export default function CongDRLPage() {
               <h2 className="text-sm font-black text-[#004A52] uppercase mb-4">
                 Danh sách minh chứng ({proofs.length}) - {selectedSemester}
               </h2>
-
-              {loading ? (
-                <div className="text-center py-6 text-xs text-slate-400">Đang tải minh chứng...</div>
-              ) : proofs.length === 0 ? (
-                <div className="text-center py-8 text-xs text-slate-400">
-                  Học kỳ này chưa có minh chứng nào được lưu.
-                </div>
+              {proofs.length === 0 ? (
+                <div className="text-center py-8 text-xs text-slate-400">Học kỳ này chưa có minh chứng nào.</div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
@@ -618,13 +608,16 @@ export default function CongDRLPage() {
           </div>
         )}
 
-        {/* TAB 2 */}
+        {/* TAB 2: PHIẾU ĐRL (TỰ ĐỘNG TÍNH THEO SỐ LẦN HOẶC NHẬP TRỰC TIẾP) */}
         {activeTab === "form" && (
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 space-y-6">
             <div className="border-b border-slate-100 pb-4">
               <h2 className="text-base font-black text-[#004A52] uppercase">
                 PHIẾU ĐÁNH GIÁ ĐIỂM RÈN LUYỆN ({selectedSemester})
               </h2>
+              <p className="text-xs text-slate-500 mt-1">
+                Các tiểu mục tính theo lần: Hệ thống sẽ tự động nhân số lần tham gia với điểm đơn vị (và tự khống chế tối đa theo quy định).
+              </p>
             </div>
 
             <div className="space-y-6">
@@ -633,7 +626,7 @@ export default function CongDRLPage() {
                 return (
                   <div key={section.id} className="border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
                     <div className="bg-slate-100 p-3.5 flex justify-between items-center text-xs font-black text-[#004A52]">
-                      <span>{section.title}</span>
+                      <span>{section.title} (Tối đa {section.maxPoints} điểm)</span>
                       <span className="bg-white px-3 py-1 rounded-xl border border-slate-200 text-[#EE6425]">
                         Tổng phần: {sectionScore} / {section.maxPoints} đ
                       </span>
@@ -643,63 +636,72 @@ export default function CongDRLPage() {
                       <table className="w-full text-left text-xs">
                         <thead>
                           <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold text-[11px]">
-                            <th className="py-2.5 px-4 w-5/12">Nội dung đánh giá</th>
+                            <th className="py-2.5 px-4 w-4/12">Nội dung đánh giá</th>
                             <th className="py-2.5 px-2 text-center w-20">Điểm Max</th>
-                            <th className="py-2.5 px-2 text-center w-20">SV Tự chấm</th>
-                            <th className="py-2.5 px-4 text-center w-4/12">Minh chứng đính kèm</th>
+                            <th className="py-2.5 px-2 text-center w-24">Số lần / Điểm</th>
+                            <th className="py-2.5 px-4 text-center w-5/12">Minh chứng đính kèm</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                          {section.items.map((item) => (
-                            <tr key={item.id} className="hover:bg-slate-50/80">
-                              <td className="py-3 px-4 text-slate-700">
-                                <span className="font-bold block text-slate-800 leading-snug">{item.title}</span>
-                                <span className="block text-[11px] italic text-slate-500 mt-1 leading-relaxed">{item.subtext}</span>
-                              </td>
-                              <td className="py-3 px-2 text-center font-bold text-slate-600 align-top pt-4">
-                                {item.maxLabel}
-                              </td>
-                              <td className="py-3 px-2 text-center align-top pt-3">
-                                <input
-                                  type="number"
-                                  disabled={!isSemesterOpen}
-                                  min="0"
-                                  max={item.max}
-                                  value={scores[item.id] !== undefined ? scores[item.id] : 0}
-                                  onChange={(e) => handleScoreChange(item.id, Number(e.target.value), item.max)}
-                                  className="w-16 border border-slate-300 rounded-lg px-2 py-1 text-center font-bold text-[#EE6425] outline-none focus:border-[#EE6425] disabled:bg-slate-100"
-                                />
-                              </td>
-                              <td className="py-3 px-4 align-top pt-3">
-                                {isSemesterOpen ? (
-                                  <div className="flex items-center gap-1.5">
+                          {section.items.map((item) => {
+                            const currentScore = scores[item.id] !== undefined ? scores[item.id] : 0;
+                            // Nếu là per_time, tính ngược lại số lần (currentScore / unit)
+                            const timesValue = item.type === "per_time" ? Math.round(currentScore / (item.unit || 1)) : currentScore;
+
+                            return (
+                              <tr key={item.id} className="hover:bg-slate-50/80">
+                                <td className="py-3 px-4 text-slate-700">
+                                  <span className="font-bold block text-slate-800 leading-snug">{item.title}</span>
+                                  <span className="block text-[11px] italic text-slate-500 mt-1 leading-relaxed">{item.subtext}</span>
+                                </td>
+                                <td className="py-3 px-2 text-center font-bold text-slate-600 align-top pt-4">
+                                  {item.maxLabel}
+                                </td>
+                                <td className="py-3 px-2 text-center align-top pt-3">
+                                  <div className="flex flex-col items-center">
                                     <input
-                                      type="text"
-                                      value={itemProofs[item.id] || ""}
-                                      onChange={(e) => setItemProofs((prev) => ({ ...prev, [item.id]: e.target.value }))}
-                                      placeholder="Link Drive/ảnh..."
-                                      className="flex-1 border border-slate-300 rounded-lg px-2 py-1 text-[11px] outline-none focus:border-[#EE6425]"
+                                      type="number"
+                                      disabled={!isSemesterOpen}
+                                      min="0"
+                                      max={item.type === "per_time" ? 20 : item.max}
+                                      value={timesValue}
+                                      onChange={(e) => handleItemChange(item, Number(e.target.value))}
+                                      className="w-16 border border-slate-300 rounded-lg px-2 py-1 text-center font-bold text-[#EE6425] outline-none disabled:bg-slate-100"
                                     />
-                                    <label className="cursor-pointer bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 px-2 py-1 rounded-lg flex items-center justify-center gap-1 text-[11px] font-bold transition flex-shrink-0">
-                                      <span>{uploadingItemId === item.id ? "..." : "Tải tệp"}</span>
-                                      <input
-                                        type="file"
-                                        accept="image/*,.pdf"
-                                        onChange={(e) => handleFileUploadItem(item.id, item.title, item.max, e)}
-                                        className="hidden"
-                                      />
-                                    </label>
+                                    <span className="text-[10px] text-slate-400 mt-1">= {currentScore} điểm</span>
                                   </div>
-                                ) : (
-                                  itemProofs[item.id] && (
-                                    <a href={itemProofs[item.id]} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline text-[11px] font-bold">
-                                      Xem file minh chứng
-                                    </a>
-                                  )
-                                )}
-                              </td>
-                            </tr>
-                          ))}
+                                </td>
+                                <td className="py-3 px-4 align-top pt-3">
+                                  {isSemesterOpen ? (
+                                    <div className="flex items-center gap-1.5">
+                                      <input
+                                        type="text"
+                                        value={itemProofs[item.id] || ""}
+                                        onChange={(e) => setItemProofs((prev) => ({ ...prev, [item.id]: e.target.value }))}
+                                        placeholder="Link Drive/ảnh..."
+                                        className="flex-1 border border-slate-300 rounded-lg px-2 py-1 text-[11px] outline-none focus:border-[#EE6425]"
+                                      />
+                                      <label className="cursor-pointer bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 px-2 py-1 rounded-lg flex items-center justify-center gap-1 text-[11px] font-bold transition flex-shrink-0">
+                                        <span>{uploadingItemId === item.id ? "..." : "Tải tệp"}</span>
+                                        <input
+                                          type="file"
+                                          accept="image/*,.pdf"
+                                          onChange={(e) => handleFileUploadItem(item.id, item.title, item.max, e)}
+                                          className="hidden"
+                                        />
+                                      </label>
+                                    </div>
+                                  ) : (
+                                    itemProofs[item.id] && (
+                                      <a href={itemProofs[item.id]} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline text-[11px] font-bold">
+                                        Xem file minh chứng
+                                      </a>
+                                    )
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>
@@ -708,7 +710,6 @@ export default function CongDRLPage() {
               })}
             </div>
 
-            {/* Nút nộp */}
             <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4 bg-orange-50/50 p-4 rounded-2xl">
               <div>
                 <span className="text-xs text-slate-500 block">TỔNG ĐIỂM TỰ CHẤM:</span>
