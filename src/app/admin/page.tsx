@@ -33,17 +33,19 @@ export function generateCtuetEmail(fullName: string, mssv: string): string {
   const parts = cleanName.split(/\s+/).filter(Boolean);
 
   if (parts.length === 0) return "";
+  if (parts.length === 1) return `${parts[0]}${cleanMssv}@student.ctuet.edu.vn`;
 
-  if (parts.length === 1) {
-    return `${parts[0]}${cleanMssv}@student.ctuet.edu.vn`;
-  }
-
-  // Lấy chữ cái đầu họ & tên đệm
   const initials = parts.slice(0, -1).map((p) => p[0]).join("");
-  // Lấy trọn vẹn tên chính
   const lastName = parts[parts.length - 1];
 
   return `${initials}${lastName}${cleanMssv}@student.ctuet.edu.vn`;
+}
+
+// Hàm lấy mật khẩu là 3 số cuối của MSSV
+export function generatePasswordFromMssv(mssv: string): string {
+  const clean = mssv.trim();
+  if (clean.length < 3) return clean || "123";
+  return clean.slice(-3);
 }
 
 export default function AdminDashboard() {
@@ -56,7 +58,6 @@ export default function AdminDashboard() {
   const [newMssv, setNewMssv] = useState("");
   const [newName, setNewName] = useState("");
   const [newClass, setNewClass] = useState("");
-  const [newPass, setNewPass] = useState("123456");
 
   // State form bài viết
   const [postTitle, setPostTitle] = useState("");
@@ -81,7 +82,7 @@ export default function AdminDashboard() {
     setPosts(JSON.parse(localStorage.getItem("ctut_custom_posts") || "[]"));
   }, [router]);
 
-  // 1. XỬ LÝ IMPORT TỪ FILE EXCEL/CSV (KHÔNG CẦN CỘT EMAIL TRONG FILE)
+  // 1. NHẬP DANH SÁCH TỪ FILE (TỰ ĐỘNG TẠO PASS = 3 SỐ CUỐI MSSV)
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -105,8 +106,8 @@ export default function AdminDashboard() {
         if (row.length >= 2 && row[0]) {
           const mssv = row[0];
           const fullName = row[1] || `Sinh viên ${mssv}`;
-          const studentClass = row[2] || "CK22A1";
-          const password = row[3] || "123456";
+          const studentClass = row[2] || "CK24A1";
+          const password = generatePasswordFromMssv(mssv);
           const email = generateCtuetEmail(fullName, mssv);
 
           importedStudents.push({
@@ -127,37 +128,33 @@ export default function AdminDashboard() {
 
         setStudents(updated);
         localStorage.setItem("ctut_student_accounts", JSON.stringify(updated));
-        alert(`Đã nhập thành công ${newUnique.length} tài khoản sinh viên với Email chuẩn CTUET!`);
+        alert(`Đã nhập thành công ${newUnique.length} sinh viên! Mật khẩu mặc định là 3 số cuối MSSV.`);
       } else {
-        alert("Không tìm thấy dòng dữ liệu hợp lệ!");
+        alert("Không tìm thấy dữ liệu hợp lệ!");
       }
       e.target.value = "";
     };
     reader.readAsText(file, "UTF-8");
   };
 
-  // Tải file mẫu CSV (Chỉ cần 3 cột: MSSV, Họ và tên, Lớp)
+  // TẢI FILE MẪU TRẮNG (CHỈ CÓ TIÊU ĐỀ 3 CỘT)
   const downloadSampleTemplate = () => {
-    const csvContent =
-      "MSSV,Họ và tên,Lớp,Mật khẩu\n" +
-      "CNDT2411081,Phạm Thái Minh Đăng,CK24A1,123456\n" +
-      "CNDT2411099,Cao Sang,CK24A1,123456\n" +
-      "2200101,Nguyễn Văn An,CK22A1,123456";
-
+    const csvContent = "MSSV,Họ và tên,Lớp\n";
     const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", "Mau_Danh_Sach_CTUET.csv");
+    link.setAttribute("download", "Mau_Danh_Sach_Sinh_Vien.csv");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  // 2. TẠO SINH VIÊN THỦ CÔNG (TỰ ĐỘNG TÍNH EMAIL)
+  // 2. TẠO SINH VIÊN THỦ CÔNG
   const handleAddStudent = (e: React.FormEvent) => {
     e.preventDefault();
     const autoEmail = generateCtuetEmail(newName, newMssv);
+    const autoPass = generatePasswordFromMssv(newMssv);
 
     const updated = [
       ...students,
@@ -166,7 +163,7 @@ export default function AdminDashboard() {
         fullName: newName.trim(),
         email: autoEmail,
         studentClass: newClass.trim(),
-        password: newPass,
+        password: autoPass,
         createdAt: new Date().toLocaleDateString("vi-VN"),
       },
     ];
@@ -175,7 +172,7 @@ export default function AdminDashboard() {
     setNewMssv("");
     setNewName("");
     setNewClass("");
-    alert(`Cấp tài khoản thành công!\nEmail tạo tự động: ${autoEmail}`);
+    alert(`Cấp tài khoản thành công!\nMật khẩu đăng nhập: ${autoPass}`);
   };
 
   const handleDeleteStudent = (mssvToDelete: string) => {
@@ -241,17 +238,17 @@ export default function AdminDashboard() {
     }
   };
 
-  // Xem trước email sinh viên khi gõ form thủ công
-  const previewGeneratedEmail = generateCtuetEmail(newName, newMssv);
+  const previewEmail = generateCtuetEmail(newName, newMssv);
+  const previewPass = generatePasswordFromMssv(newMssv);
 
   return (
     <main className="min-h-screen bg-slate-100 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        {/* HEADER ADMIN */}
+        {/* HEADER */}
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl font-black text-[#004A52]">BẢNG ĐIỀU KHIỂN QUẢN TRỊ VIÊN</h1>
-            <p className="text-xs text-slate-500 mt-0.5">Quản trị bài viết & Cấp tài khoản sinh viên CTUET</p>
+            <p className="text-xs text-slate-500 mt-0.5">Quản lý nội dung & Cấp tài khoản sinh viên CTUET</p>
           </div>
           <div className="flex items-center gap-3">
             <Link href="/" className="text-xs font-bold text-[#007A87] hover:underline">
@@ -410,7 +407,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* TAB 2: QUẢN LÝ TÀI KHOẢN SINH VIÊN (TỰ ĐỘNG SINH EMAIL @student.ctuet.edu.vn) */}
+        {/* TAB 2: QUẢN LÝ TÀI KHOẢN SINH VIÊN (PASS = 3 SỐ CUỐI MSSV) */}
         {activeTab === "students" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-4 space-y-6">
@@ -418,7 +415,7 @@ export default function AdminDashboard() {
               <div className="bg-white p-5 rounded-2xl border border-teal-200 bg-teal-50/40 shadow-sm">
                 <h3 className="text-sm font-bold text-[#004A52] mb-1">📊 Nhập hàng loạt từ Excel / CSV</h3>
                 <p className="text-[11px] text-slate-500 mb-3">
-                  File chỉ cần cột: <strong>MSSV, Họ và tên, Lớp</strong>. Hệ thống sẽ tự động tạo Email <code>@student.ctuet.edu.vn</code> chính xác.
+                  Tải file mẫu về, điền 3 cột <strong>MSSV, Họ và tên, Lớp</strong>. Hệ thống tự động tạo Email và đặt mật khẩu là <strong>3 số cuối của MSSV</strong>.
                 </p>
 
                 <div className="space-y-2">
@@ -433,12 +430,12 @@ export default function AdminDashboard() {
                     onClick={downloadSampleTemplate}
                     className="w-full text-center text-xs font-bold text-[#007A87] hover:underline py-1"
                   >
-                    📥 Tải file CSV mẫu về máy
+                    📥 Tải file CSV mẫu (trắng) về máy
                   </button>
                 </div>
               </div>
 
-              {/* FORM TẠO THỦ CÔNG */}
+              {/* FORM THỦ CÔNG */}
               <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                 <h2 className="text-base font-bold text-[#004A52] mb-4">Cấp tài khoản thủ công</h2>
                 <form onSubmit={handleAddStudent} className="space-y-3">
@@ -466,41 +463,31 @@ export default function AdminDashboard() {
                     />
                   </div>
 
-                  {/* KHỐI HIỂN THỊ EMAIL TỰ ĐỘNG TẠO */}
-                  {previewGeneratedEmail && (
-                    <div className="p-2.5 bg-orange-50 border border-orange-200 rounded-xl">
-                      <span className="text-[10px] font-bold text-[#EE6425] block uppercase">
-                        Email CTUET tạo tự động:
-                      </span>
-                      <span className="text-xs font-mono font-bold text-[#004A52] break-all">
-                        {previewGeneratedEmail}
-                      </span>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Lớp *</label>
+                    <input
+                      type="text"
+                      required
+                      value={newClass}
+                      onChange={(e) => setNewClass(e.target.value)}
+                      placeholder="CK24A1"
+                      className="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#EE6425]"
+                    />
+                  </div>
+
+                  {/* THÔNG TIN TỰ ĐỘNG TẠO */}
+                  {newMssv && (
+                    <div className="p-2.5 bg-orange-50 border border-orange-200 rounded-xl space-y-1 text-xs">
+                      <div>
+                        <span className="text-[10px] font-bold text-[#EE6425] uppercase block">Email tự động:</span>
+                        <span className="font-mono font-bold text-[#004A52] break-all">{previewEmail}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-bold text-[#EE6425] uppercase block">Mật khẩu khởi tạo (3 số cuối):</span>
+                        <span className="font-mono font-bold text-slate-800">{previewPass}</span>
+                      </div>
                     </div>
                   )}
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">Lớp *</label>
-                      <input
-                        type="text"
-                        required
-                        value={newClass}
-                        onChange={(e) => setNewClass(e.target.value)}
-                        placeholder="CK24A1"
-                        className="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#EE6425]"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">Mật khẩu *</label>
-                      <input
-                        type="text"
-                        required
-                        value={newPass}
-                        onChange={(e) => setNewPass(e.target.value)}
-                        className="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#EE6425]"
-                      />
-                    </div>
-                  </div>
 
                   <button
                     type="submit"
@@ -556,7 +543,9 @@ export default function AdminDashboard() {
                           {s.email || generateCtuetEmail(s.fullName, s.mssv)}
                         </td>
                         <td className="p-3 text-slate-600">{s.studentClass}</td>
-                        <td className="p-3 font-mono text-slate-500">{s.password}</td>
+                        <td className="p-3 font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded inline-block my-2">
+                          {s.password}
+                        </td>
                         <td className="p-3 text-right">
                           <button
                             onClick={() => handleDeleteStudent(s.mssv)}
