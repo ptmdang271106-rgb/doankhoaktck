@@ -1,166 +1,205 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-export const EVENTS = [
-  {
-    id: "ipmc-2026",
-    title: "Khoa Kỹ thuật Cơ khí CTUT tổ chức Mechanical Innovation & Tech Festival 2026",
-    date: "25/10/2026",
-    time: "08:00 - 17:00",
-    location: "Hội trường A - Đại học KT-CN Cần Thơ",
-    desc: "Ngày hội Sáng tạo & Trình diễn Công nghệ Cơ khí 2026. Quy tụ các mô hình robot tự hành, cánh tay robot công nghiệp và sản phẩm công nghệ xuất sắc của sinh viên CTUT.",
-    deadline: "20/10/2026",
-    badge: "Sự kiện trọng điểm",
-    image: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&auto=format&fit=crop&q=60",
-  },
-  {
-    id: "nckh-ck-2026",
-    title: "Hội nghị Sinh viên Nghiên cứu Khoa học & Đổi mới sáng tạo Khối Kỹ thuật 2026",
-    date: "15/11/2026",
-    time: "07:30 - 11:30",
-    location: "Khu thực hành Xưởng Cơ khí CTUT",
-    desc: "Báo cáo các đề tài NCKH xuất sắc về Tự động hóa, Thiết kế máy và Năng lượng mới. Cơ hội nhận học bổng tài năng và điểm rèn luyện nghiên cứu khoa học.",
-    deadline: "05/11/2026",
-    badge: "Học thuật - NCKH",
-    image: "https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=800&auto=format&fit=crop&q=60",
-  },
-  {
-    id: "mua-he-xanh-2026",
-    title: "Lễ ra quân Chiến dịch Tình nguyện Mùa hè xanh & Ngày hội Kỹ thuật vì cộng đồng",
-    date: "05/12/2026",
-    time: "06:30 - 16:30",
-    location: "Huyện Phong Điền, TP. Cần Thơ",
-    desc: "Chiến dịch tình nguyện chuyên ngành: Sửa chữa điện gia dụng, bảo dưỡng máy móc nông nghiệp miễn phí cho bà con nông dân và thắp sáng tuyến đường quê.",
-    deadline: "28/11/2026",
-    badge: "Tình nguyện CTXH",
-    image: "https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=800&auto=format&fit=crop&q=60",
-  },
-];
+export default function DangKySuKienPage() {
+  const router = useRouter();
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [events, setEvents] = useState<any[]>([]);
+  const [selectedEvent, setSelectedEvent] = useState("");
+  const [note, setNote] = useState("");
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [registeredList, setRegisteredList] = useState<any[]>([]);
 
-export default function SuKienPage() {
-  const [selectedDay, setSelectedDay] = useState(25);
+  useEffect(() => {
+    // 1. Kiểm tra trạng thái đăng nhập
+    const userStr = localStorage.getItem("ctut_current_user");
+    if (!userStr) {
+      // Nếu chưa đăng nhập thì mới chuyển hướng kèm redirect
+      router.push("/dang-nhap?redirect=/dang-ky");
+      return;
+    }
+    const user = JSON.parse(userStr);
+    setCurrentUser(user);
+
+    // 2. Lấy danh sách sự kiện từ bài viết của Admin + các sự kiện mặc định
+    const customPosts = JSON.parse(localStorage.getItem("ctut_custom_posts") || "[]");
+    const defaultEvents = [
+      { id: "ev-1", title: "Hội thảo: Ứng dụng AI trong thiết kế CAD/CAM 2026", category: "Học thuật - NCKH" },
+      { id: "ev-2", title: "Chiến dịch Tình nguyện sửa chữa máy móc thiết bị Ninh Kiều", category: "Phong trào" },
+      { id: "ev-3", title: "Hội thi Sáng tạo Mô hình Cơ điện tử CTUET 2026", category: "Học thuật - NCKH" },
+    ];
+    
+    const combined = [...customPosts, ...defaultEvents];
+    setEvents(combined);
+    if (combined.length > 0) setSelectedEvent(combined[0].title);
+
+    // 3. Lấy lịch sử sự kiện sinh viên này đã đăng ký
+    const allRegistrations = JSON.parse(localStorage.getItem("ctut_event_registrations") || "[]");
+    const myRegistrations = allRegistrations.filter((r: any) => r.mssv === user.mssv);
+    setRegisteredList(myRegistrations);
+  }, [router]);
+
+  const handleRegister = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedEvent) {
+      alert("Vui lòng chọn sự kiện!");
+      return;
+    }
+
+    const allRegistrations = JSON.parse(localStorage.getItem("ctut_event_registrations") || "[]");
+    
+    // Kiểm tra xem đã đăng ký sự kiện này chưa
+    const already = allRegistrations.some(
+      (r: any) => r.mssv === currentUser.mssv && r.eventTitle === selectedEvent
+    );
+
+    if (already) {
+      alert("Bạn đã đăng ký tham gia sự kiện này rồi!");
+      return;
+    }
+
+    const newReg = {
+      id: Date.now().toString(),
+      mssv: currentUser.mssv,
+      fullName: currentUser.fullName,
+      studentClass: currentUser.studentClass || "Khoa Cơ Khí",
+      eventTitle: selectedEvent,
+      note: note,
+      createdAt: new Date().toLocaleString("vi-VN"),
+      status: "Đã xác nhận",
+    };
+
+    const updated = [newReg, ...allRegistrations];
+    localStorage.setItem("ctut_event_registrations", JSON.stringify(updated));
+    setRegisteredList([newReg, ...registeredList]);
+    setIsSuccess(true);
+    setNote("");
+    setTimeout(() => setIsSuccess(false), 3000);
+  };
+
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <div className="text-sm font-bold text-[#007A87]">Đang kiểm tra thông tin tài khoản...</div>
+      </div>
+    );
+  }
 
   return (
-    <main className="min-h-screen bg-white text-slate-800 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Breadcrumb Navigation chuẩn UEH */}
-        <nav className="flex items-center gap-2 text-sm text-[#006674] font-medium mb-8">
-          <Link href="/" className="hover:underline">Trang chủ</Link>
-          <span className="text-slate-400">›</span>
-          <span className="text-[#006674] font-bold">Hoạt động & Sự kiện Cơ khí</span>
-        </nav>
+    <main className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        {/* HEADER */}
+        <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <Link href="/">
+              <img
+                src="/logo-doankhoa.png"
+                alt="Logo Đoàn Khoa Cơ Khí"
+                className="h-12 w-auto object-contain cursor-pointer"
+              />
+            </Link>
+            <div>
+              <h1 className="text-xl font-black text-[#004A52]">ĐĂNG KÝ THAM GIA HOẠT ĐỘNG – SỰ KIỆN</h1>
+              <p className="text-xs text-slate-500">Đoàn Khoa Kỹ thuật Cơ khí CTUET</p>
+            </div>
+          </div>
+          <Link
+            href="/"
+            className="text-xs font-bold text-[#007A87] hover:underline"
+          >
+            ← Về trang chủ
+          </Link>
+        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          {/* CỘT TRÁI: DANH SÁCH SỰ KIỆN */}
-          <div className="lg:col-span-8 divide-y divide-gray-100 space-y-8">
-            {EVENTS.map((event) => (
-              <div key={event.id} className="pt-6 first:pt-0 flex flex-col sm:flex-row gap-6 group">
-                <div className="w-full sm:w-56 h-36 relative flex-shrink-0 rounded-lg overflow-hidden bg-slate-100 shadow-sm">
-                  <img
-                    src={event.image}
-                    alt={event.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                  />
-                  <span className="absolute top-2 left-2 bg-[#007A87] text-white text-[10px] font-bold px-2 py-0.5 rounded">
-                    {event.badge}
-                  </span>
-                </div>
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+          {/* CỘT FORM ĐĂNG KÝ */}
+          <div className="md:col-span-6 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+            <h2 className="text-base font-bold text-[#EE6425] mb-4 uppercase tracking-wider">
+              Phiếu Đăng Ký Trực Tuyến
+            </h2>
 
-                <div className="flex-1 flex flex-col justify-between">
-                  <div>
-                    <Link
-                      href={`/su-kien/${event.id}`}
-                      className="text-lg sm:text-xl font-bold text-[#EE6425] hover:underline leading-snug transition-colors line-clamp-2"
-                    >
-                      {event.title}
-                    </Link>
+            {isSuccess && (
+              <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold rounded-xl">
+                ✓ Đăng ký tham gia sự kiện thành công!
+              </div>
+            )}
 
-                    <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-500 my-2">
-                      <span className="flex items-center gap-1 text-[#007A87]">
-                        📅 Ngày diễn ra: {event.date}
-                      </span>
-                      <span>⏰ Hạn đăng ký: {event.deadline}</span>
-                    </div>
-
-                    <p className="text-xs sm:text-sm text-slate-600 line-clamp-2 leading-relaxed">
-                      {event.desc}
-                    </p>
-                  </div>
-
-                  <div className="mt-3 flex items-center gap-4">
-                    <Link
-                      href={`/su-kien/${event.id}`}
-                      className="text-xs font-bold text-[#007A87] hover:underline"
-                    >
-                      Xem chi tiết bài viết →
-                    </Link>
-                    <Link
-                      href={`/dang-nhap?redirect=/su-kien/${event.id}`}
-                      className="text-xs font-bold text-white bg-[#EE6425] hover:bg-[#d85216] px-3.5 py-1.5 rounded-lg shadow-sm transition"
-                    >
-                      Đăng ký tham gia
-                    </Link>
-                  </div>
+            <form onSubmit={handleRegister} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-600 mb-1">Sinh viên đăng ký</label>
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-1">
+                  <p className="font-bold text-[#004A52]">{currentUser.fullName}</p>
+                  <p className="text-slate-500 font-mono">MSSV: {currentUser.mssv} {currentUser.studentClass && `• Lớp: ${currentUser.studentClass}`}</p>
+                  <p className="text-slate-500 font-mono text-[11px]">{currentUser.email}</p>
                 </div>
               </div>
-            ))}
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Chọn Hoạt động / Sự kiện *</label>
+                <select
+                  value={selectedEvent}
+                  onChange={(e) => setSelectedEvent(e.target.value)}
+                  className="w-full border border-slate-300 rounded-xl p-2.5 text-xs font-semibold outline-none focus:border-[#EE6425]"
+                >
+                  {events.map((ev, idx) => (
+                    <option key={idx} value={ev.title}>
+                      [{ev.category || "Sự kiện"}] {ev.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Ghi chú / Yêu cầu thêm</label>
+                <textarea
+                  rows={3}
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  placeholder="Ví dụ: Đăng ký tham gia theo nhóm, cần hỗ trợ thiết bị..."
+                  className="w-full border border-slate-300 rounded-xl p-3 text-xs outline-none focus:border-[#EE6425]"
+                ></textarea>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-[#EE6425] hover:bg-[#d85216] text-white font-bold py-3 rounded-2xl transition shadow text-xs uppercase tracking-wider"
+              >
+                Xác nhận đăng ký
+              </button>
+            </form>
           </div>
 
-          {/* CỘT PHẢI: LỊCH SỰ KIỆN UEH STYLE */}
-          <div className="lg:col-span-4">
-            <div className="bg-[#FFFBF7] rounded-xl border border-orange-100 p-5 shadow-sm sticky top-24">
-              <h3 className="text-center font-bold text-sm tracking-wider uppercase text-[#004A52] mb-4">
-                THỜI GIAN DIỄN RA SỰ KIỆN
-              </h3>
+          {/* CỘT DANH SÁCH SỰ KIỆN ĐÃ ĐĂNG KÝ */}
+          <div className="md:col-span-6 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+            <h2 className="text-base font-bold text-[#004A52] mb-4 uppercase tracking-wider">
+              Lịch sử đã đăng ký ({registeredList.length})
+            </h2>
 
-              <div className="flex items-center justify-between text-xs font-bold text-slate-600 mb-3 px-2">
-                <button className="hover:text-orange-600">‹</button>
-                <span className="text-slate-800">Tháng 8, 2026</span>
-                <button className="hover:text-orange-600">›</button>
+            {registeredList.length === 0 ? (
+              <div className="py-12 text-center text-xs text-slate-400 border border-dashed border-slate-200 rounded-2xl">
+                Bạn chưa đăng ký hoạt động nào.
               </div>
-
-              {/* Lưới ngày */}
-              <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium">
-                {["CN", "T2", "T3", "T4", "T5", "T6", "T7"].map((d, i) => (
-                  <div key={i} className="py-1 text-slate-400 font-bold">{d}</div>
+            ) : (
+              <div className="space-y-3">
+                {registeredList.map((item, idx) => (
+                  <div key={idx} className="p-3.5 bg-slate-50 border border-slate-100 rounded-2xl">
+                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
+                      {item.status}
+                    </span>
+                    <h4 className="text-xs font-bold text-slate-800 mt-1 leading-snug">
+                      {item.eventTitle}
+                    </h4>
+                    {item.note && <p className="text-[11px] text-slate-500 mt-1 italic">"{item.note}"</p>}
+                    <span className="text-[10px] text-slate-400 mt-1.5 block">
+                      Đăng ký lúc: {item.createdAt}
+                    </span>
+                  </div>
                 ))}
-
-                {[
-                  26, 27, 28, 29, 30, 31, 1,
-                  2, 3, 4, 5, 6, 7, 8,
-                  9, 10, 11, 12, 13, 14, 15,
-                  16, 17, 18, 19, 20, 21, 22,
-                  23, 24, 25, 26, 27, 28, 29,
-                  30, 31, 1, 2, 3, 4, 5
-                ].map((day, idx) => {
-                  const isEventDay = [25, 28, 15].includes(day);
-                  const isSelected = selectedDay === day;
-
-                  return (
-                    <button
-                      key={idx}
-                      onClick={() => setSelectedDay(day)}
-                      className={`h-8 w-8 mx-auto flex items-center justify-center rounded-full transition-all text-xs ${
-                        isEventDay
-                          ? "bg-[#EE6425] text-white font-bold shadow-sm"
-                          : isSelected
-                          ? "bg-slate-200 font-bold"
-                          : "text-slate-700 hover:bg-orange-50"
-                      }`}
-                    >
-                      {day}
-                    </button>
-                  );
-                })}
               </div>
-
-              <div className="mt-4 pt-4 border-t border-orange-100 flex items-center gap-2 text-[11px] text-slate-500 justify-center">
-                <span className="w-2.5 h-2.5 bg-[#EE6425] rounded-full inline-block"></span>
-                <span>Ngày có sự kiện Đoàn - Hội</span>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
