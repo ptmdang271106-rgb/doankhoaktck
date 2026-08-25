@@ -45,11 +45,11 @@ export default function SuKienPage() {
   return (
     <main className="min-h-screen bg-white text-slate-800 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        {/* Breadcrumb Navigation */}
+        {/* Breadcrumb Navigation chuẩn UEH */}
         <nav className="flex items-center gap-2 text-sm text-[#006674] font-medium mb-8">
           <Link href="/" className="hover:underline">Trang chủ</Link>
           <span className="text-slate-400">›</span>
-          <span className="text-[#006674] font-bold">Sự kiện & Hoạt động Cơ khí</span>
+          <span className="text-[#006674] font-bold">Hoạt động & Sự kiện Cơ khí</span>
         </nav>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
@@ -72,13 +72,13 @@ export default function SuKienPage() {
                   <div>
                     <Link
                       href={`/su-kien/${event.id}`}
-                      className="text-lg sm:text-xl font-bold text-[#004A52] hover:text-[#E05A10] leading-snug transition-colors line-clamp-2"
+                      className="text-lg sm:text-xl font-bold text-[#EE6425] hover:underline leading-snug transition-colors line-clamp-2"
                     >
                       {event.title}
                     </Link>
 
                     <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-500 my-2">
-                      <span className="flex items-center gap-1 text-[#E05A10]">
+                      <span className="flex items-center gap-1 text-[#007A87]">
                         📅 Ngày diễn ra: {event.date}
                       </span>
                       <span>⏰ Hạn đăng ký: {event.deadline}</span>
@@ -89,12 +89,18 @@ export default function SuKienPage() {
                     </p>
                   </div>
 
-                  <div className="mt-3">
+                  <div className="mt-3 flex items-center gap-4">
                     <Link
                       href={`/su-kien/${event.id}`}
-                      className="inline-flex items-center text-xs font-bold text-[#007A87] hover:text-[#E05A10] group-hover:translate-x-1 transition-all"
+                      className="text-xs font-bold text-[#007A87] hover:underline"
                     >
-                      Xem chi tiết & Đăng ký tham gia →
+                      Xem chi tiết bài viết →
+                    </Link>
+                    <Link
+                      href={`/dang-nhap?redirect=/su-kien/${event.id}`}
+                      className="text-xs font-bold text-white bg-[#EE6425] hover:bg-[#d85216] px-3.5 py-1.5 rounded-lg shadow-sm transition"
+                    >
+                      Đăng ký tham gia
                     </Link>
                   </div>
                 </div>
@@ -102,7 +108,7 @@ export default function SuKienPage() {
             ))}
           </div>
 
-          {/* CỘT PHẢI: LỊCH SỰ KIỆN (CALENDAR UEH STYLE) */}
+          {/* CỘT PHẢI: LỊCH SỰ KIỆN UEH STYLE */}
           <div className="lg:col-span-4">
             <div className="bg-[#FFFBF7] rounded-xl border border-orange-100 p-5 shadow-sm sticky top-24">
               <h3 className="text-center font-bold text-sm tracking-wider uppercase text-[#004A52] mb-4">
@@ -115,7 +121,7 @@ export default function SuKienPage() {
                 <button className="hover:text-orange-600">›</button>
               </div>
 
-              {/* Lưới lịch */}
+              {/* Lưới ngày */}
               <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium">
                 {["CN", "T2", "T3", "T4", "T5", "T6", "T7"].map((d, i) => (
                   <div key={i} className="py-1 text-slate-400 font-bold">{d}</div>
@@ -138,7 +144,7 @@ export default function SuKienPage() {
                       onClick={() => setSelectedDay(day)}
                       className={`h-8 w-8 mx-auto flex items-center justify-center rounded-full transition-all text-xs ${
                         isEventDay
-                          ? "bg-[#E05A10] text-white font-bold shadow-sm"
+                          ? "bg-[#EE6425] text-white font-bold shadow-sm"
                           : isSelected
                           ? "bg-slate-200 font-bold"
                           : "text-slate-700 hover:bg-orange-50"
@@ -151,7 +157,7 @@ export default function SuKienPage() {
               </div>
 
               <div className="mt-4 pt-4 border-t border-orange-100 flex items-center gap-2 text-[11px] text-slate-500 justify-center">
-                <span className="w-2.5 h-2.5 bg-[#E05A10] rounded-full inline-block"></span>
+                <span className="w-2.5 h-2.5 bg-[#EE6425] rounded-full inline-block"></span>
                 <span>Ngày có sự kiện Đoàn - Hội</span>
               </div>
             </div>
