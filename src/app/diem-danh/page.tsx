@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
-// Công thức tính khoảng cách Haversine chính xác theo mét
 function calculateDistanceInMeters(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371e3;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -22,7 +22,7 @@ export default function DiemDanhPage() {
   const [qrCodeInput, setQrCodeInput] = useState("");
   const [currentLat, setCurrentLat] = useState<number | null>(null);
   const [currentLng, setCurrentLng] = useState<number | null>(null);
-  const [gpsStatusText, setGpsStatusText] = useState("Đang dò tìm tọa độ thiết bị...");
+  const [gpsStatusText, setGpsStatusText] = useState("Đang dò tìm tọa độ GPS...");
   const [successInfo, setSuccessInfo] = useState<any>(null);
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -34,7 +34,6 @@ export default function DiemDanhPage() {
     }
     setCurrentUser(JSON.parse(userStr));
 
-    // Lấy vị trí GPS từ điện thoại/máy tính của sinh viên
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
@@ -42,14 +41,12 @@ export default function DiemDanhPage() {
           setCurrentLng(pos.coords.longitude);
           setGpsStatusText(`Đã định vị: ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`);
         },
-        () => {
-          setGpsStatusText("Không bật định vị GPS (Hệ thống sẽ áp dụng theo cấu hình của sự kiện)");
-        }
+        () => setGpsStatusText("Không bật GPS (Áp dụng theo cấu hình sự kiện)")
       );
     }
   }, [router]);
 
-  const handleCheckinSubmit = (e: React.FormEvent) => {
+  const handleCheckinSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
     setSuccessInfo(null);
@@ -57,70 +54,70 @@ export default function DiemDanhPage() {
     const checkCode = qrCodeInput.trim();
     if (!checkCode) return setErrorMsg("Vui lòng nhập hoặc quét mã QR sự kiện!");
 
-    // 1. Tìm sự kiện
-    const allEvents = JSON.parse(localStorage.getItem("ctut_custom_events") || "[]");
-    const matchedEvent = allEvents.find(
-      (ev: any) => ev.id === checkCode || ev.title.toLowerCase().includes(checkCode.toLowerCase())
-    );
+    // 1. Kiểm tra sự kiện trên Supabase
+    const { data: matchedEvents } = await supabase
+      .from("events")
+      .select("*")
+      .or(`id.eq.${checkCode},title.ilike.%${checkCode}%`);
 
+    const matchedEvent = matchedEvents?.[0];
     if (!matchedEvent) {
-      return setErrorMsg("Mã QR không hợp lệ hoặc sự kiện chưa được Admin mở điểm danh!");
+      return setErrorMsg("Mã QR không hợp lệ hoặc sự kiện chưa được mở trên hệ thống!");
     }
 
-    // 2. Kiểm tra danh sách đăng ký
-    const allRegistrations = JSON.parse(localStorage.getItem("ctut_event_registrations") || "[]");
-    const isRegistered = allRegistrations.some(
-      (r: any) => r.mssv === currentUser.mssv && (r.eventTitle === matchedEvent.title || r.eventTitle.includes(matchedEvent.title))
-    );
+    // 2. Kiểm tra danh sách đăng ký trên Supabase
+    const { data: regList } = await supabase
+      .from("registrations")
+      .select("*")
+      .eq("mssv", currentUser.mssv)
+      .eq("event_title", matchedEvent.title);
 
-    if (!isRegistered) {
-      return setErrorMsg(
-        `Bạn chưa đăng ký tham gia sự kiện "${matchedEvent.title}"! Vui lòng đăng ký trước khi điểm danh.`
-      );
+    if (!regList || regList.length === 0) {
+      return setErrorMsg(`Bạn chưa đăng ký tham gia sự kiện "${matchedEvent.title}"!`);
     }
 
-    // 3. Kiểm tra khoảng cách GPS theo cấu hình của Admin (100m hoặc 200m)
-    const radiusLimit = matchedEvent.gpsRadius ? Number(matchedEvent.gpsRadius) : 200;
-    if (matchedEvent.gpsRadius !== "none" && matchedEvent.lat && matchedEvent.lng) {
+    // 3. Kiểm tra GPS
+    const radiusLimit = matchedEvent.gps_radius ? Number(matchedEvent.gps_radius) : 200;
+    if (matchedEvent.gps_radius !== "none" && matchedEvent.lat && matchedEvent.lng) {
       if (currentLat !== null && currentLng !== null) {
-        const distance = calculateDistanceInMeters(currentLat, currentLng, matchedEvent.lat, matchedEvent.lng);
-        if (distance > radiusLimit) {
-          return setErrorMsg(
-            `Điểm danh thất bại! Bạn đang cách địa điểm tổ chức ~${distance}m (Vượt quá bán kính cho phép ${radiusLimit}m).`
-          );
+        const dist = calculateDistanceInMeters(currentLat, currentLng, matchedEvent.lat, matchedEvent.lng);
+        if (dist > radiusLimit) {
+          return setErrorMsg(`Điểm danh thất bại! Bạn đang cách sự kiện ~${dist}m (Vượt quá bán kính ${radiusLimit}m).`);
         }
       }
     }
 
-    // 4. Kiểm tra đã điểm danh chưa
-    const allProofs = JSON.parse(localStorage.getItem("ctut_student_proofs") || "[]");
-    const alreadyCheckedIn = allProofs.some(
-      (p: any) => p.mssv === currentUser.mssv && p.title.includes(matchedEvent.title)
-    );
+    // 4. Kiểm tra xem đã điểm danh chưa
+    const { data: existingProof } = await supabase
+      .from("proofs")
+      .select("*")
+      .eq("mssv", currentUser.mssv)
+      .ilike("title", `%${matchedEvent.title}%`);
 
-    if (alreadyCheckedIn) {
-      return setErrorMsg(`Bạn đã được điểm danh sự kiện "${matchedEvent.title}" rồi!`);
+    if (existingProof && existingProof.length > 0) {
+      return setErrorMsg(`Bạn đã được điểm danh sự kiện "${matchedEvent.title}" trước đó rồi!`);
     }
 
-    // 5. Tự động lưu minh chứng vào Cổng ĐRL
+    // 5. Lưu minh chứng và cộng điểm tự động lên Supabase
     const newProof = {
-      id: "proof-" + Date.now().toString(),
       mssv: currentUser.mssv,
-      fullName: currentUser.fullName,
+      full_name: currentUser.fullName,
       title: `Được điểm danh hoạt động Tại sự kiện "${matchedEvent.title}"`,
-      categoryCode: matchedEvent.categoryCode || "III.8",
+      category_code: matchedEvent.category_code || "III.8",
       points: Number(matchedEvent.points) || 4,
       source: "Điểm danh QR (GPS)",
       status: "Đã duyệt",
-      createdAt: new Date().toLocaleDateString("vi-VN"),
     };
 
-    localStorage.setItem("ctut_student_proofs", JSON.stringify([newProof, ...allProofs]));
+    const { error } = await supabase.from("proofs").insert([newProof]);
+    if (error) {
+      return setErrorMsg("Lỗi khi lưu điểm danh: " + error.message);
+    }
 
     setSuccessInfo({
       eventTitle: matchedEvent.title,
       points: newProof.points,
-      code: newProof.categoryCode,
+      code: newProof.category_code,
       location: matchedEvent.location,
     });
     setQrCodeInput("");
@@ -129,17 +126,14 @@ export default function DiemDanhPage() {
   return (
     <main className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8 font-sans antialiased">
       <div className="max-w-lg mx-auto bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200">
-        
-        {/* HEADER */}
         <div className="text-center mb-6">
           <Link href="/">
             <img src="/logo-doankhoa.png" alt="Logo" className="h-12 mx-auto object-contain mb-3 cursor-pointer" />
           </Link>
           <h1 className="text-xl sm:text-2xl font-black text-[#004A52]">QUÉT MÃ QR ĐIỂM DANH</h1>
-          <p className="text-xs text-slate-500 mt-1">Hệ thống xác thực tọa độ GPS Google Maps</p>
+          <p className="text-xs text-slate-500 mt-1">Hệ thống xác thực tọa độ GPS Cloud Realtime</p>
         </div>
 
-        {/* THÔNG TIN SINH VIÊN & GPS */}
         <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs mb-5 space-y-1.5">
           <div className="flex justify-between">
             <span className="text-slate-500">Sinh viên:</span>
@@ -150,13 +144,13 @@ export default function DiemDanhPage() {
             <span className="font-mono font-bold text-slate-700">{currentUser?.mssv} • {currentUser?.studentClass || "Khoa Cơ Khí"}</span>
           </div>
           <div className="flex justify-between pt-1.5 border-t border-slate-200 text-[11px]">
-            <span className="text-slate-400">Tọa độ thiết bị:</span>
+            <span className="text-slate-400">Định vị GPS:</span>
             <span className="text-[#EE6425] font-semibold">{gpsStatusText}</span>
           </div>
         </div>
 
         {errorMsg && (
-          <div className="mb-5 p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs rounded-2xl font-medium leading-relaxed">
+          <div className="mb-5 p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs rounded-2xl font-medium">
             ⚠️ {errorMsg}
           </div>
         )}
@@ -167,7 +161,6 @@ export default function DiemDanhPage() {
               <span>✓</span> Điểm danh thành công!
             </div>
             <p>Hoạt động: <strong>{successInfo.eventTitle}</strong></p>
-            <p>Địa điểm: <strong>{successInfo.location}</strong></p>
             <p className="text-emerald-800">
               Đã tự động cộng <strong>+{successInfo.points} Điểm</strong> tại <strong>Mục {successInfo.code}</strong> trong Cổng ĐRL.
             </p>
@@ -177,7 +170,6 @@ export default function DiemDanhPage() {
           </div>
         )}
 
-        {/* FORM NHẬP CHECK-IN */}
         <form onSubmit={handleCheckinSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">
