@@ -37,37 +37,49 @@ export default function CTUTYouthPortal() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="h-20 grid grid-cols-12 items-center text-[13px] font-medium text-[#2C3E50]">
             
-            {/* Menu Trái: Điểm danh + Cổng ĐRL + Giới thiệu */}
-            <div className="col-span-4 hidden lg:flex items-center justify-start space-x-3 pr-4 whitespace-nowrap">
-              <button className="bg-[#007A87] text-white px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-[#00606B] transition-colors">
+            {/* MENU TRÁI: Điểm danh + Cổng ĐRL + Giới thiệu + Chi đoàn/Chi hội + Hỗ trợ SV */}
+            <div className="col-span-5 hidden lg:flex items-center justify-start space-x-3 pr-2 whitespace-nowrap">
+              <button className="bg-[#007A87] text-white px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-[#00606B] transition-colors shadow-sm">
                 Điểm danh
               </button>
               
               <Link
                 href="/tra-cuu"
-                className="bg-[#00707b] hover:bg-[#005a63] text-white px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors inline-block"
+                className="bg-[#00707b] hover:bg-[#005a63] text-white px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors inline-block shadow-sm"
               >
                 Cổng ĐRL
               </Link>
 
-              <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1 pl-2 text-xs">
+              <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1 text-xs">
                 Giới thiệu <span className="text-[10px]">▼</span>
+              </a>
+
+              <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1 text-xs">
+                Chi đoàn / Chi hội <span className="text-[10px]">▼</span>
+              </a>
+
+              <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1 text-xs">
+                Hỗ trợ sinh viên <span className="text-[10px]">▼</span>
               </a>
             </div>
 
-            {/* LOGO CHÍNH THỨC Ở TÂM */}
-            <div className="col-span-12 lg:col-span-4 flex items-center justify-center py-1">
+            {/* LOGO CHÍNH THỨC Ở CHÍNH GIỮA (file logo-doankhoa.png) */}
+            <div className="col-span-12 lg:col-span-2 flex items-center justify-center py-1">
               <Link href="/">
                 <img
-                  src="/logodk.png"
+                  src="/logo-doankhoa.png"
                   alt="Tuổi trẻ Khoa Kỹ thuật Cơ khí - Trường Đại học Kỹ thuật - Công nghệ Cần Thơ"
                   className="h-10 sm:h-12 w-auto max-w-full object-contain block mx-auto cursor-pointer"
                 />
               </Link>
             </div>
 
-            {/* Menu Phải: Văn phòng ĐT + Đăng nhập / Tên người dùng */}
-            <div className="col-span-4 hidden lg:flex items-center justify-end space-x-4 pl-4 whitespace-nowrap">
+            {/* MENU PHẢI: Giao dịch điện tử + Văn phòng điện tử + Nút Đăng nhập */}
+            <div className="col-span-5 hidden lg:flex items-center justify-end space-x-4 pl-2 whitespace-nowrap">
+              <a href="#" className="hover:text-[#007A87] transition-colors text-xs">
+                Giao dịch điện tử
+              </a>
+              
               <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1 text-xs">
                 Văn phòng điện tử <span className="text-[10px]">▼</span>
               </a>
