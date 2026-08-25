@@ -93,8 +93,6 @@ export default function CTUTYouthPortal() {
     Cổng ĐRL
   </Link>
   
-  {/* Các mục còn lại giữ nguyên... */}
-</div>
 
               <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1 text-xs font-semibold pl-1">
                 Giới thiệu <span className="text-[9px]">▼</span>
