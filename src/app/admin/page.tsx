@@ -4,6 +4,80 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+// Danh sách đầy đủ 100% các tiêu chí ĐRL theo QĐ 147/QĐ-ĐHKTCN
+export const EVENT_CRITERIA_OPTIONS = [
+  // I. HỌC TẬP
+  { code: "I.1", label: "I.1 Điểm TB học tập tích lũy thang 4", max: 5 },
+  { code: "I.2", label: "I.2 Giấy chứng nhận lớp kỹ năng học tập", max: 3 },
+  { code: "I.3", label: "I.3 Hội thảo / Tọa đàm cấp Khoa, Trường", max: 3 },
+  { code: "I.4", label: "I.4 Cuộc thi học thuật cấp Khoa / Trường", max: 7 },
+  { code: "I.5", label: "I.5 Cuộc thi học thuật ngoài Trường", max: 8 },
+  { code: "I.6", label: "I.6 Báo cáo khoa học cấp Khoa", max: 8 },
+  { code: "I.7", label: "I.7 Tham gia đề tài NCKH cấp Trường", max: 10 },
+  { code: "I.8", label: "I.8 Viết bài báo khoa học", max: 8 },
+  { code: "I.9", label: "I.9 Cuộc thi khởi nghiệp cấp Trường", max: 7 },
+  { code: "I.10", label: "I.10 Cuộc thi khởi nghiệp ngoài Trường", max: 8 },
+  { code: "I.11", label: "I.11 Thành viên CLB học thuật", max: 2 },
+  { code: "I.12", label: "I.12 Các hoạt động học thuật khác", max: 3 },
+
+  // II. NỘI QUY - QUY CHẾ
+  { code: "II.1", label: "II.1 Ý thức, thái độ trong học tập", max: 5 },
+  { code: "II.2", label: "II.2 Chấp hành nội quy, quy chế Trường", max: 5 },
+  { code: "II.3", label: "II.3 Chấp hành quy chế thi cử", max: 5 },
+  { code: "II.4", label: "II.4 Chấp hành quy định thư viện", max: 5 },
+  { code: "II.5", label: "II.5 Chấp hành quy định phòng học, xưởng", max: 5 },
+  { code: "II.6", label: "II.6 Thực hiện đăng ký ngoại trú", max: 5 },
+  { code: "II.7", label: "II.7 Mặc đồng phục đúng quy định", max: 5 },
+  { code: "II.8", label: "II.8 Sinh hoạt lớp với CVHT", max: 5 },
+
+  // III. PHONG TRÀO - CHÍNH TRỊ - XÃ HỘI
+  { code: "III.1", label: "III.1 Hoạt động bắt buộc do Khoa/Trường tổ chức", max: 3 },
+  { code: "III.2", label: "III.2 Đại hội Chi đoàn/Chi hội, sinh hoạt Chi đoàn", max: 3 },
+  { code: "III.3", label: "III.3 Báo cáo chuyên đề do Trường tổ chức", max: 4 },
+  { code: "III.4", label: "III.4 Hoạt động ngoại khóa / Cuộc thi cấp CLB/Khoa/Trường", max: 7 },
+  { code: "III.5", label: "III.5 Ngoại khóa / Cuộc thi từ cấp Thành phố trở lên", max: 8 },
+  { code: "III.6", label: "III.6 Được kết nạp Đoàn", max: 5 },
+  { code: "III.7", label: "III.7 Được kết nạp Đảng", max: 8 },
+  { code: "III.8", label: "III.8 Hoạt động phong trào do Đoàn/Hội điều động", max: 4 },
+  { code: "III.9", label: "III.9 Thành viên CLB, đội, nhóm Đoàn - Hội", max: 2 },
+  { code: "III.10", label: "III.10 Học tập các bài lý luận chính trị", max: 4 },
+  { code: "III.11", label: "III.11 Đền ơn đáp nghĩa, Thắp nến tri ân", max: 3 },
+  { code: "III.12", label: "III.12 Lao động tình nguyện tại Trường", max: 3 },
+  { code: "III.13", label: "III.13 Khen thưởng phong trào cá nhân", max: 7 },
+  { code: "III.14", label: "III.14 Tập thể được khen thưởng phong trào", max: 1 },
+  { code: "III.15", label: "III.15 Các hoạt động phong trào khác", max: 3 },
+
+  // IV. CỘNG ĐỒNG - TÌNH NGUYỆN
+  { code: "IV.1", label: "IV.1 Chấp hành pháp luật Nhà nước", max: 10 },
+  { code: "IV.2", label: "IV.2 Hành vi tốt, tinh thần sẻ chia, giúp đỡ người yếu thế", max: 5 },
+  { code: "IV.3", label: "IV.3 Biểu dương, khen thưởng hoạt động xã hội ngoài trường", max: 5 },
+  { code: "IV.4", label: "IV.4 Giao lưu các CLB, Đội, Nhóm trực thuộc", max: 5 },
+  { code: "IV.5", label: "IV.5 Chương trình Tư vấn tuyển sinh", max: 5 },
+  { code: "IV.6", label: "IV.6 Công tác hỗ trợ nhập học sinh viên mới", max: 5 },
+  { code: "IV.7", label: "IV.7 Công tác khám sức khỏe sinh viên", max: 5 },
+  { code: "IV.8", label: "IV.8 Công tác tổ chức Ngày hội việc làm", max: 5 },
+  { code: "IV.9", label: "IV.9 Công tác tổ chức Lễ Tốt nghiệp", max: 5 },
+  { code: "IV.10", label: "IV.10 Công tác kiểm tra hồ sơ sinh viên", max: 5 },
+  { code: "IV.11", label: "IV.11 Tham gia các phiên giao dịch việc làm", max: 3 },
+  { code: "IV.12", label: "IV.12 Hiến máu tình nguyện", max: 10 },
+  { code: "IV.13", label: "IV.13 Chương trình Xuân tình nguyện", max: 5 },
+  { code: "IV.14", label: "IV.14 Chiến dịch Tình nguyện Mùa hè xanh", max: 7 },
+  { code: "IV.15", label: "IV.15 Chương trình Ngày Chủ nhật xanh", max: 5 },
+  { code: "IV.16", label: "IV.16 Chương trình Thứ Bảy tình nguyện", max: 5 },
+  { code: "IV.17", label: "IV.17 Chương trình Chào đón tân sinh viên", max: 5 },
+  { code: "IV.18", label: "IV.18 Trách nhiệm xã hội & phát triển bền vững", max: 3 },
+
+  // V. CÁN BỘ LỚP & THÀNH TÍCH ĐẶC BIỆT
+  { code: "V.1", label: "V.1 Tham gia tích cực phong trào Lớp, Đoàn, Hội", max: 3 },
+  { code: "V.2", label: "V.2 Cán bộ Lớp/Đoàn/Hội hoàn thành tốt nhiệm vụ", max: 5 },
+  { code: "V.3", label: "V.3 Sinh viên đạt giải học tập, NCKH", max: 7 },
+  { code: "V.4", label: "V.4 Bằng khen UBND Tỉnh/Thành phố trở lên", max: 5 },
+  { code: "V.5", label: "V.5 Sinh viên 5 Tốt cấp Trường, Đoàn viên tiêu biểu", max: 6 },
+  { code: "V.6", label: "V.6 Sinh viên 5 Tốt cấp Thành/Trung ương, Sao Tháng Giêng", max: 10 },
+  { code: "V.7", label: "V.7 Đạt danh hiệu Đoàn viên ưu tú", max: 6 },
+  { code: "V.8", label: "V.8 Giấy khen tập thể của Đoàn trao tặng", max: 2 },
+];
+
 function removeVietnameseTones(str: string): string {
   if (!str) return "";
   return str
@@ -38,17 +112,14 @@ export function generatePasswordFromMssv(mssv: string): string {
 
 export default function AdminDashboard() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"posts" | "events" | "students">("events");
+  const [activeTab, setActiveTab] = useState<"events" | "posts" | "students">("events");
   const [students, setStudents] = useState<any[]>([]);
   const [posts, setPosts] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [registrations, setRegistrations] = useState<any[]>([]);
 
-  // State tạo sinh viên
+  // State sinh viên
   const [pasteData, setPasteData] = useState("");
-  const [newMssv, setNewMssv] = useState("");
-  const [newName, setNewName] = useState("");
-  const [newClass, setNewClass] = useState("");
 
   // State bài viết
   const [postTitle, setPostTitle] = useState("");
@@ -59,9 +130,10 @@ export default function AdminDashboard() {
   // State tạo sự kiện
   const [eventTitle, setEventTitle] = useState("");
   const [eventCategory, setEventCategory] = useState("Phong trào");
+  const [eventCategoryCode, setEventCategoryCode] = useState("III.8");
+  const [eventPoints, setEventPoints] = useState<number>(4);
   const [eventTime, setEventTime] = useState("");
   const [eventLocation, setEventLocation] = useState("Hội trường A - CTUET");
-  const [eventPoints, setEventPoints] = useState("+5 ĐRL");
   const [eventDeadline, setEventDeadline] = useState("");
   const [eventDesc, setEventDesc] = useState("");
 
@@ -84,16 +156,30 @@ export default function AdminDashboard() {
     setRegistrations(JSON.parse(localStorage.getItem("ctut_event_registrations") || "[]"));
   }, [router]);
 
-  // TẠO SỰ KIỆN MỚI CHO SINH VIÊN ĐĂNG KÝ
+  // TỰ ĐỘNG CẬP NHẬT ĐIỂM KHI ADMIN CHỌN MỤC ĐRL
+  const handleSelectCriteria = (selectedCode: string) => {
+    setEventCategoryCode(selectedCode);
+    const item = EVENT_CRITERIA_OPTIONS.find((c) => c.code === selectedCode);
+    if (item) {
+      setEventPoints(item.max);
+    }
+  };
+
+  // TẠO SỰ KIỆN MỚI
   const handleAddEvent = (e: React.FormEvent) => {
     e.preventDefault();
+    const criteriaItem = EVENT_CRITERIA_OPTIONS.find((c) => c.code === eventCategoryCode);
+
     const newEvent = {
       id: "ev-" + Date.now().toString(),
       title: eventTitle,
       category: eventCategory,
+      categoryCode: eventCategoryCode,
+      categoryLabel: criteriaItem?.label || eventCategoryCode,
+      points: Number(eventPoints),
+      pointsText: `+${eventPoints} ĐRL`,
       time: eventTime || "07:30 - Ngày 30/08/2026",
       location: eventLocation,
-      points: eventPoints,
       deadline: eventDeadline || "23:59 - Ngày 29/08/2026",
       description: eventDesc,
       createdAt: new Date().toLocaleDateString("vi-VN"),
@@ -107,7 +193,7 @@ export default function AdminDashboard() {
     setEventDesc("");
     setEventTime("");
     setEventDeadline("");
-    alert("Đã đăng sự kiện thành công! Sinh viên có thể vào trang Hoạt động để đăng ký.");
+    alert(`Đã đăng sự kiện thành công!\nÁp dụng: Mục ${eventCategoryCode} (+${eventPoints} ĐRL)`);
   };
 
   const handleDeleteEvent = (id: string) => {
@@ -118,7 +204,7 @@ export default function AdminDashboard() {
     }
   };
 
-  // QUẢN LÝ SINH VIÊN
+  // XỬ LÝ SINH VIÊN
   const handleProcessPasteData = () => {
     if (!pasteData.trim()) return alert("Vui lòng dán dữ liệu!");
     const rows = pasteData.split(/\r\n|\n/).filter((r) => r.trim() !== "");
@@ -155,7 +241,7 @@ export default function AdminDashboard() {
     }
   };
 
-  // SOẠN BÀI VIẾT
+  // XỬ LÝ BÀI VIẾT
   const handleCoverUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -234,7 +320,7 @@ export default function AdminDashboard() {
                 : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
             }`}
           >
-            Đăng & Quản lý Sự kiện ({events.length})
+            🎯 Đăng & Quản lý Sự kiện ({events.length})
           </button>
           <button
             onClick={() => setActiveTab("posts")}
@@ -244,7 +330,7 @@ export default function AdminDashboard() {
                 : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
             }`}
           >
-            Bài viết & Bản tin ({posts.length})
+            📝 Bài viết & Bản tin ({posts.length})
           </button>
           <button
             onClick={() => setActiveTab("students")}
@@ -258,12 +344,12 @@ export default function AdminDashboard() {
           </button>
         </div>
 
-        {/* TAB 1: SỰ KIỆN MỞ ĐĂNG KÝ */}
+        {/* TAB 1: SỰ KIỆN MỞ ĐĂNG KÝ (CÓ MỤC VÀ ĐIỂM ĐRL CHI TIẾT) */}
         {activeTab === "events" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
               <h2 className="text-base font-bold text-[#004A52] mb-4">Tạo Sự Kiện Mới Cho Sinh Viên Đăng Ký</h2>
-              <form onSubmit={handleAddEvent} className="space-y-3">
+              <form onSubmit={handleAddEvent} className="space-y-3.5">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Tên sự kiện / Hoạt động *</label>
                   <input
@@ -276,30 +362,79 @@ export default function AdminDashboard() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Chuyên mục</label>
-                    <select
-                      value={eventCategory}
-                      onChange={(e) => setEventCategory(e.target.value)}
-                      className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none focus:border-[#EE6425]"
-                    >
-                      <option value="Học thuật - NCKH">Học thuật - NCKH</option>
-                      <option value="Phong trào">Phong trào</option>
-                      <option value="Tình nguyện">Tình nguyện</option>
-                      <option value="Hội thảo Cơ khí">Hội thảo Cơ khí</option>
-                    </select>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Chuyên mục hiển thị *</label>
+                  <select
+                    value={eventCategory}
+                    onChange={(e) => setEventCategory(e.target.value)}
+                    className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none focus:border-[#EE6425]"
+                  >
+                    <option value="Phong trào">Phong trào</option>
+                    <option value="Học thuật - NCKH">Học thuật - NCKH</option>
+                    <option value="Tình nguyện">Tình nguyện</option>
+                    <option value="Hội thảo Cơ khí">Hội thảo Cơ khí</option>
+                  </select>
+                </div>
+
+                {/* Ô CHỌN MỤC ĐRL THEO QUY ĐỊNH */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Mục áp dụng Điểm Rèn Luyện (Theo QĐ 147) *
+                  </label>
+                  <select
+                    value={eventCategoryCode}
+                    onChange={(e) => handleSelectCriteria(e.target.value)}
+                    className="w-full border border-slate-300 rounded-xl p-2.5 text-xs font-medium outline-none focus:border-[#EE6425]"
+                  >
+                    <optgroup label="TIÊU CHÍ I: Ý THỨC HỌC TẬP (TỐI ĐA 20 ĐIỂM)">
+                      {EVENT_CRITERIA_OPTIONS.filter((c) => c.code.startsWith("I.")).map((c) => (
+                        <option key={c.code} value={c.code}>{c.label}</option>
+                      ))}
+                    </optgroup>
+
+                    <optgroup label="TIÊU CHÍ II: NỘI QUY & QUY CHẾ (TỐI ĐA 25 ĐIỂM)">
+                      {EVENT_CRITERIA_OPTIONS.filter((c) => c.code.startsWith("II.")).map((c) => (
+                        <option key={c.code} value={c.code}>{c.label}</option>
+                      ))}
+                    </optgroup>
+
+                    <optgroup label="TIÊU CHÍ III: PHONG TRÀO & CHÍNH TRỊ - XÃ HỘI (TỐI ĐA 20 ĐIỂM)">
+                      {EVENT_CRITERIA_OPTIONS.filter((c) => c.code.startsWith("III.")).map((c) => (
+                        <option key={c.code} value={c.code}>{c.label}</option>
+                      ))}
+                    </optgroup>
+
+                    <optgroup label="TIÊU CHÍ IV: QUAN HỆ CỘNG ĐỒNG & TÌNH NGUYỆN (TỐI ĐA 25 ĐIỂM)">
+                      {EVENT_CRITERIA_OPTIONS.filter((c) => c.code.startsWith("IV.")).map((c) => (
+                        <option key={c.code} value={c.code}>{c.label}</option>
+                      ))}
+                    </optgroup>
+
+                    <optgroup label="TIÊU CHÍ V: CÁN BỘ LỚP & THÀNH TÍCH ĐẶC BIỆT (TỐI ĐA 10 ĐIỂM)">
+                      {EVENT_CRITERIA_OPTIONS.filter((c) => c.code.startsWith("V.")).map((c) => (
+                        <option key={c.code} value={c.code}>{c.label}</option>
+                      ))}
+                    </optgroup>
+                  </select>
+                </div>
+
+                {/* Ô NHẬP ĐIỂM CỘNG */}
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-bold text-slate-700">Điểm rèn luyện cộng khi tham gia *</label>
+                    <span className="text-[11px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded">
+                      Tự động tính: +{eventPoints} ĐRL
+                    </span>
                   </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Điểm rèn luyện</label>
-                    <input
-                      type="text"
-                      value={eventPoints}
-                      onChange={(e) => setEventPoints(e.target.value)}
-                      placeholder="+5 ĐRL"
-                      className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none focus:border-[#EE6425]"
-                    />
-                  </div>
+                  <input
+                    type="number"
+                    min="1"
+                    max="10"
+                    required
+                    value={eventPoints}
+                    onChange={(e) => setEventPoints(Number(e.target.value))}
+                    className="w-full border border-slate-300 rounded-xl px-3.5 py-2 text-xs font-bold text-[#EE6425] outline-none focus:border-[#EE6425]"
+                  />
                 </div>
 
                 <div>
@@ -351,7 +486,7 @@ export default function AdminDashboard() {
 
                 <button
                   type="submit"
-                  className="w-full bg-[#EE6425] hover:bg-[#d85216] text-white font-bold py-2.5 rounded-xl transition text-xs uppercase shadow"
+                  className="w-full bg-[#EE6425] hover:bg-[#d85216] text-white font-bold py-3 rounded-xl transition text-xs uppercase shadow tracking-wider"
                 >
                   Đăng sự kiện lên hệ thống
                 </button>
@@ -369,16 +504,19 @@ export default function AdminDashboard() {
                     {events.map((ev) => (
                       <div key={ev.id} className="pt-3 first:pt-0 flex justify-between items-start gap-4">
                         <div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
                             <span className="text-[10px] font-bold text-[#007A87] bg-teal-50 px-2 py-0.5 rounded">
                               {ev.category}
                             </span>
+                            <span className="text-[10px] font-bold text-[#EE6425] bg-orange-50 border border-orange-200 px-2 py-0.5 rounded">
+                              Mục: {ev.categoryCode || "III.8"}
+                            </span>
                             <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
-                              {ev.points}
+                              +{ev.points || 4} ĐRL
                             </span>
                           </div>
                           <h3 className="text-sm font-bold text-slate-800 mt-1">{ev.title}</h3>
-                          <p className="text-xs text-slate-500 mt-0.5">{ev.time} • {ev.location}</p>
+                          <p className="text-xs text-slate-500 mt-0.5">⏰ {ev.time} • 📍 {ev.location}</p>
                           <p className="text-[11px] text-red-500 font-semibold mt-0.5">⏳ Hạn: {ev.deadline}</p>
                         </div>
                         <button
@@ -497,7 +635,7 @@ export default function AdminDashboard() {
                     <button type="button" onClick={() => formatText("italic")} className="px-2.5 py-1 bg-white border border-slate-200 rounded italic">I</button>
                     <button type="button" onClick={() => formatText("underline")} className="px-2.5 py-1 bg-white border border-slate-200 rounded underline">U</button>
                     <label className="px-2.5 py-1 bg-orange-50 text-[#EE6425] border border-orange-200 rounded cursor-pointer flex items-center gap-1">
-                      Chèn hình
+                      📷 Chèn hình
                       <input type="file" accept="image/*" onChange={handleInsertBodyImage} className="hidden" />
                     </label>
                   </div>
@@ -509,7 +647,7 @@ export default function AdminDashboard() {
                 </div>
                 <button
                   type="submit"
-                  className="w-full bg-[#EE6425] hover:bg-[#d85216] text-white font-bold py-3 rounded-xl transition text-xs uppercase"
+                  className="w-full bg-[#EE6425] hover:bg-[#d85216] text-white font-bold py-3 rounded-xl transition text-xs uppercase shadow"
                 >
                   Xuất bản bài viết
                 </button>
@@ -535,7 +673,7 @@ export default function AdminDashboard() {
         {activeTab === "students" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-5 bg-white p-5 rounded-2xl border border-emerald-500/30 bg-emerald-50/20 shadow-sm">
-              <h3 className="text-sm font-bold text-emerald-800 mb-1"> Dán trực tiếp từ bảng Excel</h3>
+              <h3 className="text-sm font-bold text-emerald-800 mb-1">📋 Dán trực tiếp từ bảng Excel</h3>
               <p className="text-[11px] text-slate-500 mb-2">Quét chọn (MSSV, Họ tên, Lớp) từ Excel rồi dán vào đây:</p>
               <textarea
                 rows={5}
