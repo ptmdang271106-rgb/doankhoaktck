@@ -1129,30 +1129,102 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* ================= TAB 6: BÀI VIẾT ================= */}
+        {/* ================= TAB 6: BÀI VIẾT (CÓ ẢNH BÌA & WORD EDITOR) ================= */}
         {activeTab === "posts" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-              <h2 className="text-base font-bold text-[#004A52] mb-4">Tạo bài viết mới</h2>
+              <h2 className="text-base font-bold text-[#004A52] mb-4">Tạo bài viết mới (Kèm Hình Bìa & Nội Dung)</h2>
               <form onSubmit={handleAddPost} className="space-y-4">
-                <input type="text" required value={postTitle} onChange={(e) => setPostTitle(e.target.value)} placeholder="Tiêu đề..." className="w-full border border-slate-300 rounded-xl px-3.5 py-2 text-sm outline-none" />
-                <select value={postCategory} onChange={(e) => setPostCategory(e.target.value)} className="w-full border border-slate-300 rounded-xl px-3.5 py-2 text-sm outline-none">
+                <input
+                  type="text"
+                  required
+                  value={postTitle}
+                  onChange={(e) => setPostTitle(e.target.value)}
+                  placeholder="Tiêu đề bài viết..."
+                  className="w-full border border-slate-300 rounded-xl px-3.5 py-2 text-sm outline-none focus:border-[#EE6425]"
+                />
+                
+                <select
+                  value={postCategory}
+                  onChange={(e) => setPostCategory(e.target.value)}
+                  className="w-full border border-slate-300 rounded-xl px-3.5 py-2 text-sm outline-none"
+                >
                   <option value="Phong trào">Phong trào</option>
                   <option value="Học thuật - NCKH">Học thuật - NCKH</option>
+                  <option value="Tổ chức - Đoàn thể">Tổ chức - Đoàn thể</option>
+                  <option value="Hội thảo Cơ khí">Hội thảo Cơ khí</option>
+                  <option value="Tình nguyện">Tình nguyện</option>
                 </select>
-                <div ref={editorRef} contentEditable className="w-full min-h-[160px] border border-slate-300 rounded-xl p-4 text-sm outline-none bg-white"></div>
-                <button type="submit" className="w-full bg-[#EE6425] text-white font-bold py-3 rounded-xl text-xs uppercase">Xuất bản bài viết</button>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Hình ảnh bìa bài viết</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleCoverUpload}
+                    className="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-500"
+                  />
+                  {postCoverImage && <img src={postCoverImage} alt="Cover Preview" className="mt-2 h-24 rounded-xl object-cover" />}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Nội dung chi tiết (Soạn thảo như Word)</label>
+                  <div className="flex flex-wrap items-center gap-1.5 p-2 bg-slate-50 border border-slate-300 rounded-t-xl text-xs font-bold">
+                    <button type="button" onClick={() => formatText("bold")} className="px-2.5 py-1 bg-white border border-slate-200 rounded font-black">B</button>
+                    <button type="button" onClick={() => formatText("italic")} className="px-2.5 py-1 bg-white border border-slate-200 rounded italic">I</button>
+                    <button type="button" onClick={() => formatText("underline")} className="px-2.5 py-1 bg-white border border-slate-200 rounded underline">U</button>
+                    <label className="px-2.5 py-1 bg-orange-50 text-[#EE6425] border border-orange-200 rounded cursor-pointer">
+                      Chèn hình
+                      <input type="file" accept="image/*" onChange={handleInsertBodyImage} className="hidden" />
+                    </label>
+                  </div>
+                  <div
+                    ref={editorRef}
+                    contentEditable
+                    className="w-full min-h-[160px] border border-t-0 border-slate-300 rounded-b-xl p-4 text-sm outline-none bg-white"
+                  ></div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full bg-[#EE6425] hover:bg-[#d85216] text-white font-bold py-3 rounded-xl text-xs uppercase shadow"
+                >
+                  Xuất bản bài viết
+                </button>
               </form>
             </div>
 
             <div className="lg:col-span-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-              <h2 className="text-base font-bold text-[#004A52] mb-4">Bài viết đã xuất bản ({posts.length})</h2>
-              {posts.map((p) => (
-                <div key={p.id} className="flex justify-between items-center py-2 border-b">
-                  <span className="text-xs font-bold">{p.title}</span>
-                  <button onClick={() => handleDeleteSinglePost(p.id, p.title)} className="text-red-600 text-xs font-bold">Xóa</button>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-2 border-b border-slate-200">
+                <h2 className="text-base font-bold text-[#004A52]">Bài viết đã xuất bản ({posts.length})</h2>
+                {posts.length > 0 && (
+                  <button onClick={handleDeleteAllPosts} className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition shadow">
+                    Xóa tất cả
+                  </button>
+                )}
+              </div>
+
+              {posts.length === 0 ? (
+                <p className="text-xs text-slate-400 py-4">Chưa có bài viết nào.</p>
+              ) : (
+                <div className="divide-y divide-slate-100 space-y-3">
+                  {posts.map((p) => (
+                    <div key={p.id} className="pt-3 first:pt-0 flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        {p.cover_image && <img src={p.cover_image} alt="" className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />}
+                        <div>
+                          <span className="text-[10px] font-bold text-[#007A87] bg-teal-50 px-2 py-0.5 rounded">{p.category}</span>
+                          <h3 className="text-xs font-bold text-slate-800 mt-1">{p.title}</h3>
+                          <span className="text-[10px] text-slate-400 mt-0.5 block">Ngày: {p.date}</span>
+                        </div>
+                      </div>
+                      <button onClick={() => handleDeleteSinglePost(p.id, p.title)} className="text-red-600 hover:text-red-800 text-xs font-bold hover:underline flex-shrink-0">
+                        Xóa
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
           </div>
         )}
