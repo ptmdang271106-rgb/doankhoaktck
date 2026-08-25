@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Montserrat } from "next/font/google";
+import { Poppins } from "next/font/google";
 import "./globals.css";
 import FloatingContact from "@/components/FloatingContact";
 
-const montserrat = Montserrat({
-  subsets: ["latin", "vietnamese"],
+const poppins = Poppins({
+  subsets: ["latin", "latin-ext", "vietnamese"],
   weight: ["300", "400", "500", "600", "700", "800", "900"],
   display: "swap",
 });
@@ -25,8 +25,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi" className={montserrat.className}>
-      <body className="antialiased bg-white text-slate-800">
+    <html lang="vi">
+      <body className={`${poppins.className} antialiased bg-white text-slate-800`}>
         {children}
         <FloatingContact />
       </body>
