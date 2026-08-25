@@ -52,7 +52,7 @@ function AuthForm() {
       <div className="text-center mb-6">
         <Link href="/" className="inline-block mb-3">
           <Image
-            src="/logodk.png"
+            src="/logo-doankhoa.png"
             alt="Logo Khoa Cơ khí"
             width={64}
             height={64}
