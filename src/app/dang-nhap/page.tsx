@@ -2,7 +2,6 @@
 
 import React, { useState, Suspense } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useSearchParams, useRouter } from "next/navigation";
 
 function AuthForm() {
@@ -23,44 +22,77 @@ function AuthForm() {
     setErrorMessage("");
     setSuccessMessage("");
 
-    if (!mssv.trim()) {
-      setErrorMessage("Vui lòng nhập Mã số sinh viên (MSSV)!");
-      return;
-    }
-
     if (isLoginTab) {
-      setSuccessMessage("Đăng nhập thành công! Đang chuyển hướng...");
-      setTimeout(() => {
-        router.push(redirectUrl);
-      }, 1000);
+      // 1. Kiểm tra tài khoản Admin mặc định
+      if (mssv.trim().toLowerCase() === "admin" && password === "admin@ctut2026") {
+        const adminUser = {
+          mssv: "admin",
+          fullName: "Ban Quản Trị (Admin)",
+          role: "admin",
+        };
+        localStorage.setItem("ctut_current_user", JSON.stringify(adminUser));
+        setSuccessMessage("Đăng nhập quyền Admin thành công!");
+        setTimeout(() => router.push("/admin"), 1000);
+        return;
+      }
+
+      // 2. Kiểm tra tài khoản Sinh viên đã lưu
+      const storedUsers = JSON.parse(localStorage.getItem("ctut_student_accounts") || "[]");
+      const foundUser = storedUsers.find(
+        (u: any) => u.mssv === mssv.trim() && u.password === password
+      );
+
+      if (foundUser || password === "123456") {
+        const currentUser = foundUser || {
+          mssv: mssv.trim(),
+          fullName: `Sinh viên ${mssv.trim()}`,
+          role: "student",
+        };
+        localStorage.setItem("ctut_current_user", JSON.stringify(currentUser));
+        setSuccessMessage("Đăng nhập thành công! Đang chuyển hướng...");
+        setTimeout(() => router.push(redirectUrl), 1000);
+      } else {
+        setErrorMessage("MSSV hoặc mật khẩu không chính xác! (Gợi ý: Mật khẩu mặc định là 123456 hoặc tạo tài khoản mới).");
+      }
     } else {
-      setSuccessMessage("Đăng ký tài khoản thành công! Vui lòng chuyển sang tab Đăng nhập.");
+      // Đăng ký tài khoản Sinh viên mới
+      const storedUsers = JSON.parse(localStorage.getItem("ctut_student_accounts") || "[]");
+      if (storedUsers.some((u: any) => u.mssv === mssv.trim())) {
+        setErrorMessage("MSSV này đã được đăng ký trên hệ thống!");
+        return;
+      }
+
+      const newUser = {
+        mssv: mssv.trim(),
+        fullName: fullName.trim(),
+        studentClass: studentClass.trim(),
+        password: password,
+        role: "student",
+        createdAt: new Date().toLocaleDateString("vi-VN"),
+      };
+
+      storedUsers.push(newUser);
+      localStorage.setItem("ctut_student_accounts", JSON.stringify(storedUsers));
+      setSuccessMessage("Tạo tài khoản thành công! Bạn có thể đăng nhập ngay.");
       setIsLoginTab(true);
     }
   };
 
-  const handleGoogleLogin = () => {
-    setSuccessMessage("Đang kết nối tài khoản Google CTUT...");
-    setTimeout(() => {
-      router.push(redirectUrl);
-    }, 1200);
-  };
-
   return (
     <div className="max-w-md w-full bg-white rounded-3xl shadow-xl border border-orange-100 p-6 sm:p-8">
-      {/* LOGO & TIÊU ĐỀ */}
+      {/* LOGO */}
       <div className="text-center mb-6">
-  <Link href="/" className="inline-block mb-4">
-    <img
-      src="/logo-doankhoa.png"
-      alt="Tuổi trẻ Khoa Kỹ thuật Cơ khí CTUT"
-      className="h-12 sm:h-14 w-auto max-w-[280px] sm:max-w-[320px] object-contain mx-auto"
-    />
-  </Link>
-  <h1 className="text-2xl sm:text-[26px] font-extrabold text-[#004A52] tracking-tight">
-    CỔNG DỊCH VỤ SINH VIÊN
-  </h1>
-</div>
+        <Link href="/" className="inline-block mb-3">
+          <img
+            src="/logodk.png"
+            alt="Tuổi trẻ Khoa Kỹ thuật Cơ khí CTUT"
+            className="h-12 sm:h-14 w-auto max-w-[280px] sm:max-w-[320px] object-contain mx-auto"
+          />
+        </Link>
+        <h1 className="text-2xl sm:text-[26px] font-black text-[#004A52] tracking-tight">
+          CỔNG DỊCH VỤ SINH VIÊN
+        </h1>
+      </div>
 
       {/* CHUYỂN TABS */}
       <div className="flex bg-slate-100/80 p-1 rounded-2xl mb-6 text-xs sm:text-sm font-bold">
@@ -112,7 +144,7 @@ function AuthForm() {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="Nguyễn Văn A"
-                className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#EE6425] focus:ring-1 focus:ring-[#EE6425]"
+                className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#EE6425]"
               />
             </div>
             <div>
@@ -123,7 +155,7 @@ function AuthForm() {
                 value={studentClass}
                 onChange={(e) => setStudentClass(e.target.value)}
                 placeholder="CK22A1"
-                className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#EE6425] focus:ring-1 focus:ring-[#EE6425]"
+                className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#EE6425]"
               />
             </div>
           </>
@@ -131,15 +163,15 @@ function AuthForm() {
 
         <div>
           <label className="block text-xs font-bold text-slate-700 mb-1">
-            Mã số sinh viên (MSSV) *
+            Mã số sinh viên (MSSV) hoặc Tên đăng nhập Admin *
           </label>
           <input
             type="text"
             required
             value={mssv}
             onChange={(e) => setMssv(e.target.value)}
-            placeholder="Nhập MSSV (VD: 2200101)"
-            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#EE6425] focus:ring-1 focus:ring-[#EE6425]"
+            placeholder="MSSV (VD: 2200101) hoặc admin"
+            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#EE6425]"
           />
         </div>
 
@@ -158,11 +190,10 @@ function AuthForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
-            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#EE6425] focus:ring-1 focus:ring-[#EE6425]"
+            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#EE6425]"
           />
         </div>
 
-        {/* NÚT ĐĂNG NHẬP / ĐĂNG KÝ HỆ THỐNG */}
         <button
           type="submit"
           className="w-full bg-[#EE6425] hover:bg-[#d85216] text-white font-extrabold py-3.5 rounded-2xl transition shadow-md hover:shadow-lg uppercase tracking-wider text-sm active:scale-[0.98]"
@@ -179,11 +210,15 @@ function AuthForm() {
         </span>
       </div>
 
-      {/* NÚT ĐĂNG NHẬP GOOGLE */}
       <button
         type="button"
-        onClick={handleGoogleLogin}
-        className="w-full flex items-center justify-center gap-3 border border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-bold py-3 rounded-2xl transition shadow-sm active:scale-[0.98] text-sm"
+        onClick={() => {
+          const mockUser = { mssv: "2200101", fullName: "Sinh viên CTUT", role: "student" };
+          localStorage.setItem("ctut_current_user", JSON.stringify(mockUser));
+          setSuccessMessage("Đăng nhập Google CTUT thành công!");
+          setTimeout(() => router.push(redirectUrl), 1000);
+        }}
+        className="w-full flex items-center justify-center gap-3 border border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-bold py-3 rounded-2xl transition shadow-sm text-sm"
       >
         <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -194,9 +229,10 @@ function AuthForm() {
         <span>Đăng nhập với Google CTUT</span>
       </button>
 
-      <p className="text-center text-[11px] text-slate-400 mt-4">
-        Dành riêng cho đoàn viên & sinh viên Khoa Kỹ thuật Cơ khí CTUT
-      </p>
+      <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 text-[11px] text-slate-500 mt-5 space-y-1">
+        <p>🔑 <strong>Tài khoản Admin:</strong> <code>admin</code> / Mật khẩu: <code>admin@ctut2026</code></p>
+        <p>🎓 <strong>Tài khoản SV mẫu:</strong> Nhập MSSV bất kỳ / Mật khẩu: <code>123456</code></p>
+      </div>
     </div>
   );
 }
