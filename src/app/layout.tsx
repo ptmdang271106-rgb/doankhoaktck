@@ -1,10 +1,17 @@
 import type { Metadata } from "next";
+import { Montserrat } from "next/font/google";
 import "./globals.css";
 import FloatingContact from "@/components/FloatingContact";
 
+const montserrat = Montserrat({
+  subsets: ["latin", "vietnamese"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Tuổi trẻ Khoa Kỹ thuật Cơ khí - CTUT",
-  description: "Cổng thông tin Khoa Kỹ thuật Cơ khí - CTUT",
+  description: "Cổng thông tin & Hoạt động phong trào Đoàn Khoa Kỹ thuật Cơ khí CTUT",
   icons: {
     icon: "/logodk.png",
     shortcut: "/logodk.png",
@@ -18,8 +25,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi">
-      <body className="antialiased">
+    <html lang="vi" className={montserrat.className}>
+      <body className="antialiased bg-white text-slate-800">
         {children}
         <FloatingContact />
       </body>
