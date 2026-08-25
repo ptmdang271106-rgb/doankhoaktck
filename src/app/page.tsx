@@ -2,42 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-
-const DEFAULT_POSTS = [
-  {
-    id: "default-1",
-    title: "Hành trình chinh phục giải thưởng Sáng tạo Khoa học Kỹ thuật 2026 của nhóm sinh viên Cơ điện tử K21",
-    category: "Học thuật - NCKH",
-    content: "Chia sẻ về phương pháp nghiên cứu đề tài ứng dụng IoT và Trí tuệ nhân tạo trong việc giám sát dây chuyền sản xuất tự động hóa thông minh...",
-    date: "24 Tháng 08, 2026",
-    badge: "Sinh viên 5 Tốt",
-    coverImage: "",
-  },
-  {
-    id: "default-2",
-    title: "Workshop: Ứng dụng công nghệ AI tạo sinh trong tối ưu hóa thiết kế mô hình 3D SolidWorks",
-    category: "Học thuật - NCKH",
-    content: "Chuỗi hội thảo nâng cao năng lực thiết kế đồ họa kỹ thuật dành cho đoàn viên sinh viên Khoa Cơ khí.",
-    date: "22 Tháng 08, 2026",
-    badge: "Học thuật",
-    coverImage: "",
-  },
-  {
-    id: "default-3",
-    title: "Đoàn Khoa ra quân Chiến dịch tình nguyện sửa chữa điện - máy công cụ tại địa bàn Quận Ninh Kiều",
-    category: "Phong trào",
-    content: "Hoạt động phát huy chuyên môn ngành nghề của sinh viên Cơ khí hỗ trợ cộng đồng.",
-    date: "20 Tháng 08, 2026",
-    badge: "Phong trào",
-    coverImage: "",
-  },
-];
+import { supabase } from "@/lib/supabase";
 
 export default function CTUTYouthPortal() {
   const [activeCategory, setActiveCategory] = useState("Tất cả");
   const [activeTabRank, setActiveTabRank] = useState("Nổi bật");
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [allPosts, setAllPosts] = useState<any[]>(DEFAULT_POSTS);
+  const [allPosts, setAllPosts] = useState<any[]>([]);
 
   useEffect(() => {
     const savedUser = localStorage.getItem("ctut_current_user");
@@ -45,10 +16,13 @@ export default function CTUTYouthPortal() {
       setCurrentUser(JSON.parse(savedUser));
     }
 
-    const customPosts = JSON.parse(localStorage.getItem("ctut_custom_posts") || "[]");
-    if (customPosts.length > 0) {
-      setAllPosts([...customPosts, ...DEFAULT_POSTS]);
-    }
+    const fetchPosts = async () => {
+      const { data } = await supabase.from("posts").select("*").order("id", { ascending: false });
+      if (data && data.length > 0) {
+        setAllPosts(data);
+      }
+    };
+    fetchPosts();
   }, []);
 
   const handleLogout = () => {
@@ -72,14 +46,12 @@ export default function CTUTYouthPortal() {
 
   return (
     <div className="min-h-screen bg-white text-[#333333] font-sans antialiased">
-      {/* 1. THANH ĐIỀU HƯỚNG TẦNG 1 */}
-      <header className="border-b border-gray-100 bg-white sticky top-0 z-40 shadow-xs">
+      {/* 1. THANH DIEU HUONG */}
+      <header className="border-b border-gray-100 bg-white sticky top-0 z-40">
         <div className="w-full px-3 sm:px-6 lg:px-10">
-          
-          {/* HÀNG TRÊN: LOGO & NÚT TRÊN MÁY TÍNH */}
           <div className="py-2.5 sm:py-3 lg:h-24 grid grid-cols-12 items-center text-[13px] font-medium text-[#2C3E50]">
             
-            {/* MENU TRÁI (HIỂN THỊ TRÊN MÁY TÍNH) */}
+            {/* MENU TRAI (DESKTOP) */}
             <div className="col-span-4 hidden lg:flex items-center justify-start space-x-3 whitespace-nowrap">
               <Link
                 href="/diem-danh"
@@ -96,15 +68,15 @@ export default function CTUTYouthPortal() {
               </Link>
 
               <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1 text-xs font-semibold pl-1">
-                Giới thiệu <span className="text-[9px]">▼</span>
+                Giới thiệu
               </a>
 
               <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1 text-xs font-semibold">
-                Chi đoàn / Chi hội <span className="text-[9px]">▼</span>
+                Chi đoàn / Chi hội
               </a>
             </div>
 
-            {/* LOGO CHÍNH GIỮA */}
+            {/* LOGO */}
             <div className="col-span-12 lg:col-span-4 flex items-center justify-center py-1">
               <Link href="/">
                 <img
@@ -115,14 +87,14 @@ export default function CTUTYouthPortal() {
               </Link>
             </div>
 
-            {/* MENU PHẢI (HIỂN THỊ TRÊN MÁY TÍNH) */}
+            {/* MENU PHAI (DESKTOP) */}
             <div className="col-span-4 hidden lg:flex items-center justify-end space-x-4 whitespace-nowrap">
               <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1 text-xs font-semibold">
-                Hỗ trợ sinh viên <span className="text-[9px]">▼</span>
+                Hỗ trợ sinh viên
               </a>
               
               <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1 text-xs font-semibold">
-                Văn phòng điện tử <span className="text-[9px]">▼</span>
+                Văn phòng điện tử
               </a>
 
               {currentUser ? (
@@ -154,33 +126,31 @@ export default function CTUTYouthPortal() {
                 </Link>
               )}
             </div>
-
           </div>
 
-          {/* THANH NÚT CHỨC NĂNG DÀNH RIÊNG CHO ĐIỆN THOẠI (MOBILE QUICK BAR) */}
+          {/* MOBILE QUICK BAR */}
           <div className="flex lg:hidden items-center justify-between gap-1.5 py-2 border-t border-slate-100 overflow-x-auto whitespace-nowrap">
             <div className="flex items-center gap-1.5">
               <Link
                 href="/diem-danh"
-                className="bg-[#007A87] text-white px-2.5 py-1.5 rounded-lg text-[11px] font-bold shadow-xs flex items-center gap-1"
+                className="bg-[#007A87] text-white px-2.5 py-1.5 rounded-lg text-[11px] font-bold shadow-xs"
               >
-                <span></span> Điểm danh
+                Điểm danh
               </Link>
               <Link
                 href="/tra-cuu"
-                className="bg-[#00707b] text-white px-2.5 py-1.5 rounded-lg text-[11px] font-bold shadow-xs flex items-center gap-1"
+                className="bg-[#00707b] text-white px-2.5 py-1.5 rounded-lg text-[11px] font-bold shadow-xs"
               >
-                <span></span> Cổng ĐRL
+                Cổng ĐRL
               </Link>
               <Link
                 href="/dang-ky"
-                className="bg-emerald-600 text-white px-2.5 py-1.5 rounded-lg text-[11px] font-bold shadow-xs flex items-center gap-1"
+                className="bg-emerald-600 text-white px-2.5 py-1.5 rounded-lg text-[11px] font-bold shadow-xs"
               >
-                <span></span> Sự kiện
+                Sự kiện
               </Link>
             </div>
 
-            {/* TRẠNG THÁI ĐĂNG NHẬP TRÊN ĐIỆN THOẠI */}
             <div>
               {currentUser ? (
                 <div className="flex items-center gap-1 bg-orange-50 border border-orange-200 px-2 py-1 rounded-lg text-[11px] font-bold text-[#EE6425]">
@@ -200,10 +170,9 @@ export default function CTUTYouthPortal() {
               )}
             </div>
           </div>
-
         </div>
 
-        {/* 2. THANH MENU PHỤ TẦNG 2 */}
+        {/* MENU PHU */}
         <div className="bg-[#F8FCFC] border-t border-b border-[#E6F4F4]">
           <div className="w-full px-4 sm:px-6 lg:px-10">
             <div className="flex justify-start sm:justify-center space-x-6 sm:space-x-10 py-2.5 text-[12.5px] sm:text-[13.5px] font-semibold text-[#007A87] overflow-x-auto whitespace-nowrap">
@@ -219,18 +188,18 @@ export default function CTUTYouthPortal() {
         </div>
       </header>
 
-      {/* 3. BANNER */}
+      {/* BANNER */}
       <section className="w-full bg-[#0A2540] flex justify-center items-center">
         <div className="w-full max-w-7xl mx-auto px-0 sm:px-4 lg:px-8 py-1 sm:py-4">
           <img
             src="/banner-ctut.png"
-            alt="Chương trình Chào đón Tân sinh viên - Khoa Kỹ thuật Cơ khí CTUT"
+            alt="Chương trình Chào đón Tân sinh viên"
             className="w-full h-auto block rounded-none sm:rounded-lg shadow-sm"
           />
         </div>
       </section>
 
-      {/* 4. KHỐI NỘI DUNG VÀ BỘ LỌC */}
+      {/* NOI DUNG */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between border-b-2 border-gray-100 pb-4 gap-4">
           <h2 className="text-xl sm:text-2xl font-bold text-[#006674] tracking-tight">
@@ -254,7 +223,6 @@ export default function CTUTYouthPortal() {
           </div>
         </div>
 
-        {/* 5. KHU VỰC BÀI VIẾT */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-6">
           <div className="lg:col-span-8 space-y-6">
             {filteredPosts.length === 0 ? (
@@ -269,9 +237,9 @@ export default function CTUTYouthPortal() {
                   className="group grid grid-cols-1 sm:grid-cols-12 gap-4 sm:gap-5 bg-white p-3.5 sm:p-4 rounded-xl border border-gray-100 hover:shadow-md transition-shadow cursor-pointer block"
                 >
                   <div className="sm:col-span-5 relative aspect-video rounded-lg overflow-hidden bg-gradient-to-tr from-[#006674] to-[#16A085] flex items-center justify-center">
-                    {post.coverImage ? (
+                    {post.cover_image ? (
                       <img
-                        src={post.coverImage}
+                        src={post.cover_image}
                         alt={post.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                       />
@@ -287,11 +255,6 @@ export default function CTUTYouthPortal() {
 
                   <div className="sm:col-span-7 flex flex-col justify-between py-1">
                     <div>
-                      {post.badge && (
-                        <span className="text-[11px] font-bold text-[#D35400] uppercase block mb-1">
-                          [{post.badge}]
-                        </span>
-                      )}
                       <h3 className="text-sm sm:text-base font-bold text-gray-900 leading-snug group-hover:text-[#EE6425] transition-colors line-clamp-2">
                         {post.title}
                       </h3>
@@ -308,7 +271,6 @@ export default function CTUTYouthPortal() {
             )}
           </div>
 
-          {/* Cột phụ bên phải */}
           <div className="lg:col-span-4">
             <div className="border-b border-gray-200 flex space-x-6 text-sm font-bold pb-2">
               <button
@@ -335,10 +297,9 @@ export default function CTUTYouthPortal() {
 
             <div className="divide-y divide-gray-100 mt-2">
               {[
-                { title: "[Thông báo] Mở cổng tự đánh giá Điểm Rèn Luyện Học kỳ II trực tuyến", date: "25/08/2026" },
+                { title: "[Thông báo] Mở cổng tự đánh giá Điểm Rèn Luyện Học kỳ II", date: "25/08/2026" },
                 { title: "Kế hoạch tổ chức Hội thi Thiết kế xe tiết kiệm nhiên liệu CTUT 2026", date: "23/08/2026" },
                 { title: "Danh sách sinh viên Khoa Cơ khí nhận học bổng Khuyến khích Tài năng đợt 1", date: "21/08/2026" },
-                { title: "Thông báo tuyển Cộng tác viên Ban Truyền thông & Kỹ thuật Đoàn Khoa", date: "19/08/2026" },
               ].map((post, i) => (
                 <div key={i} className="py-3 group cursor-pointer">
                   <h4 className="text-xs font-semibold text-gray-800 leading-snug group-hover:text-[#007A87] transition-colors">
@@ -353,7 +314,7 @@ export default function CTUTYouthPortal() {
 
             <div className="mt-6 bg-[#006674] text-white p-4 rounded-xl text-center space-y-2">
               <div className="text-xs font-bold uppercase tracking-wide">Cổng Dịch Vụ Sinh Viên</div>
-              <p className="text-[11px] text-teal-100">Tra cứu kết quả rèn luyện & Check-in sự kiện bằng mã QR cá nhân</p>
+              <p className="text-[11px] text-teal-100">Tra cứu kết quả rèn luyện & Check-in sự kiện bằng mã QR</p>
               <Link
                 href="/tra-cuu"
                 className="w-full bg-[#E67E22] hover:bg-[#D35400] text-white text-xs font-bold py-2 rounded transition-colors uppercase inline-block"
@@ -365,14 +326,13 @@ export default function CTUTYouthPortal() {
         </div>
       </main>
 
-      {/* FOOTER */}
       <footer className="bg-[#1A252F] text-gray-400 py-8 border-t border-gray-700 text-xs">
         <div className="max-w-7xl mx-auto px-4 text-center space-y-2">
           <div className="text-white font-bold uppercase">
             ĐOÀN KHOA KỸ THUẬT CƠ KHÍ – TRƯỜNG ĐẠI HỌC KỸ THUẬT - CÔNG NGHỆ CẦN THƠ
           </div>
-          <div>Địa chỉ: 256 Nguyễn Văn Cừ, Quận Ninh Kiều, Thành phố Cần Thơ</div>
-          <div className="text-gray-500 text-[11px]">Bản quyền © 2026 Phạm Thái Minh Đăng.</div>
+          <div>Địa chỉ: 256 Nguyễn Văn Cừ, Phường An Hòa, Quận Ninh Kiều, TP. Cần Thơ</div>
+          <div className="text-gray-500 text-[11px]">Bản quyền 2026 CTUT Mechanical Youth Portal.</div>
         </div>
       </footer>
     </div>
