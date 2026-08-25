@@ -18,7 +18,6 @@ export const EVENT_CRITERIA_OPTIONS = [
   { code: "I.10", label: "I.10 Cuộc thi khởi nghiệp ngoài Trường", max: 8 },
   { code: "I.11", label: "I.11 Thành viên CLB học thuật", max: 2 },
   { code: "I.12", label: "I.12 Các hoạt động học thuật khác", max: 3 },
-
   { code: "II.1", label: "II.1 Ý thức, thái độ trong học tập", max: 5 },
   { code: "II.2", label: "II.2 Chấp hành nội quy, quy chế Trường", max: 5 },
   { code: "II.3", label: "II.3 Chấp hành quy chế thi cử", max: 5 },
@@ -27,7 +26,6 @@ export const EVENT_CRITERIA_OPTIONS = [
   { code: "II.6", label: "II.6 Thực hiện đăng ký ngoại trú", max: 5 },
   { code: "II.7", label: "II.7 Mặc đồng phục đúng quy định", max: 5 },
   { code: "II.8", label: "II.8 Sinh hoạt lớp với CVHT", max: 5 },
-
   { code: "III.1", label: "III.1 Hoạt động bắt buộc do Khoa/Trường tổ chức", max: 3 },
   { code: "III.2", label: "III.2 Đại hội Chi đoàn/Chi hội, sinh hoạt Chi đoàn", max: 3 },
   { code: "III.3", label: "III.3 Báo cáo chuyên đề do Trường tổ chức", max: 4 },
@@ -43,7 +41,6 @@ export const EVENT_CRITERIA_OPTIONS = [
   { code: "III.13", label: "III.13 Khen thưởng phong trào cá nhân", max: 7 },
   { code: "III.14", label: "III.14 Tập thể được khen thưởng phong trào", max: 1 },
   { code: "III.15", label: "III.15 Các hoạt động phong trào khác", max: 3 },
-
   { code: "IV.1", label: "IV.1 Chấp hành pháp luật Nhà nước", max: 10 },
   { code: "IV.2", label: "IV.2 Hành vi tốt, tinh thần sẻ chia, giúp đỡ người yếu thế", max: 5 },
   { code: "IV.3", label: "IV.3 Biểu dương, khen thưởng hoạt động xã hội ngoài trường", max: 5 },
@@ -62,7 +59,6 @@ export const EVENT_CRITERIA_OPTIONS = [
   { code: "IV.16", label: "IV.16 Chương trình Thứ Bảy tình nguyện", max: 5 },
   { code: "IV.17", label: "IV.17 Chương trình Chào đón tân sinh viên", max: 5 },
   { code: "IV.18", label: "IV.18 Trách nhiệm xã hội và phát triển bền vững", max: 3 },
-
   { code: "V.1", label: "V.1 Tham gia tích cực phong trào Lớp, Đoàn, Hội", max: 3 },
   { code: "V.2", label: "V.2 Cán bộ Lớp/Đoàn/Hội hoàn thành tốt nhiệm vụ", max: 5 },
   { code: "V.3", label: "V.3 Sinh viên đạt giải học tập, NCKH", max: 7 },
@@ -101,8 +97,10 @@ export function generateCtuetEmail(fullName: string, mssv: string): string {
 
 export default function AdminDashboard() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"students" | "events" | "posts">("students");
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<"students" | "officers" | "events" | "posts">("students");
   const [students, setStudents] = useState<any[]>([]);
+  const [officers, setOfficers] = useState<any[]>([]);
   const [posts, setPosts] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [registrations, setRegistrations] = useState<any[]>([]);
@@ -113,6 +111,12 @@ export default function AdminDashboard() {
   const [manualMssv, setManualMssv] = useState("");
   const [manualFullName, setManualFullName] = useState("");
   const [manualClass, setManualClass] = useState("CNKT Tự động hóa K2024");
+
+  // State tạo tài khoản BCH Chi đoàn
+  const [officerUser, setOfficerUser] = useState("");
+  const [officerName, setOfficerName] = useState("");
+  const [officerClass, setOfficerClass] = useState("");
+  const [officerPass, setOfficerPass] = useState("");
 
   // State sự kiện
   const [eventTitle, setEventTitle] = useState("");
@@ -138,6 +142,9 @@ export default function AdminDashboard() {
     const { data: stdData } = await supabase.from("students").select("*").order("id", { ascending: false });
     if (stdData) setStudents(stdData);
 
+    const { data: offData } = await supabase.from("branch_officers").select("*").order("id", { ascending: false });
+    if (offData) setOfficers(offData);
+
     const { data: postData } = await supabase.from("posts").select("*").order("id", { ascending: false });
     if (postData) setPosts(postData);
 
@@ -155,18 +162,50 @@ export default function AdminDashboard() {
       return;
     }
     const user = JSON.parse(userStr);
-    if (user.role !== "admin") {
+    if (user.role !== "super_admin" && user.role !== "branch_admin" && user.role !== "admin") {
       alert("Bạn không có quyền truy cập trang quản trị!");
       router.push("/");
       return;
     }
-
+    setCurrentUser(user);
     fetchAllData();
   }, [router]);
 
-  // ================= QUẢN LÝ SINH VIÊN =================
+  // ================= 1. QUẢN LÝ TÀI KHOẢN BCH CHI ĐOÀN (CHỈ SUPER ADMIN) =================
+  const handleCreateOfficer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!officerUser.trim() || !officerPass.trim() || !officerName.trim()) {
+      return alert("Vui lòng điền đầy đủ thông tin cán bộ!");
+    }
 
-  // 1. Dán từ Excel
+    const newOfficer = {
+      username: officerUser.trim().toLowerCase(),
+      full_name: officerName.trim(),
+      branch_class: officerClass.trim() || "Khoa Kỹ thuật Cơ khí",
+      password: officerPass.trim(),
+    };
+
+    const { error } = await supabase.from("branch_officers").insert([newOfficer]);
+    if (error) {
+      alert("Lỗi tạo tài khoản: " + error.message);
+    } else {
+      alert(`Đã cấp tài khoản cán bộ cho: ${newOfficer.full_name}`);
+      fetchAllData();
+      setOfficerUser("");
+      setOfficerName("");
+      setOfficerClass("");
+      setOfficerPass("");
+    }
+  };
+
+  const handleDeleteOfficer = async (id: number, name: string) => {
+    if (confirm(`Xác nhận xóa tài khoản cán bộ: ${name}?`)) {
+      await supabase.from("branch_officers").delete().eq("id", id);
+      fetchAllData();
+    }
+  };
+
+  // ================= 2. QUAN LY SINH VIEN =================
   const handleProcessPasteData = async () => {
     if (!pasteData.trim()) return alert("Vui lòng dán dữ liệu!");
     const rows = pasteData.split(/\r\n|\n/).filter((r) => r.trim() !== "");
@@ -181,13 +220,7 @@ export default function AdminDashboard() {
         const password = mssv.slice(-3);
         const email = generateCtuetEmail(full_name, mssv);
 
-        imported.push({
-          mssv,
-          full_name,
-          email,
-          student_class,
-          password,
-        });
+        imported.push({ mssv, full_name, email, student_class, password });
       }
     }
 
@@ -196,14 +229,13 @@ export default function AdminDashboard() {
       if (error) {
         alert("Lỗi lưu dữ liệu: " + error.message);
       } else {
-        alert(`Đã lưu thành công ${imported.length} sinh viên lên hệ thống.`);
+        alert(`Đã lưu ${imported.length} sinh viên lên hệ thống.`);
         fetchAllData();
         setPasteData("");
       }
     }
   };
 
-  // 2. Nhập thủ công 1 sinh viên
   const handleAddManualStudent = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!manualMssv.trim() || !manualFullName.trim()) {
@@ -216,20 +248,17 @@ export default function AdminDashboard() {
     const password = mssv.slice(-3);
     const email = generateCtuetEmail(full_name, mssv);
 
-    const newStudent = { mssv, full_name, email, student_class, password };
-
-    const { error } = await supabase.from("students").upsert([newStudent], { onConflict: "mssv" });
+    const { error } = await supabase.from("students").upsert([{ mssv, full_name, email, student_class, password }], { onConflict: "mssv" });
     if (error) {
       alert("Lỗi thêm sinh viên: " + error.message);
     } else {
-      alert(`Đã thêm sinh viên ${full_name} (${mssv}) thành công.`);
+      alert(`Đã thêm sinh viên ${full_name} (${mssv})`);
       fetchAllData();
       setManualMssv("");
       setManualFullName("");
     }
   };
 
-  // 3. Tải lên file Excel/CSV
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -238,7 +267,6 @@ export default function AdminDashboard() {
     reader.onload = async (event) => {
       const text = event.target?.result as string;
       if (!text) return;
-
       const rows = text.split(/\r\n|\n/).filter((r) => r.trim() !== "");
       const imported: any[] = [];
 
@@ -250,33 +278,24 @@ export default function AdminDashboard() {
           const student_class = cols[2] || "CNKT Tự động hóa K2024";
           const password = mssv.slice(-3);
           const email = generateCtuetEmail(full_name, mssv);
-
           imported.push({ mssv, full_name, email, student_class, password });
         }
       }
 
       if (imported.length > 0) {
-        const { error } = await supabase.from("students").upsert(imported, { onConflict: "mssv" });
-        if (error) {
-          alert("Lỗi đọc file: " + error.message);
-        } else {
-          alert(`Đã tải lên thành công ${imported.length} sinh viên từ file.`);
-          fetchAllData();
-        }
-      } else {
-        alert("Không tìm thấy dữ liệu hợp lệ trong file!");
+        await supabase.from("students").upsert(imported, { onConflict: "mssv" });
+        alert(`Đã nạp thành công ${imported.length} sinh viên từ file.`);
+        fetchAllData();
       }
     };
     reader.readAsText(file);
   };
 
-  // 4. Tải file form mẫu Excel/CSV
   const handleDownloadSampleTemplate = () => {
     const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + 
       "MSSV,Họ và tên,Lớp\n" +
       "CNDT2411081,Phạm Thái Minh Đăng,CNKT Tự động hóa K2024\n" +
-      "CNDT2411026,Nguyễn Huỳnh Bảo Châu,CNKT Tự động hóa K2024\n" +
-      "CNDT2411025,Đinh Thành Công,CNKT Tự động hóa K2024\n";
+      "CNDT2411026,Nguyễn Huỳnh Bảo Châu,CNKT Tự động hóa K2024\n";
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -286,35 +305,22 @@ export default function AdminDashboard() {
     document.body.removeChild(link);
   };
 
-  // 5. Xóa từng sinh viên
   const handleDeleteSingleStudent = async (mssv: string, name: string) => {
-    if (confirm(`Xác nhận xóa sinh viên: ${name} (MSSV: ${mssv}) khỏi hệ thống?`)) {
-      const { error } = await supabase.from("students").delete().eq("mssv", mssv);
-      if (error) {
-        alert("Lỗi khi xóa: " + error.message);
-      } else {
-        setStudents(students.filter((s) => s.mssv !== mssv));
-      }
+    if (confirm(`Xác nhận xóa sinh viên: ${name} (MSSV: ${mssv})?`)) {
+      await supabase.from("students").delete().eq("mssv", mssv);
+      setStudents(students.filter((s) => s.mssv !== mssv));
     }
   };
 
-  // 6. Xóa tất cả sinh viên
   const handleDeleteAllStudents = async () => {
-    if (students.length === 0) return alert("Danh sách hiện đang trống!");
-    if (confirm("CẢNH BÁO: Bạn có chắc chắn muốn XÓA TOÀN BỘ danh sách sinh viên?")) {
-      if (confirm("Hành động này không thể hoàn tác. Tiếp tục xóa?")) {
-        const { error } = await supabase.from("students").delete().neq("id", 0);
-        if (error) {
-          alert("Lỗi khi xóa: " + error.message);
-        } else {
-          setStudents([]);
-          alert("Đã xóa sạch toàn bộ danh sách sinh viên.");
-        }
-      }
+    if (confirm("CẢNH BÁO: Xác nhận XÓA TOÀN BỘ danh sách sinh viên?")) {
+      await supabase.from("students").delete().neq("id", 0);
+      setStudents([]);
+      alert("Đã xóa sạch toàn bộ danh sách sinh viên.");
     }
   };
 
-  // ================= QUẢN LÝ SỰ KIỆN =================
+  // ================= 3. QUAN LY SU KIEN =================
   const handleSelectCriteria = (selectedCode: string) => {
     setEventCategoryCode(selectedCode);
     const item = EVENT_CRITERIA_OPTIONS.find((c) => c.code === selectedCode);
@@ -327,9 +333,9 @@ export default function AdminDashboard() {
         (pos) => {
           setEventLat(pos.coords.latitude);
           setEventLng(pos.coords.longitude);
-          alert(`Tọa độ GPS hiện tại: ${pos.coords.latitude}, ${pos.coords.longitude}`);
+          alert(`Tọa độ: ${pos.coords.latitude}, ${pos.coords.longitude}`);
         },
-        () => alert("Không thể truy cập vị trí GPS.")
+        () => alert("Không lấy được GPS.")
       );
     }
   };
@@ -337,7 +343,6 @@ export default function AdminDashboard() {
   const handleAddEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     const criteriaItem = EVENT_CRITERIA_OPTIONS.find((c) => c.code === eventCategoryCode);
-
     const newEvent = {
       id: "ev-" + Date.now().toString(),
       title: eventTitle,
@@ -362,38 +367,25 @@ export default function AdminDashboard() {
       fetchAllData();
       setEventTitle("");
       setEventDesc("");
-      setEventTime("");
-      setEventDeadline("");
     }
   };
 
   const handleDeleteSingleEvent = async (id: string, title: string) => {
     if (confirm(`Xác nhận xóa sự kiện: "${title}"?`)) {
-      const { error } = await supabase.from("events").delete().eq("id", id);
-      if (error) {
-        alert("Lỗi khi xóa: " + error.message);
-      } else {
-        setEvents(events.filter((e) => e.id !== id));
-      }
+      await supabase.from("events").delete().eq("id", id);
+      setEvents(events.filter((e) => e.id !== id));
     }
   };
 
   const handleDeleteAllEvents = async () => {
-    if (events.length === 0) return alert("Danh sách sự kiện đang trống!");
-    if (confirm("CẢNH BÁO: Bạn có chắc chắn muốn XÓA TOÀN BỘ tất cả sự kiện?")) {
-      if (confirm("Hành động này không thể hoàn tác. Tiếp tục xóa?")) {
-        const { error } = await supabase.from("events").delete().neq("id", "none");
-        if (error) {
-          alert("Lỗi khi xóa: " + error.message);
-        } else {
-          setEvents([]);
-          alert("Đã xóa toàn bộ sự kiện.");
-        }
-      }
+    if (confirm("CẢNH BÁO: Xóa tất cả sự kiện?")) {
+      await supabase.from("events").delete().neq("id", "none");
+      setEvents([]);
+      alert("Đã xóa sạch sự kiện.");
     }
   };
 
-  // ================= QUẢN LÝ BÀI VIẾT =================
+  // ================= 4. QUAN LY BAI VIET =================
   const handleCoverUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -442,27 +434,16 @@ export default function AdminDashboard() {
 
   const handleDeleteSinglePost = async (id: number, title: string) => {
     if (confirm(`Xác nhận xóa bài viết: "${title}"?`)) {
-      const { error } = await supabase.from("posts").delete().eq("id", id);
-      if (error) {
-        alert("Lỗi khi xóa: " + error.message);
-      } else {
-        setPosts(posts.filter((p) => p.id !== id));
-      }
+      await supabase.from("posts").delete().eq("id", id);
+      setPosts(posts.filter((p) => p.id !== id));
     }
   };
 
   const handleDeleteAllPosts = async () => {
-    if (posts.length === 0) return alert("Danh sách bài viết đang trống!");
-    if (confirm("CẢNH BÁO: Bạn có chắc chắn muốn XÓA TOÀN BỘ bài viết?")) {
-      if (confirm("Toàn bộ bài viết sẽ bị xóa khỏi trang chủ. Tiếp tục xóa?")) {
-        const { error } = await supabase.from("posts").delete().neq("id", 0);
-        if (error) {
-          alert("Lỗi khi xóa: " + error.message);
-        } else {
-          setPosts([]);
-          alert("Đã xóa toàn bộ bài viết.");
-        }
-      }
+    if (confirm("CẢNH BÁO: Xóa tất cả bài viết?")) {
+      await supabase.from("posts").delete().neq("id", 0);
+      setPosts([]);
+      alert("Đã xóa tất cả bài viết.");
     }
   };
 
@@ -470,13 +451,13 @@ export default function AdminDashboard() {
     <main className="min-h-screen bg-slate-100 py-8 px-4 sm:px-6 lg:px-8 font-sans antialiased text-slate-800">
       <div className="max-w-7xl mx-auto">
         
-        {/* HEADER: LOGO BÊN TRÁI + TIÊU ĐỀ TIẾNG VIỆT CÓ DẤU (ĐÃ BỎ DÒNG PHỤ) */}
+        {/* HEADER */}
         <div className="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-4">
             <Link href="/">
               <img
                 src="/logo-doankhoa.png"
-                alt="Logo Đoàn Khoa Cơ Khí CTUT"
+                alt="Logo Đoàn Khoa"
                 className="h-12 sm:h-14 w-auto object-contain cursor-pointer"
               />
             </Link>
@@ -484,6 +465,9 @@ export default function AdminDashboard() {
               <h1 className="text-xl sm:text-2xl font-black text-[#004A52] tracking-tight">
                 BẢNG ĐIỀU KHIỂN QUẢN TRỊ VIÊN
               </h1>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Đang đăng nhập: <strong className="text-[#EE6425]">{currentUser?.fullName}</strong> ({currentUser?.role === "super_admin" ? "Admin Tối Cao" : "Cán Bộ Chi Đoàn"})
+              </p>
             </div>
           </div>
 
@@ -494,7 +478,7 @@ export default function AdminDashboard() {
             <button
               onClick={() => {
                 localStorage.removeItem("ctut_current_user");
-                router.push("/");
+                router.push("/dang-nhap");
               }}
               className="bg-red-50 text-red-600 hover:bg-red-100 text-xs font-bold px-3.5 py-1.5 rounded-lg transition"
             >
@@ -503,7 +487,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* CÁC TAB ĐIỀU HƯỚNG */}
+        {/* TABS */}
         <div className="flex flex-wrap gap-2 mb-6">
           <button
             onClick={() => setActiveTab("students")}
@@ -515,6 +499,20 @@ export default function AdminDashboard() {
           >
             Quản lý Sinh viên ({students.length})
           </button>
+
+          {currentUser?.role === "super_admin" && (
+            <button
+              onClick={() => setActiveTab("officers")}
+              className={`px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition ${
+                activeTab === "officers"
+                  ? "bg-[#004A52] text-white shadow"
+                  : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
+              }`}
+            >
+              Cán bộ BCH Chi đoàn ({officers.length})
+            </button>
+          )}
+
           <button
             onClick={() => setActiveTab("events")}
             className={`px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition ${
@@ -525,6 +523,7 @@ export default function AdminDashboard() {
           >
             Sự kiện và Điểm danh ({events.length})
           </button>
+
           <button
             onClick={() => setActiveTab("posts")}
             className={`px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition ${
@@ -537,11 +536,9 @@ export default function AdminDashboard() {
           </button>
         </div>
 
-        {/* ================= TAB 1: QUẢN LÝ SINH VIÊN (3 CHẾ ĐỘ NHẬP + MẪU EXCEL) ================= */}
+        {/* ================= TAB 1: QUAN LY SINH VIEN ================= */}
         {activeTab === "students" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            
-            {/* KHỐI NHẬP LIỆU BÊN TRÁI */}
             <div className="lg:col-span-5 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
               <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                 <h3 className="text-sm font-bold text-[#004A52]">Thêm sinh viên vào hệ thống</h3>
@@ -554,7 +551,6 @@ export default function AdminDashboard() {
                 </button>
               </div>
 
-              {/* CHỌN PHƯƠNG THỨC NHẬP */}
               <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 rounded-xl text-xs font-bold text-slate-600">
                 <button
                   type="button"
@@ -579,7 +575,6 @@ export default function AdminDashboard() {
                 </button>
               </div>
 
-              {/* 1. DÁN TỪ EXCEL */}
               {studentInputMode === "paste" && (
                 <div className="space-y-2">
                   <p className="text-[11px] text-slate-500">Quét chọn 3 cột (MSSV, Họ tên, Lớp) từ file Excel rồi dán vào đây:</p>
@@ -600,7 +595,6 @@ export default function AdminDashboard() {
                 </div>
               )}
 
-              {/* 2. NHẬP THỦ CÔNG */}
               {studentInputMode === "manual" && (
                 <form onSubmit={handleAddManualStudent} className="space-y-3">
                   <div>
@@ -644,11 +638,9 @@ export default function AdminDashboard() {
                 </form>
               )}
 
-              {/* 3. TẢI FILE EXCEL/CSV */}
               {studentInputMode === "file" && (
                 <div className="space-y-3 p-4 bg-slate-50 border border-dashed border-slate-300 rounded-2xl text-center">
                   <p className="text-xs font-bold text-slate-700">Chọn file danh sách sinh viên (.csv / .txt)</p>
-                  <p className="text-[11px] text-slate-500">Hãy dùng form mẫu để đảm bảo đúng định dạng cột.</p>
                   <input
                     type="file"
                     accept=".csv, .txt"
@@ -659,7 +651,6 @@ export default function AdminDashboard() {
               )}
             </div>
 
-            {/* DANH SÁCH SINH VIÊN BÊN PHẢI */}
             <div className="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm overflow-x-auto">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-slate-200">
                 <h2 className="text-base font-bold text-[#004A52]">
@@ -716,7 +707,107 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* ================= TAB 2: QUẢN LÝ SỰ KIỆN ================= */}
+        {/* ================= TAB ĐẶC QUYỀN: TẠO TÀI KHOẢN BCH CHI ĐOÀN ================= */}
+        {activeTab === "officers" && currentUser?.role === "super_admin" && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+              <h2 className="text-base font-bold text-[#004A52]">Cấp tài khoản cho BCH Chi đoàn / Lớp</h2>
+              <form onSubmit={handleCreateOfficer} className="space-y-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Tên tài khoản đăng nhập *</label>
+                  <input
+                    type="text"
+                    required
+                    value={officerUser}
+                    onChange={(e) => setOfficerUser(e.target.value)}
+                    placeholder="VD: bch_tdhk24, bithi_ck23..."
+                    className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none focus:border-[#004A52]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Họ tên Cán bộ / Chức vụ *</label>
+                  <input
+                    type="text"
+                    required
+                    value={officerName}
+                    onChange={(e) => setOfficerName(e.target.value)}
+                    placeholder="VD: Nguyễn Văn A (Bí thư Chi đoàn)"
+                    className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none focus:border-[#004A52]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Thuộc Chi đoàn / Lớp *</label>
+                  <input
+                    type="text"
+                    required
+                    value={officerClass}
+                    onChange={(e) => setOfficerClass(e.target.value)}
+                    placeholder="VD: CNKT Tự động hóa K2024"
+                    className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none focus:border-[#004A52]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Mật khẩu cấp *</label>
+                  <input
+                    type="password"
+                    required
+                    value={officerPass}
+                    onChange={(e) => setOfficerPass(e.target.value)}
+                    placeholder="Mật khẩu cán bộ"
+                    className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none focus:border-[#004A52]"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="w-full bg-[#004A52] hover:bg-[#00343a] text-white font-bold py-2.5 rounded-xl transition text-xs uppercase shadow"
+                >
+                  Cấp tài khoản Cán bộ Chi đoàn
+                </button>
+              </form>
+            </div>
+
+            <div className="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm overflow-x-auto">
+              <h2 className="text-base font-bold text-[#004A52] mb-4">
+                Danh sách cán bộ BCH Chi đoàn đã cấp ({officers.length})
+              </h2>
+              {officers.length === 0 ? (
+                <p className="text-xs text-slate-400 py-4">Chưa có tài khoản cán bộ Chi đoàn nào.</p>
+              ) : (
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                    <tr>
+                      <th className="p-2.5">Tài khoản</th>
+                      <th className="p-2.5">Cán bộ</th>
+                      <th className="p-2.5">Chi đoàn</th>
+                      <th className="p-2.5">Mật khẩu</th>
+                      <th className="p-2.5 text-center">Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {officers.map((off) => (
+                      <tr key={off.id} className="hover:bg-slate-50">
+                        <td className="p-2.5 font-bold text-[#007A87]">{off.username}</td>
+                        <td className="p-2.5 font-medium text-slate-800">{off.full_name}</td>
+                        <td className="p-2.5 text-slate-600">{off.branch_class}</td>
+                        <td className="p-2.5 font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded inline-block my-1">{off.password}</td>
+                        <td className="p-2.5 text-center">
+                          <button
+                            onClick={() => handleDeleteOfficer(off.id, off.full_name)}
+                            className="text-red-600 hover:text-red-800 font-bold hover:underline"
+                          >
+                            Xóa
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ================= TAB 3: SU KIEN ================= */}
         {activeTab === "events" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
@@ -938,7 +1029,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* ================= TAB 3: QUẢN LÝ BÀI VIẾT ================= */}
+        {/* ================= TAB 4: BAI VIET ================= */}
         {activeTab === "posts" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
@@ -1031,7 +1122,7 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* POPUP MÃ QR TRÌNH CHIẾU */}
+      {/* POPUP MA QR */}
       {activeQrEvent && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-xl w-full p-8 shadow-2xl border-4 border-[#EE6425] text-center">
