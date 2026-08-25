@@ -13,16 +13,16 @@ const DRL_SECTIONS = [
     maxPoints: 20,
     items: [
       { id: "1_1", title: "1. Điểm trung bình học tập tích lũy thang điểm 4", subtext: "Loại Trung bình: 2đ | Khá: 3đ | Giỏi: 4đ | Xuất sắc: 5đ", max: 5, maxLabel: "Tối đa 5 đ" },
-      { id: "1_2", title: "2. Giấy chứng nhận tham gia lớp chuyên đề kỹ năng học tập", subtext: "Cộng 3 điểm cho học kỳ có chứng nhận kỹ năng", max: 3, maxLabel: "Tối đa 3 đ" },
-      { id: "1_3", title: "3. Hội thảo hoặc Tọa đàm do Khoa hoặc Trường tổ chức", subtext: "Tham gia trực tiếp: 3 đ/lần | Tham gia trực tuyến: 1 đ/lần", max: 3, maxLabel: "Tối đa 3 đ" },
-      { id: "1_4", title: "4. Cuộc thi học thuật cấp Khoa hoặc Trường tổ chức", subtext: "Cổ vũ: 1đ | BTC: 2đ | Tham gia: 3đ | Giải: 4 đến 7 đ/lần", max: 7, maxLabel: "Tối đa 7 đ" },
+      { id: "1_2", title: "2. Giấy chứng nhận tham gia lớp chuyên đề kỹ năng học tập", subtext: "Có giấy xác nhận, chứng nhận, giấy khen", max: 3, maxLabel: "Tối đa 3 đ" },
+      { id: "1_3", title: "3. Hội thảo hoặc Tọa đàm do Khoa hoặc Trường tổ chức", subtext: "Trực tiếp: 3 đ/lần | Trực tuyến: 1 đ/lần", max: 3, maxLabel: "Tối đa 3 đ" },
+      { id: "1_4", title: "4. Các cuộc thi học thuật cấp Khoa hoặc Trường tổ chức", subtext: "Cổ vũ: 1đ | BTC: 2đ | Tham gia: 3đ | Giải: 4 đến 7 đ/lần", max: 7, maxLabel: "Tối đa 7 đ" },
       { id: "1_5", title: "5. Các cuộc thi học thuật do đơn vị bên ngoài trường tổ chức", subtext: "Cổ vũ: 2đ | BTC: 3đ | Tham gia: 4đ | Giải: 5 đến 8 đ/lần", max: 8, maxLabel: "Tối đa 8 đ" },
-      { id: "1_6", title: "6. Báo cáo khoa học cấp Khoa", subtext: "Đạt loại Trung bình: 3đ | Khá: 4đ | Tốt: 6đ | Xuất sắc: 8 đ/lần", max: 8, maxLabel: "Tối đa 8 đ" },
-      { id: "1_7", title: "7. Tham gia đề tài Nghiên cứu khoa học Trường", subtext: "Đạt loại Trung bình: 5đ | Khá: 6đ | Tốt: 8đ | Xuất sắc: 10 đ/lần", max: 10, maxLabel: "Tối đa 10 đ" },
-      { id: "1_8", title: "8. Viết bài báo khoa học trong và ngoài Trường", subtext: "Đăng kỷ yếu: 5đ | Tạp chí khoa học: 8 đ/lần", max: 8, maxLabel: "Tối đa 8 đ" },
+      { id: "1_6", title: "6. Báo cáo khoa học cấp Khoa", subtext: "Trung bình: 3đ | Khá: 4đ | Tốt: 6đ | Xuất sắc: 8 đ/lần", max: 8, maxLabel: "Tối đa 8 đ" },
+      { id: "1_7", title: "7. Tham gia đề tài Nghiên cứu khoa học Trường", subtext: "Trung bình: 5đ | Khá: 6đ | Tốt: 8đ | Xuất sắc: 10 đ/lần", max: 10, maxLabel: "Tối đa 10 đ" },
+      { id: "1_8", title: "8. Viết bài báo khoa học trong và ngoài Trường", subtext: "Kỷ yếu: 5đ | Tạp chí khoa học: 8 đ/lần", max: 8, maxLabel: "Tối đa 8 đ" },
       { id: "1_9", title: "9. Các cuộc thi khởi nghiệp do Trường tổ chức", subtext: "Cổ vũ: 1đ | BTC: 2đ | Tham gia: 3đ | Giải: 4 đến 7 đ/lần", max: 7, maxLabel: "Tối đa 7 đ" },
       { id: "1_10", title: "10. Các cuộc thi khởi nghiệp do đơn vị ngoài Trường tổ chức", subtext: "Cổ vũ: 2đ | BTC: 3đ | Tham gia: 4đ | Giải: 5 đến 8 đ/lần", max: 8, maxLabel: "Tối đa 8 đ" },
-      { id: "1_11", title: "11. Thành viên các câu lạc bộ học thuật cấp Khoa, Trường", subtext: "Cộng 2 điểm mỗi học kỳ tham gia CLB học thuật", max: 2, maxLabel: "Tối đa 2 đ" },
+      { id: "1_11", title: "11. Thành viên các câu lạc bộ học thuật cấp Khoa, Trường", subtext: "Minh chứng thành viên CLB", max: 2, maxLabel: "Tối đa 2 đ" },
       { id: "1_12", title: "12. Các hoạt động học tập khác", subtext: "Tham gia trực tiếp: 3 đ/lần | Tham gia trực tuyến: 1 đ/lần", max: 3, maxLabel: "Tối đa 3 đ" },
     ],
   },
@@ -127,7 +127,7 @@ export default function CongDRLPage() {
   const [itemProofs, setItemProofs] = useState<{ [key: string]: string }>({});
   const [uploadingItemId, setUploadingItemId] = useState<string | null>(null);
 
-  // Sinh viên tự nhập trực tiếp số điểm đạt được cho từng mục
+  // Sinh viên tự nhập trực tiếp số điểm đạt được
   const [scores, setScores] = useState<{ [key: string]: number }>({
     "1_1": 3, "2_1": 5, "2_2": 5, "2_3": 5, "2_4": 5, "2_5": 5, "2_6": 5, "2_7": 5, "2_8": 5,
     "3_1": 3, "3_2": 3, "4_1": 10, "5_1": 3,
@@ -218,11 +218,11 @@ export default function CongDRLPage() {
     checkSemesterStatus(sem);
   };
 
-  // Cho phép sinh viên nhập trực tiếp số điểm, tự động khống chế không vượt quá mức tối đa của tiểu mục
-  const handleDirectScoreChange = (item: any, val: number) => {
+  // Cho phép sinh viên tự nhập điểm trực tiếp
+  const handleDirectScoreChange = (itemId: string, val: number) => {
     if (!isSemesterOpen) return;
-    const safeVal = Math.min(Math.max(0, val || 0), item.max);
-    setScores((prev) => ({ ...prev, [item.id]: safeVal }));
+    const safeVal = Math.max(0, val || 0);
+    setScores((prev) => ({ ...prev, [itemId]: safeVal }));
   };
 
   const handleFileUploadTab1 = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -610,7 +610,7 @@ export default function CongDRLPage() {
                 PHIẾU ĐÁNH GIÁ ĐIỂM RÈN LUYỆN ({selectedSemester})
               </h2>
               <p className="text-xs text-slate-500 mt-1">
-                Sinh viên tự nhập trực tiếp số điểm đạt được cho từng tiểu mục (hệ thống tự động khống chế không vượt quá mức tối đa của tiêu chí).
+                Sinh viên tự nhập trực tiếp tổng số điểm đạt được cho từng tiểu mục (hệ thống tự động kiểm tra tổng điểm toàn phần không vượt quá giới hạn quy định).
               </p>
             </div>
 
@@ -620,7 +620,7 @@ export default function CongDRLPage() {
                 return (
                   <div key={section.id} className="border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
                     <div className="bg-slate-100 p-3.5 flex justify-between items-center text-xs font-black text-[#004A52]">
-                      <span>{section.title} (Tối đa {section.maxPoints} điểm)</span>
+                      <span>{section.title} (Điểm tối đa phần này là {section.maxPoints} điểm)</span>
                       <span className="bg-white px-3 py-1 rounded-xl border border-slate-200 text-[#EE6425]">
                         Tổng phần: {sectionScore} / {section.maxPoints} đ
                       </span>
@@ -631,7 +631,7 @@ export default function CongDRLPage() {
                         <thead>
                           <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold text-[11px]">
                             <th className="py-2.5 px-4 w-4/12">Nội dung đánh giá</th>
-                            <th className="py-2.5 px-2 text-center w-24">Mức tối đa</th>
+                            <th className="py-2.5 px-2 text-center w-24">Quy định</th>
                             <th className="py-2.5 px-2 text-center w-28">Nhập Số Điểm</th>
                             <th className="py-2.5 px-4 text-center w-4/12">Minh chứng đính kèm</th>
                           </tr>
@@ -655,9 +655,8 @@ export default function CongDRLPage() {
                                       type="number"
                                       disabled={!isSemesterOpen}
                                       min="0"
-                                      max={item.max}
                                       value={currentScore}
-                                      onChange={(e) => handleDirectScoreChange(item, Number(e.target.value))}
+                                      onChange={(e) => handleDirectScoreChange(item.id, Number(e.target.value))}
                                       className="w-16 border border-slate-300 rounded-lg px-2 py-1.5 text-center font-bold text-[#EE6425] outline-none disabled:bg-slate-100"
                                     />
                                     <span className="text-[10px] text-slate-400 mt-1">Đã nhập: {currentScore} đ</span>
