@@ -16,69 +16,94 @@ function LoginForm() {
   const [errorMsg, setErrorMsg] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Xử lý kiểm tra và đối chiếu email sau khi xác thực từ Google
+  // Kiem tra callback tu Google sau khi nguoi dung chon tai khoan
   useEffect(() => {
-    const verifyGoogleUserAgainstDatabase = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (data?.user?.email) {
-        setLoading(true);
-        const userEmail = data.user.email.toLowerCase().trim();
+    const handleAuthCallback = async () => {
+      // Chi kiem tra neu tren URL co hash token tra ve tu Google hoac ma xac thuc
+      const hasAuthHash = window.location.hash.includes("access_token") || window.location.search.includes("code");
+      if (!hasAuthHash) return;
 
-        // 1. Trích xuất MSSV dự phòng từ email nếu có (VD: pmdangcndt2411081 -> CNDT2411081)
-        const match = userEmail.match(/(cndt|ck|tdh|cd)\d+/i);
-        const extractedMssv = match ? match[0].toUpperCase() : "";
+      setLoading(true);
+      setErrorMsg("");
 
-        // 2. ĐỐI CHIẾU TRỰC TIẾP TRONG BẢNG STUDENTS (Phải do Admin tạo trước)
-        let query = supabase.from("students").select("*");
-        if (extractedMssv) {
-          query = query.or(`email.ilike.${userEmail},mssv.eq.${extractedMssv}`);
-        } else {
-          query = query.ilike("email", userEmail);
-        }
-
-        const { data: studentList, error: fetchErr } = await query;
-
-        if (fetchErr || !studentList || studentList.length === 0) {
-          // KHÔNG CÓ TRONG DANH SÁCH DO ADMIN TẠO -> ĐĂNG XUẤT VÀ TỪ CHỐI TRUY CẬP
-          await supabase.auth.signOut();
-          localStorage.removeItem("ctut_current_user");
-          setErrorMsg(
-            `Tài khoản (${userEmail}) chưa được Quản trị viên hoặc BCH Chi đoàn thêm vào hệ thống. Vui lòng liên hệ cán bộ để được cấp quyền đăng nhập!`
-          );
-          setLoading(false);
-          return;
-        }
-
-        // 3. TÌM THẤY SINH VIÊN HỢP LỆ -> LẤY ĐÚNG THÔNG TIN DO ADMIN ĐÃ NẠP
-        const verifiedStudent = studentList[0];
-        const loggedInUser = {
-          mssv: verifiedStudent.mssv,
-          fullName: verifiedStudent.full_name,
-          studentClass: verifiedStudent.student_class,
-          email: verifiedStudent.email || userEmail,
-          role: "student",
-        };
-
-        localStorage.setItem("ctut_current_user", JSON.stringify(loggedInUser));
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error || !session?.user?.email) {
         setLoading(false);
-        router.push(redirectUrl);
+        return;
       }
+
+      const userEmail = session.user.email.toLowerCase().trim();
+      
+      // Trich xuat MSSV tu email (neu co, VD: pmdangcndt2411081 -> CNDT2411081)
+      const match = userEmail.match(/(cndt|ck|tdh|cd)\d+/i);
+      const extractedMssv = match ? match[0].toUpperCase() : "";
+
+      // DOI CHIEU CHAT CHE TRONG BANG STUDENTS DO ADMIN TAO
+      let query = supabase.from("students").select("*");
+      if (extractedMssv) {
+        query = query.or(`email.ilike.${userEmail},mssv.eq.${extractedMssv}`);
+      } else {
+        query = query.ilike("email", userEmail);
+      }
+
+      const { data: studentList, error: fetchErr } = await query;
+
+      if (fetchErr || !studentList || studentList.length === 0) {
+        // KHONG CO TRONG DANH SACH -> HUY PHIEN DANG NHAP GOOGLE NGAY LAP TUC
+        await supabase.auth.signOut();
+        localStorage.removeItem("ctut_current_user");
+        
+        // Xoa hash tren URL de tranh reload lai
+        window.history.replaceState(null, "", window.location.pathname);
+
+        setErrorMsg(
+          `Tài khoản (${userEmail}) chưa được Quản trị viên hoặc BCH Chi đoàn thêm vào hệ thống. Vui lòng liên hệ cán bộ lớp để được cấp quyền!`
+        );
+        setLoading(false);
+        return;
+      }
+
+      // HOP LE -> DANG NHAP THANH CONG
+      const validStudent = studentList[0];
+      const loggedInUser = {
+        mssv: validStudent.mssv,
+        fullName: validStudent.full_name,
+        studentClass: validStudent.student_class,
+        email: validStudent.email || userEmail,
+        role: "student",
+      };
+
+      localStorage.setItem("ctut_current_user", JSON.stringify(loggedInUser));
+      
+      // Xoa hash tren URL
+      window.history.replaceState(null, "", window.location.pathname);
+      setLoading(false);
+      router.push(redirectUrl);
     };
 
-    verifyGoogleUserAgainstDatabase();
+    handleAuthCallback();
   }, [redirectUrl, router]);
 
-  // Xử lý chuyển hướng sang Google OAuth
+  // Dang nhap Google bat buoc hien bang chon tai khoan
   const handleGoogleLogin = async () => {
     setErrorMsg("");
     setLoading(true);
     try {
+      // Dang xuat phien cu truoc khi mo bang chon tai khoan moi
+      await supabase.auth.signOut();
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: window.location.origin + "/dang-nhap?redirect=" + encodeURIComponent(redirectUrl),
+          queryParams: {
+            prompt: "select_account",
+            access_type: "offline",
+          },
         },
       });
+
       if (error) {
         setErrorMsg("Lỗi xác thực Google: " + error.message);
         setLoading(false);
@@ -89,7 +114,7 @@ function LoginForm() {
     }
   };
 
-  // Xử lý đăng nhập tài khoản / mật khẩu
+  // Dang nhap bang MSSV / Tai khoan Admin
   const handleAccountLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
@@ -98,7 +123,7 @@ function LoginForm() {
     const cleanUser = username.trim();
     const cleanPass = password.trim();
 
-    // 1. Phân quyền Quản trị / BCH Chi đoàn
+    // 1. Phân quyền Admin & BCH Chi đoàn
     if (loginRole === "admin") {
       if (cleanUser.toLowerCase() === "adminktck" && cleanPass === "doankhoaktck") {
         const adminUser = {
@@ -140,7 +165,7 @@ function LoginForm() {
       return;
     }
 
-    // 2. Phân quyền Sinh viên (MSSV hoặc Email)
+    // 2. Phân quyền Sinh viên
     try {
       let query = supabase.from("students").select("*");
       if (cleanUser.includes("@")) {
@@ -183,7 +208,6 @@ function LoginForm() {
 
   return (
     <div className="space-y-4">
-      {/* TAB CHUYỂN ĐỔI VAI TRÒ */}
       <div className="grid grid-cols-2 p-1 bg-slate-100 rounded-2xl text-xs font-bold">
         <button
           type="button"
@@ -194,9 +218,7 @@ function LoginForm() {
             setPassword("");
           }}
           className={`py-2 rounded-xl transition ${
-            loginRole === "student"
-              ? "bg-[#EE6425] text-white shadow-xs"
-              : "text-slate-600 hover:text-slate-900"
+            loginRole === "student" ? "bg-[#EE6425] text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
           }`}
         >
           Sinh viên
@@ -210,9 +232,7 @@ function LoginForm() {
             setPassword("");
           }}
           className={`py-2 rounded-xl transition ${
-            loginRole === "admin"
-              ? "bg-[#004A52] text-white shadow-xs"
-              : "text-slate-600 hover:text-slate-900"
+            loginRole === "admin" ? "bg-[#004A52] text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
           }`}
         >
           BCH / Quản trị
@@ -225,7 +245,6 @@ function LoginForm() {
         </div>
       )}
 
-      {/* NÚT ĐĂNG NHẬP GOOGLE KÈM XÁC THỰC DANH SÁCH */}
       {loginRole === "student" && (
         <div className="space-y-3">
           <button
@@ -235,72 +254,45 @@ function LoginForm() {
             className="w-full bg-white hover:bg-slate-50 text-slate-700 font-bold py-2.5 px-4 rounded-xl border border-slate-300 transition text-xs flex items-center justify-center gap-3 shadow-xs active:scale-95"
           >
             <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
-              <path
-                fill="#4285F4"
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-              />
-              <path
-                fill="#34A853"
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-              />
-              <path
-                fill="#EA4335"
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-              />
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
             </svg>
             <span>Đăng nhập bằng Google sinh viên (@student.ctuet.edu.vn)</span>
           </button>
 
           <div className="flex items-center my-3">
             <div className="flex-grow border-t border-slate-200"></div>
-            <span className="flex-shrink mx-3 text-[11px] text-slate-400 font-semibold uppercase">
-              Hoặc dùng mã sinh viên
-            </span>
+            <span className="flex-shrink mx-3 text-[11px] text-slate-400 font-semibold uppercase">Hoặc dùng mã sinh viên</span>
             <div className="flex-grow border-t border-slate-200"></div>
           </div>
         </div>
       )}
 
-      {/* FORM NHẬP THỦ CÔNG */}
       <form onSubmit={handleAccountLogin} className="space-y-3.5">
         <div>
           <label className="block text-xs font-bold text-slate-700 mb-1">
-            {loginRole === "admin"
-              ? "Tên tài khoản Quản trị / BCH Chi đoàn *"
-              : "Mã số sinh viên (MSSV) hoặc Email *"}
+            {loginRole === "admin" ? "Tên tài khoản Quản trị / BCH Chi đoàn *" : "Mã số sinh viên (MSSV) hoặc Email *"}
           </label>
           <input
             type="text"
             required
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            placeholder={
-              loginRole === "admin"
-                ? "VD: adminktck hoặc tài khoản Chi đoàn"
-                : "VD: CNDT2411081"
-            }
+            placeholder={loginRole === "admin" ? "VD: adminktck hoặc tài khoản Chi đoàn" : "VD: CNDT2411081"}
             className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#EE6425]"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-slate-700 mb-1">
-            Mật khẩu *
-          </label>
+          <label className="block text-xs font-bold text-slate-700 mb-1">Mật khẩu *</label>
           <input
             type="password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder={
-              loginRole === "admin"
-                ? "Mật khẩu quản trị"
-                : "Mật khẩu (Mặc định: 3 số cuối MSSV)"
-            }
+            placeholder={loginRole === "admin" ? "Mật khẩu quản trị" : "Mật khẩu (Mặc định: 3 số cuối MSSV)"}
             className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#EE6425]"
           />
         </div>
@@ -309,16 +301,10 @@ function LoginForm() {
           type="submit"
           disabled={loading}
           className={`w-full text-white font-bold py-3 rounded-xl transition text-xs uppercase shadow tracking-wider disabled:bg-slate-300 ${
-            loginRole === "admin"
-              ? "bg-[#004A52] hover:bg-[#00343a]"
-              : "bg-[#EE6425] hover:bg-[#d85216]"
+            loginRole === "admin" ? "bg-[#004A52] hover:bg-[#00343a]" : "bg-[#EE6425] hover:bg-[#d85216]"
           }`}
         >
-          {loading
-            ? "Đang xác thực dữ liệu..."
-            : loginRole === "admin"
-            ? "Đăng nhập Bảng Quản Trị"
-            : "Đăng nhập Sinh viên"}
+          {loading ? "Đang xác thực dữ liệu..." : loginRole === "admin" ? "Đăng nhập Bảng Quản Trị" : "Đăng nhập Sinh viên"}
         </button>
       </form>
     </div>
