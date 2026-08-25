@@ -557,13 +557,13 @@ export default function AdminDashboard() {
 
                 <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#004A52]">Ghim GPS Google Maps:</span>
+                    <span className="text-xs font-bold text-[#004A52]"> Ghim GPS Google Maps:</span>
                     <button
                       type="button"
                       onClick={handleGetCurrentGps}
                       className="text-[11px] bg-teal-50 text-[#007A87] hover:bg-teal-100 font-bold px-2.5 py-1 rounded-lg border border-teal-200"
                     >
-                      Lấy GPS tại đây
+                      🎯 Lấy GPS tại đây
                     </button>
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-xs font-mono">
@@ -631,7 +631,7 @@ export default function AdminDashboard() {
                             </span>
                           </div>
                           <h3 className="text-sm font-bold text-slate-800 mt-1">{ev.title}</h3>
-                          <p className="text-xs text-slate-500 mt-0.5">{ev.time} • {ev.location}</p>
+                          <p className="text-xs text-slate-500 mt-0.5">⏰ {ev.time} • 📍 {ev.location}</p>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
                           <button
