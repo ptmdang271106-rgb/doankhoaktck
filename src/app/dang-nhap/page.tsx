@@ -50,20 +50,17 @@ function AuthForm() {
     <div className="max-w-md w-full bg-white rounded-3xl shadow-xl border border-orange-100 p-6 sm:p-8">
       {/* LOGO & TIÊU ĐỀ */}
       <div className="text-center mb-6">
-        <Link href="/" className="inline-block mb-3">
-          <Image
-            src="/logo-doankhoa.png"
-            alt="Logo Khoa Cơ khí"
-            width={64}
-            height={64}
-            className="mx-auto h-16 w-auto object-contain"
-            priority
-          />
-        </Link>
-        <h1 className="text-2xl sm:text-[26px] font-black text-[#004A52] tracking-tight">
-          CỔNG DỊCH VỤ SINH VIÊN
-        </h1>
-      </div>
+  <Link href="/" className="inline-block mb-4">
+    <img
+      src="/logo-doankhoa.png"
+      alt="Tuổi trẻ Khoa Kỹ thuật Cơ khí CTUT"
+      className="h-12 sm:h-14 w-auto max-w-[280px] sm:max-w-[320px] object-contain mx-auto"
+    />
+  </Link>
+  <h1 className="text-2xl sm:text-[26px] font-black text-[#004A52] tracking-tight">
+    CỔNG DỊCH VỤ SINH VIÊN
+  </h1>
+</div>
 
       {/* CHUYỂN TABS */}
       <div className="flex bg-slate-100/80 p-1 rounded-2xl mb-6 text-xs sm:text-sm font-bold">
