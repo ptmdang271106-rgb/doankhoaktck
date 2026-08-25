@@ -39,7 +39,7 @@ export default function CTUTYouthPortal() {
             <div className="col-span-12 lg:col-span-4 flex items-center justify-center py-1">
               <Link href="/">
                 <img
-                  src="/logodk.png"
+                  src="/logo-doankhoa.png"
                   alt="Tuổi trẻ Khoa Kỹ thuật Cơ khí - Trường Đại học Kỹ thuật - Công nghệ Cần Thơ"
                   className="h-10 sm:h-12 w-auto max-w-full object-contain block mx-auto cursor-pointer"
                 />
