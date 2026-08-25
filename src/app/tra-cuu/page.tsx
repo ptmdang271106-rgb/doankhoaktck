@@ -532,6 +532,71 @@ const DRL_SECTIONS = [
   },
 ];
 
+// Danh sách tra cứu mức điểm tối đa cho từng mục dropdown
+const CATEGORY_MAX_POINTS: { [key: string]: number } = {
+  "I.1. Điểm trung bình học tập tích lũy hệ 4": 5,
+  "I.2. Chứng nhận lớp chuyên đề kỹ năng học tập": 3,
+  "I.3. Hội thảo hoặc Tọa đàm Khoa/Trường": 3,
+  "I.4. Cuộc thi học thuật cấp Khoa hoặc Trường": 7,
+  "I.5. Cuộc thi học thuật bên ngoài Trường": 8,
+  "I.6. Báo cáo khoa học cấp Khoa": 8,
+  "I.7. Đề tài Nghiên cứu khoa học Trường": 10,
+  "I.8. Viết bài báo khoa học trong và ngoài Trường": 8,
+  "I.9. Cuộc thi khởi nghiệp do Trường tổ chức": 7,
+  "I.10. Cuộc thi khởi nghiệp đơn vị ngoài tổ chức": 8,
+  "I.11. Thành viên CLB học thuật cấp Khoa, Trường": 2,
+  "I.12. Các hoạt động học tập khác": 3,
+  "II.1. Ý thức, thái độ trong học tập": 5,
+  "II.2. Chấp hành nội quy, quy chế Nhà trường": 5,
+  "II.3. Thực hiện quy chế kỳ thi, cuộc thi": 5,
+  "II.4. Chấp hành quy định của thư viện": 5,
+  "II.5. Chấp hành quy định phòng học, xưởng thực hành": 5,
+  "II.6. Thực hiện đăng ký ngoại trú": 5,
+  "II.7. Mặc đồng phục đúng quy định": 5,
+  "II.8. Sinh hoạt lớp với Cố vấn học tập": 5,
+  "III.1. Hoạt động bắt buộc do Khoa/Trường tổ chức": 3,
+  "III.2. Đại hội Chi Đoàn/Chi Hội, sinh hoạt Chi Đoàn": 3,
+  "III.3. Báo cáo chuyên đề do Trường tổ chức": 4,
+  "III.4. Ngoại khóa/Cuộc thi cấp CLB, Khoa, Trường": 7,
+  "III.5. Ngoại khóa/Cuộc thi cấp Thành phố trở lên": 8,
+  "III.6. Được kết nạp Đoàn": 5,
+  "III.7. Được kết nạp Đảng": 8,
+  "III.8. Hoạt động do đơn vị, Đoàn, Hội điều động": 4,
+  "III.9. Thành viên CLB/Đội/Nhóm Đoàn - Hội": 2,
+  "III.10. Hoạt động Học tập các bài lý luận chính trị": 4,
+  "III.11. Đền ơn đáp nghĩa, Thắp nến tri ân": 3,
+  "III.12. Hoạt động lao động tình nguyện tại Trường": 3,
+  "III.13. Khen thưởng cá nhân trong hoạt động phong trào": 7,
+  "III.14. Tập thể được khen thưởng phong trào": 1,
+  "III.15. Các hoạt động phong trào khác": 3,
+  "IV.1. Chấp hành luật pháp, quy định Nhà nước": 10,
+  "IV.2. Giúp đỡ người yếu thế, hành vi tốt có xác nhận": 5,
+  "IV.3. Biểu dương, khen thưởng hoạt động xã hội ngoài trường": 5,
+  "IV.4. Giao lưu các CLB, Đội, Nhóm trực thuộc": 5,
+  "IV.5. Chương trình Tư vấn tuyển sinh": 5,
+  "IV.6. Công tác nhập học tân sinh viên": 5,
+  "IV.7. Khám sức khỏe sinh viên đầu khóa": 5,
+  "IV.8. Công tác Ngày hội việc làm": 5,
+  "IV.9. Công tác tổ chức Lễ Tốt nghiệp": 5,
+  "IV.10. Công tác kiểm tra hồ sơ sinh viên": 5,
+  "IV.11. Tham gia các phiên giao dịch việc làm": 3,
+  "IV.12. Hiến máu tình nguyện": 10,
+  "IV.13. Chương trình Xuân tình nguyện": 5,
+  "IV.14. Chiến dịch tình nguyện Mùa hè xanh": 7,
+  "IV.15. Chương trình Ngày Chủ nhật xanh": 5,
+  "IV.16. Chương trình Thứ Bảy tình nguyện": 5,
+  "IV.17. Chương trình Chào đón tân sinh viên": 5,
+  "IV.18. Hoạt động trách nhiệm xã hội, phát triển bền vững": 3,
+  "V.1. Tham gia tích cực phong trào Lớp, Đoàn, Hội": 3,
+  "V.2. Hoàn thành tốt nhiệm vụ cán bộ Lớp, Chi đoàn, CLB": 5,
+  "V.3. Sinh viên đạt giải học tập, Nghiên cứu khoa học": 7,
+  "V.4. Bằng khen UBND Tỉnh/Thành phố hoặc tương đương": 5,
+  "V.5. Sinh viên 5 tốt cấp Trường, Đoàn viên tiêu biểu": 6,
+  "V.6. Sinh viên 5 tốt cấp Thành/TW, giải thưởng Sao Tháng Giêng": 10,
+  "V.7. Đạt danh hiệu Đoàn viên ưu tú": 6,
+  "V.8. Giấy khen tập thể của Đoàn": 2,
+};
+
 export default function CongDRLPage() {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -543,10 +608,11 @@ export default function CongDRLPage() {
 
   // Form nộp minh chứng ngoài khoa
   const [proofTitle, setProofTitle] = useState("");
-  const [proofCategory, setProofCategory] = useState("I.1. Sinh viên có điểm trung bình học tập tích lũy với thang điểm 4");
-  const [proofPoints, setProofPoints] = useState<number>(3);
+  const [proofCategory, setProofCategory] = useState("I.1. Điểm trung bình học tập tích lũy hệ 4");
+  const [proofPoints, setProofPoints] = useState<number>(5);
   const [proofUrl, setProofUrl] = useState("");
   const [submittingProof, setSubmittingProof] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(false);
 
   // Điểm tự chấm theo từng ID chi tiết { "1_1": 3, "2_1": 5, ... }
   const [scores, setScores] = useState<{ [key: string]: number }>({
@@ -582,7 +648,6 @@ export default function CongDRLPage() {
   const loadData = async (mssv: string) => {
     setLoading(true);
     try {
-      // 1. Lấy danh sách minh chứng & điểm danh
       const { data: proofData } = await supabase
         .from("proofs")
         .select("*")
@@ -591,7 +656,6 @@ export default function CongDRLPage() {
 
       if (proofData) setProofs(proofData);
 
-      // 2. Lấy tình trạng phiếu ĐRL đã nộp
       const { data: drlData } = await supabase
         .from("drl_submissions")
         .select("*")
@@ -611,25 +675,63 @@ export default function CongDRLPage() {
     setLoading(false);
   };
 
+  // Tự động điều chỉnh điểm tối đa theo mục khi đổi dropdown
+  const handleCategoryChange = (cat: string) => {
+    setProofCategory(cat);
+    const maxVal = CATEGORY_MAX_POINTS[cat] || 10;
+    setProofPoints(maxVal);
+  };
+
   const handleScoreChange = (itemId: string, val: number, maxVal: number) => {
     const safeVal = Math.min(Math.max(0, val || 0), maxVal);
     setScores((prev) => ({ ...prev, [itemId]: safeVal }));
   };
 
-  // Tính điểm tổng cho từng phần theo quy định khống chế tối đa
+  // Xử lý tải file trực tiếp lên Storage
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingFile(true);
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${currentUser.mssv}_${Date.now()}.${fileExt}`;
+      const filePath = `proofs/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("documents")
+        .upload(filePath, file);
+
+      if (uploadError) {
+        // Dự phòng nếu bucket chưa mở public thì tạo blob URL trực tiếp
+        const localUrl = URL.createObjectURL(file);
+        setProofUrl(localUrl);
+        alert("Đã chọn file thành công!");
+      } else {
+        const { data: urlData } = supabase.storage.from("documents").getPublicUrl(filePath);
+        setProofUrl(urlData.publicUrl);
+        alert("Tải file lên hệ thống thành công!");
+      }
+    } catch (err: any) {
+      alert("Lỗi tải file: " + err.message);
+    }
+    setUploadingFile(false);
+  };
+
+  // Tính điểm tổng từng phần có khống chế tối đa
   const getSectionScore = (section: any) => {
     const rawSum = section.items.reduce((sum: number, it: any) => sum + (Number(scores[it.id]) || 0), 0);
     return Math.min(rawSum, section.maxPoints);
   };
 
-  // Tổng điểm toàn bộ 5 phần (Tối đa 100 điểm)
+  // Tổng điểm toàn bộ 5 phần
   const grandTotalScore = DRL_SECTIONS.reduce((total, sec) => total + getSectionScore(sec), 0);
 
   // Nộp minh chứng hoạt động ngoài khoa
   const handleUploadProof = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!proofTitle || !proofUrl) {
-      alert("Vui lòng điền đầy đủ tên hoạt động và đường link hình ảnh minh chứng!");
+      alert("Vui lòng điền đầy đủ tên hoạt động và chọn tệp hoặc dán link minh chứng!");
       return;
     }
 
@@ -688,11 +790,13 @@ export default function CongDRLPage() {
 
   if (!currentUser) return null;
 
+  const currentMaxAllowed = CATEGORY_MAX_POINTS[proofCategory] || 10;
+
   return (
     <div className="min-h-screen bg-slate-50 py-8 px-4 sm:px-6 lg:px-8 font-sans text-slate-800">
       <div className="max-w-6xl mx-auto space-y-6">
 
-        {/* HEADER CHUẨN BANNER LOGO */}
+        {/* HEADER */}
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center">
@@ -799,12 +903,12 @@ export default function CongDRLPage() {
                   />
                 </div>
 
-                {/* Dropdown phân cấp từng mục rõ ràng */}
+                {/* Dropdown danh mục */}
                 <div>
                   <label className="block font-bold text-slate-700 mb-1">Thuộc hạng mục tiêu chí *</label>
                   <select
                     value={proofCategory}
-                    onChange={(e) => setProofCategory(e.target.value)}
+                    onChange={(e) => handleCategoryChange(e.target.value)}
                     className="w-full border border-slate-300 rounded-xl px-4 py-2.5 outline-none focus:border-[#EE6425] bg-white text-slate-700"
                   >
                     <optgroup label="I. Đánh giá về ý thức tham gia học tập">
@@ -885,37 +989,63 @@ export default function CongDRLPage() {
                   </select>
                 </div>
 
+                {/* Ô điểm tự động giới hạn Max */}
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Điểm cộng đề xuất</label>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="font-bold text-slate-700">Điểm cộng đề xuất *</label>
+                    <span className="text-[11px] font-bold text-[#EE6425]">
+                      (Tối đa: {currentMaxAllowed} điểm theo quy định)
+                    </span>
+                  </div>
                   <input
                     type="number"
                     min="1"
-                    max="10"
+                    max={currentMaxAllowed}
                     value={proofPoints}
-                    onChange={(e) => setProofPoints(Number(e.target.value))}
-                    className="w-full border border-slate-300 rounded-xl px-4 py-2.5 outline-none focus:border-[#EE6425]"
+                    onChange={(e) => {
+                      const v = Number(e.target.value);
+                      setProofPoints(v > currentMaxAllowed ? currentMaxAllowed : v < 1 ? 1 : v);
+                    }}
+                    className="w-full border border-slate-300 rounded-xl px-4 py-2.5 font-bold text-[#EE6425] outline-none focus:border-[#EE6425]"
                   />
                 </div>
 
+                {/* Ô minh chứng kèm Nút tải file */}
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Link hình ảnh / File minh chứng *</label>
-                  <input
-                    type="url"
-                    required
-                    value={proofUrl}
-                    onChange={(e) => setProofUrl(e.target.value)}
-                    placeholder="https://drive.google.com/... hoặc link ảnh"
-                    className="w-full border border-slate-300 rounded-xl px-4 py-2.5 outline-none focus:border-[#EE6425]"
-                  />
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Link hình ảnh hoặc Tải file minh chứng *
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      required
+                      value={proofUrl}
+                      onChange={(e) => setProofUrl(e.target.value)}
+                      placeholder="Dán link Drive/URL hoặc bấm nút tải file ->"
+                      className="flex-1 border border-slate-300 rounded-xl px-3 py-2.5 outline-none focus:border-[#EE6425]"
+                    />
+                    <label className="cursor-pointer bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-bold px-3 py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition flex-shrink-0 text-xs">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                      </svg>
+                      <span>{uploadingFile ? "Đang tải..." : "Tải tệp"}</span>
+                      <input
+                        type="file"
+                        accept="image/*,.pdf"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
                 </div>
 
                 <div className="md:col-span-2 pt-2">
                   <button
                     type="submit"
-                    disabled={submittingProof}
+                    disabled={submittingProof || uploadingFile}
                     className="w-full bg-[#EE6425] hover:bg-[#d85216] text-white font-bold py-3 rounded-xl transition shadow"
                   >
-                    {submittingProof ? "Đang gửi duyệt..." : "Tải lên & Gửi minh chứng cho BCH Chi đoàn"}
+                    {submittingProof ? "Đang gửi..." : "Tải lên & Gửi minh chứng cho BCH Chi đoàn"}
                   </button>
                 </div>
               </form>
@@ -971,7 +1101,7 @@ export default function CongDRLPage() {
                           <td className="py-3 text-right">
                             {p.proof_url && (
                               <a href={p.proof_url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline font-bold">
-                                Xem link ảnh
+                                Xem tệp
                               </a>
                             )}
                           </td>
@@ -985,7 +1115,7 @@ export default function CongDRLPage() {
           </div>
         )}
 
-        {/* ================= TAB 2: PHIẾU ĐÁNH GIÁ ĐẦY ĐỦ TIÊU CHÍ (ĐỀ MỤC + CHỮ NGHIÊNG NHỎ) ================= */}
+        {/* ================= TAB 2: PHIẾU ĐÁNH GIÁ (TIÊU MỤC + CHỮ NGHIÊNG NHỎ) ================= */}
         {activeTab === "form" && (
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 space-y-6">
             <div className="border-b border-slate-100 pb-4">
@@ -993,7 +1123,7 @@ export default function CongDRLPage() {
                 PHIẾU ĐÁNH GIÁ ĐIỂM RÈN LUYỆN HỌC KỲ
               </h2>
               <p className="text-xs text-slate-500 mt-1">
-                Theo Quyết định số 147/QĐ-ĐHKTCN của Hiệu trưởng Trường Đại học Kỹ thuật - Công nghệ Cần Thơ.
+                Theo Quyết định số 147/QĐ-ĐHKTCN của Hiệu trưởng Trường Đại học Kỹ thuật - Công nghệ Cần Thơ[cite: 1].
               </p>
             </div>
 
@@ -1005,7 +1135,7 @@ export default function CongDRLPage() {
                   <div key={section.id} className="border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
                     {/* Header từng phần */}
                     <div className="bg-slate-100 p-3.5 flex justify-between items-center text-xs font-black text-[#004A52]">
-                      <span>{section.title} (Điểm tối đa là {section.maxPoints} điểm)</span>
+                      <span>{section.title} (Điểm tối đa là {section.maxPoints} điểm)[cite: 1]</span>
                       <span className="bg-white px-3 py-1 rounded-xl border border-slate-200 text-[#EE6425]">
                         Tổng phần: {sectionScore} / {section.maxPoints} đ
                       </span>
