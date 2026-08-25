@@ -15,7 +15,7 @@ const DEFAULT_EVENTS = [
     deadline: "23:59 - Ngày 27/08/2026",
     dayInMonth: 28,
     coverImage: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=500&auto=format&fit=crop&q=60",
-    description: "Ngày 28/08/2026, Đoàn Khoa Kỹ thuật Cơ khí phối hợp cùng các chuyên gia hàng đầu tổ chức chuỗi workshop chuyên sâu về trí tuệ nhân tạo, tối ưu hóa quá trình gia công và chế tạo chi tiết máy cơ khí chính xác.",
+    description: "Ngày 28/08/2026, Đoàn Khoa Kỹ thuật Cơ khí phối hợp cùng các chuyên gia tổ chức chuỗi workshop chuyên sâu về trí tuệ nhân tạo, tối ưu hóa quá trình gia công và chế tạo chi tiết máy cơ khí chính xác.",
   },
   {
     id: "ev-2",
@@ -109,9 +109,6 @@ export default function SuKienHoatDongPage() {
     setTimeout(() => setSuccessToast(""), 4000);
   };
 
-  // Các ngày có sự kiện trong tháng 8 để đánh dấu trên Lịch
-  const highlightDays = [4, 6, 7, 9, 13, 14, 17, 18, 19, 22, 26, 27, 28, 30, 31];
-
   return (
     <div className="min-h-screen bg-white text-slate-800 font-sans antialiased">
       {/* 1. THANH HEADER NHẸ */}
@@ -122,7 +119,7 @@ export default function SuKienHoatDongPage() {
           </Link>
           <div className="flex items-center gap-4 text-xs font-semibold">
             {currentUser ? (
-              <span className="text-[#006674]">👤 {currentUser.fullName} ({currentUser.mssv})</span>
+              <span className="text-[#006674]">{currentUser.fullName} ({currentUser.mssv})</span>
             ) : (
               <Link href="/dang-nhap?redirect=/dang-ky" className="bg-[#EE6425] text-white px-3.5 py-1.5 rounded-full">
                 Đăng nhập
@@ -152,7 +149,7 @@ export default function SuKienHoatDongPage() {
         {/* BỐ CỤC 2 CỘT: DANH SÁCH SỰ KIỆN (BÊN TRÁI) + LỊCH THỜI GIAN (BÊN PHẢI) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           
-          {/* CỘT TRÁI (8 CỘT): DANH SÁCH BÀI VIẾT SỰ KIỆN PHONG CÁCH UEH */}
+          {/* CỘT TRÁI (8 CỘT): DANH SÁCH BÀI VIẾT SỰ KIỆN */}
           <div className="lg:col-span-8 divide-y divide-gray-100">
             {events.map((ev, idx) => {
               const isRegistered = registeredTitles.includes(ev.title);
@@ -172,25 +169,27 @@ export default function SuKienHoatDongPage() {
                     {/* NỘI DUNG SỰ KIỆN BÊN PHẢI */}
                     <div className="sm:col-span-8 flex flex-col justify-between">
                       <div>
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="text-[10px] font-bold text-[#007A87] bg-teal-50 px-2 py-0.5 rounded">
+                            {ev.category}
+                          </span>
+                          <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
+                            {ev.points || "+5 ĐRL"}
+                          </span>
+                        </div>
+
                         <h2 className="text-base sm:text-[17px] font-black text-[#004A52] leading-snug group-hover:text-[#EE6425] transition-colors cursor-pointer">
                           {ev.title}
                         </h2>
-
-                        {/* ICON BADGES SDG KIỂU UEH */}
-                        <div className="flex items-center gap-1.5 my-3">
-                          <span className="bg-[#C5192D] text-white text-[9px] font-black px-1.5 py-0.5 rounded">4 GD CHẤT LƯỢNG</span>
-                          <span className="bg-[#FF3A21] text-white text-[9px] font-black px-1.5 py-0.5 rounded">9 CÔNG NGHIỆP</span>
-                          <span className="bg-[#FD9D24] text-white text-[9px] font-black px-1.5 py-0.5 rounded">11 ĐÔ THỊ BỀN VỮNG</span>
-                        </div>
 
                         <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-line mt-2">
                           {ev.description}
                         </p>
 
                         <div className="mt-3 text-xs text-slate-500 space-y-1 font-medium">
-                          <div>⏰ <strong>Thời gian:</strong> {ev.time}</div>
-                          <div>📍 <strong>Địa điểm:</strong> {ev.location}</div>
-                          <div className="text-emerald-700 font-bold">🎁 <strong>Điểm rèn luyện:</strong> {ev.points || "+5 ĐRL"}</div>
+                          <div><strong>Thời gian:</strong> {ev.time}</div>
+                          <div><strong>Địa điểm:</strong> {ev.location}</div>
+                          <div className="text-red-600 font-semibold text-[11px]">⏳ <strong>Hạn chót đăng ký:</strong> {ev.deadline}</div>
                         </div>
                       </div>
 
@@ -223,7 +222,7 @@ export default function SuKienHoatDongPage() {
                 THỜI GIAN DIỄN RA SỰ KIỆN
               </h3>
 
-              {/* KHUNG LỊCH KIỂU UEH */}
+              {/* KHUNG LỊCH */}
               <div className="bg-[#FFFDF9] border border-orange-100 rounded-2xl p-5 shadow-sm">
                 <div className="flex items-center justify-between text-xs font-bold text-slate-700 mb-4 px-2">
                   <button className="text-slate-400 hover:text-slate-800">‹</button>
@@ -244,7 +243,6 @@ export default function SuKienHoatDongPage() {
 
                 {/* Các ngày trong tháng */}
                 <div className="grid grid-cols-7 text-center text-xs font-semibold gap-y-2.5 items-center">
-                  {/* Ngày tháng trước */}
                   <span className="text-slate-300">26</span>
                   <span className="text-slate-300">27</span>
                   <span className="text-slate-300">28</span>
@@ -252,7 +250,6 @@ export default function SuKienHoatDongPage() {
                   <span className="text-slate-300">30</span>
                   <span className="text-slate-300">31</span>
                   
-                  {/* Tháng 8 */}
                   <span className="text-slate-700">1</span>
                   <span className="text-slate-700">2</span>
                   <span className="text-slate-700">3</span>
@@ -312,8 +309,8 @@ export default function SuKienHoatDongPage() {
               <div className="p-3.5 bg-orange-50 border border-orange-200 rounded-xl">
                 <span className="text-[10px] font-bold text-[#EE6425] uppercase block">Sự kiện:</span>
                 <p className="font-bold text-slate-800 text-sm mt-0.5">{selectedEventToRegister.title}</p>
-                <p className="text-slate-600 mt-1">⏰ {selectedEventToRegister.time}</p>
-                <p className="text-emerald-700 font-bold mt-0.5">🎁 {selectedEventToRegister.points}</p>
+                <p className="text-slate-600 mt-1">{selectedEventToRegister.time}</p>
+                <p className="text-emerald-700 font-bold mt-0.5">{selectedEventToRegister.points}</p>
               </div>
 
               <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
