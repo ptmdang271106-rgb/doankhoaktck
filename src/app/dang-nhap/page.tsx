@@ -58,7 +58,7 @@ function AuthForm() {
       <div className="text-center mb-6">
         <Link href="/" className="inline-block mb-3">
           <Image
-            src="/logodk.png"
+            src="/logo-doankhoa.png"
             alt="Logo Khoa Cơ khí"
             width={64}
             height={64}
@@ -68,9 +68,7 @@ function AuthForm() {
         </Link>
         <h1 className="text-2xl sm:text-[26px] font-black text-[#004A52] tracking-tight">
           CỔNG DỊCH VỤ SINH VIÊN
-        </h1>
-        <p className="text-xs text-slate-500 mt-1 font-medium">
-          Đoàn Khoa Kỹ thuật Cơ khí CTUT
+    
         </p>
       </div>
 
@@ -154,19 +152,19 @@ function AuthForm() {
           </>
         )}
 
-        <div>
-          <label className="block text-xs font-bold text-slate-700 mb-1">
-            Email trường (@sv.ctut.edu.vn) *
-          </label>
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="mssv@sv.ctut.edu.vn"
-            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#EE6425] focus:ring-1 focus:ring-[#EE6425]"
-          />
-        </div>
+       <div>
+  <label className="block text-xs font-bold text-slate-700 mb-1">
+    Mã số sinh viên (MSSV) *
+  </label>
+  <input
+    type="text"
+    required
+    value={mssv}
+    onChange={(e) => setMssv(e.target.value)}
+    placeholder="Nhập MSSV (VD: 2200101)"
+    className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-[#EE6425] focus:ring-1 focus:ring-[#EE6425]"
+  />
+</div>
 
         <div>
           <div className="flex items-center justify-between mb-1">
