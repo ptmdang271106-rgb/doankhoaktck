@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
@@ -25,9 +25,6 @@ export default function ChiTietSuKienPage() {
   const id = (params?.id as string) || "ipmc-2026";
   const event = EVENT_DETAILS[id] || EVENT_DETAILS["ipmc-2026"];
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-
   return (
     <main className="min-h-screen bg-white text-slate-800 py-6 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
@@ -46,7 +43,7 @@ export default function ChiTietSuKienPage() {
               {event.title}
             </h1>
 
-            {/* THANH ĐĂNG KÝ THAY THẾ 3 Ô VUÔNG LHQ */}
+            {/* THANH ĐĂNG KÝ (BẤM VÀO CHUYỂN HƯỚNG ĐẾN TRANG /dang-nhap) */}
             <div className="my-6 p-4 sm:p-5 rounded-2xl bg-[#FFF9F5] border border-[#FDE6D7] flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
               <div>
                 <span className="text-xs font-bold text-[#EE6425] uppercase tracking-wider block">
@@ -56,12 +53,12 @@ export default function ChiTietSuKienPage() {
                   Thời gian: <strong className="text-slate-800">{event.time} | {event.date}</strong>
                 </p>
               </div>
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="w-full sm:w-auto bg-[#EE6425] hover:bg-[#d85216] text-white text-xs sm:text-sm font-bold px-6 py-3 rounded-xl shadow-md transition-all active:scale-95 uppercase tracking-wider whitespace-nowrap"
+              <Link
+                href={`/dang-nhap?redirect=/su-kien/${id}`}
+                className="w-full sm:w-auto bg-[#EE6425] hover:bg-[#d85216] text-white text-xs sm:text-sm font-bold px-6 py-3 rounded-xl shadow-md transition-all active:scale-95 uppercase tracking-wider whitespace-nowrap text-center inline-block"
               >
                 ĐĂNG KÝ THAM GIA NGAY
-              </button>
+              </Link>
             </div>
 
             {/* BANNER SỰ KIỆN */}
@@ -75,6 +72,16 @@ export default function ChiTietSuKienPage() {
               {event.content.map((p: string, idx: number) => (
                 <p key={idx}>{p}</p>
               ))}
+            </div>
+
+            {/* NÚT ĐĂNG KÝ THÊM DƯỚI CUỐI BÀI */}
+            <div className="mt-10 pt-6 border-t border-slate-200 text-center">
+              <Link
+                href={`/dang-nhap?redirect=/su-kien/${id}`}
+                className="bg-[#007A87] hover:bg-[#005a63] text-white font-bold px-8 py-3.5 rounded-xl shadow transition inline-block text-center text-sm"
+              >
+                Ghi danh tham dự sự kiện này
+              </Link>
             </div>
           </div>
 
@@ -121,74 +128,6 @@ export default function ChiTietSuKienPage() {
           </div>
         </div>
       </div>
-
-      {/* POPUP MODAL ĐĂNG KÝ */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative">
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 font-bold text-xl"
-            >
-              ✕
-            </button>
-
-            {submitted ? (
-              <div className="text-center py-6">
-                <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl font-black">
-                  ✓
-                </div>
-                <h3 className="text-lg font-bold text-slate-800">Đăng ký thành công!</h3>
-                <p className="text-xs text-slate-500 mt-1">
-                  Thông tin của bạn đã được ghi nhận.
-                </p>
-                <button
-                  onClick={() => { setSubmitted(false); setIsModalOpen(false); }}
-                  className="mt-6 bg-[#006674] text-white text-xs font-bold px-6 py-2.5 rounded-xl"
-                >
-                  Đóng
-                </button>
-              </div>
-            ) : (
-              <form
-                onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }}
-                className="space-y-4"
-              >
-                <div className="text-center mb-4">
-                  <h3 className="text-lg font-bold text-[#006674]">Đăng Ký Tham Gia Sự Kiện</h3>
-                  <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">{event.title}</p>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Họ và tên *</label>
-                  <input required placeholder="Nguyễn Văn A" className="w-full border border-slate-300 rounded-xl px-3.5 py-2 text-sm outline-none focus:border-[#EE6425]" />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">MSSV *</label>
-                    <input required placeholder="2200101" className="w-full border border-slate-300 rounded-xl px-3.5 py-2 text-sm outline-none focus:border-[#EE6425]" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Lớp *</label>
-                    <input required placeholder="CK22A1" className="w-full border border-slate-300 rounded-xl px-3.5 py-2 text-sm outline-none focus:border-[#EE6425]" />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Số điện thoại / Zalo *</label>
-                  <input required type="tel" placeholder="0912345678" className="w-full border border-slate-300 rounded-xl px-3.5 py-2 text-sm outline-none focus:border-[#EE6425]" />
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full bg-[#EE6425] hover:bg-[#d85216] text-white font-bold py-3 rounded-xl transition shadow tracking-wider uppercase text-sm"
-                >
-                  Xác nhận đăng ký
-                </button>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
     </main>
   );
 }
