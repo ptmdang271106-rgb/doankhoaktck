@@ -124,14 +124,19 @@ export default function AdminDashboard() {
   const [eventCategoryCode, setEventCategoryCode] = useState("III.8");
   const [eventPoints, setEventPoints] = useState<number>(4);
   const [eventTime, setEventTime] = useState("");
-  const [eventLocation, setEventLocation] = useState("Hội trường A - CTUT");
+  const [eventLocation, setEventLocation] = useState("Hội trường A - Trường ĐH Kỹ thuật - Công nghệ Cần Thơ");
   const [eventDeadline, setEventDeadline] = useState("");
   const [eventDesc, setEventDesc] = useState("");
+  
+  // Tọa độ GPS & Cấu hình bán kính
+  const [eventLat, setEventLat] = useState<number>(10.0469);
+  const [eventLng, setEventLng] = useState<number>(105.7681);
+  const [gpsRadiusMode, setGpsRadiusMode] = useState<"none" | "100" | "200">("200");
 
   // State sinh viên
   const [pasteData, setPasteData] = useState("");
 
-  // STATE POPUP MỞ MÃ QR ĐIỂM DANH (CHO MÁY CHIẾU)
+  // Popup mã QR
   const [activeQrEvent, setActiveQrEvent] = useState<any>(null);
 
   useEffect(() => {
@@ -159,6 +164,20 @@ export default function AdminDashboard() {
     if (item) setEventPoints(item.max);
   };
 
+  // LẤY TỌA ĐỘ GPS HIỆN TẠI TỰ ĐỘNG
+  const handleGetCurrentGps = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setEventLat(pos.coords.latitude);
+          setEventLng(pos.coords.longitude);
+          alert(`Đã lấy vị trí hiện tại:\nVĩ độ: ${pos.coords.latitude}\nKinh độ: ${pos.coords.longitude}`);
+        },
+        () => alert("Vui lòng cấp quyền truy cập vị trí trên trình duyệt!")
+      );
+    }
+  };
+
   const handleAddEvent = (e: React.FormEvent) => {
     e.preventDefault();
     const criteriaItem = EVENT_CRITERIA_OPTIONS.find((c) => c.code === eventCategoryCode);
@@ -174,6 +193,9 @@ export default function AdminDashboard() {
       location: eventLocation,
       deadline: eventDeadline || "23:59 - Ngày 29/08/2026",
       description: eventDesc,
+      lat: eventLat,
+      lng: eventLng,
+      gpsRadius: gpsRadiusMode,
       createdAt: new Date().toLocaleDateString("vi-VN"),
     };
 
@@ -185,7 +207,7 @@ export default function AdminDashboard() {
     setEventDesc("");
     setEventTime("");
     setEventDeadline("");
-    alert(`Đã tạo sự kiện thành công! Bạn có thể bấm "📲 Mở Mã QR Điểm Danh" để chiếu cho sinh viên.`);
+    alert(`Đã tạo sự kiện và ghim tọa độ Google Maps thành công!`);
   };
 
   const handleDeleteEvent = (id: string) => {
@@ -282,7 +304,7 @@ export default function AdminDashboard() {
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl font-black text-[#004A52]">BẢNG ĐIỀU KHIỂN QUẢN TRỊ VIÊN</h1>
-            <p className="text-xs text-slate-500 mt-0.5">Quản lý bài viết, sự kiện & Bật QR Code điểm danh</p>
+            <p className="text-xs text-slate-500 mt-0.5">Quản lý bài viết, sự kiện & Ghim tọa độ GPS Google Maps</p>
           </div>
           <div className="flex items-center gap-3">
             <Link href="/" className="text-xs font-bold text-[#007A87] hover:underline">
@@ -310,7 +332,7 @@ export default function AdminDashboard() {
                 : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
             }`}
           >
-            Đăng & Bật QR Điểm Danh ({events.length})
+            Đăng Sự Kiện & Ghim GPS ({events.length})
           </button>
           <button
             onClick={() => setActiveTab("posts")}
@@ -330,16 +352,15 @@ export default function AdminDashboard() {
                 : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
             }`}
           >
-            Quản lý Sinh viên ({students.length})
+            🎓 Quản lý Sinh viên ({students.length})
           </button>
         </div>
 
-        {/* TAB 1: SỰ KIỆN & NÚT BẬT MÃ QR ĐIỂM DANH */}
+        {/* TAB 1: SỰ KIỆN & GHIM GPS */}
         {activeTab === "events" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* FORM TẠO SỰ KIỆN */}
             <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-              <h2 className="text-base font-bold text-[#004A52] mb-4">Tạo Sự Kiện Mới</h2>
+              <h2 className="text-base font-bold text-[#004A52] mb-4">Tạo Sự Kiện Mới & Ghim Địa Điểm</h2>
               <form onSubmit={handleAddEvent} className="space-y-3.5">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Tên sự kiện / Hoạt động *</label>
@@ -353,40 +374,36 @@ export default function AdminDashboard() {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Chuyên mục *</label>
-                  <select
-                    value={eventCategory}
-                    onChange={(e) => setEventCategory(e.target.value)}
-                    className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none focus:border-[#EE6425]"
-                  >
-                    <option value="Phong trào">Phong trào</option>
-                    <option value="Học thuật - NCKH">Học thuật - NCKH</option>
-                    <option value="Tình nguyện">Tình nguyện</option>
-                    <option value="Hội thảo Cơ khí">Hội thảo Cơ khí</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Mục Điểm Rèn Luyện (QĐ 147) *</label>
-                  <select
-                    value={eventCategoryCode}
-                    onChange={(e) => handleSelectCriteria(e.target.value)}
-                    className="w-full border border-slate-300 rounded-xl p-2.5 text-xs font-medium outline-none focus:border-[#EE6425]"
-                  >
-                    {EVENT_CRITERIA_OPTIONS.map((c) => (
-                      <option key={c.code} value={c.code}>{c.label}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="block text-xs font-bold text-slate-700">Điểm rèn luyện cộng *</label>
-                    <span className="text-[11px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded">
-                      +{eventPoints} ĐRL
-                    </span>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Chuyên mục</label>
+                    <select
+                      value={eventCategory}
+                      onChange={(e) => setEventCategory(e.target.value)}
+                      className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none"
+                    >
+                      <option value="Phong trào">Phong trào</option>
+                      <option value="Học thuật - NCKH">Học thuật - NCKH</option>
+                      <option value="Tình nguyện">Tình nguyện</option>
+                      <option value="Hội thảo Cơ khí">Hội thảo Cơ khí</option>
+                    </select>
                   </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Mục ĐRL (QĐ 147)</label>
+                    <select
+                      value={eventCategoryCode}
+                      onChange={(e) => handleSelectCriteria(e.target.value)}
+                      className="w-full border border-slate-300 rounded-xl px-2 py-2 text-xs outline-none"
+                    >
+                      {EVENT_CRITERIA_OPTIONS.map((c) => (
+                        <option key={c.code} value={c.code}>{c.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Điểm rèn luyện cộng *</label>
                   <input
                     type="number"
                     min="1"
@@ -411,7 +428,7 @@ export default function AdminDashboard() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Địa điểm tổ chức *</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Địa chỉ / Tên phòng tổ chức *</label>
                   <input
                     type="text"
                     required
@@ -420,6 +437,56 @@ export default function AdminDashboard() {
                     placeholder="Hội trường A - Trường ĐH Kỹ thuật - Công nghệ Cần Thơ"
                     className="w-full border border-slate-300 rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[#EE6425]"
                   />
+                </div>
+
+                {/* KHỐI CẤU HÌNH GPS GOOGLE MAPS */}
+                <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-[#004A52]">📍 Ghim GPS Google Maps:</span>
+                    <button
+                      type="button"
+                      onClick={handleGetCurrentGps}
+                      className="text-[11px] bg-teal-50 text-[#007A87] hover:bg-teal-100 font-bold px-2.5 py-1 rounded-lg border border-teal-200"
+                    >
+                      🎯 Lấy GPS tại đây
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+                    <div>
+                      <span className="text-[10px] text-slate-500 block">Vĩ độ (Lat):</span>
+                      <input
+                        type="number"
+                        step="0.0001"
+                        value={eventLat}
+                        onChange={(e) => setEventLat(Number(e.target.value))}
+                        className="w-full border border-slate-300 rounded-lg p-1.5 bg-white text-xs"
+                      />
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-500 block">Kinh độ (Lng):</span>
+                      <input
+                        type="number"
+                        step="0.0001"
+                        value={eventLng}
+                        onChange={(e) => setEventLng(Number(e.target.value))}
+                        className="w-full border border-slate-300 rounded-lg p-1.5 bg-white text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] text-slate-500 block mb-1">Quy định bán kính điểm danh:</span>
+                    <select
+                      value={gpsRadiusMode}
+                      onChange={(e: any) => setGpsRadiusMode(e.target.value)}
+                      className="w-full border border-slate-300 rounded-lg p-1.5 text-xs bg-white font-semibold"
+                    >
+                      <option value="100">Bán kính 100 mét quanh địa điểm</option>
+                      <option value="200">Bán kính 200 mét quanh địa điểm (Khuyên dùng)</option>
+                      <option value="none">Bỏ qua kiểm tra GPS (Điểm danh tự do)</option>
+                    </select>
+                  </div>
                 </div>
 
                 <div>
@@ -443,7 +510,7 @@ export default function AdminDashboard() {
               </form>
             </div>
 
-            {/* DANH SÁCH SỰ KIỆN + NÚT MỞ MÃ QR ĐIỂM DANH */}
+            {/* DANH SÁCH SỰ KIỆN */}
             <div className="lg:col-span-7 space-y-6">
               <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                 <h2 className="text-base font-bold text-[#004A52] mb-3">Các sự kiện đang mở ({events.length})</h2>
@@ -458,21 +525,23 @@ export default function AdminDashboard() {
                             <span className="text-[10px] font-bold text-[#007A87] bg-teal-50 px-2 py-0.5 rounded">
                               {ev.category}
                             </span>
-                            <span className="text-[10px] font-bold text-[#EE6425] bg-orange-50 px-2 py-0.5 rounded">
+                            <span className="text-[10px] font-bold text-[#EE6425] bg-orange-50 border border-orange-200 px-2 py-0.5 rounded">
                               Mục: {ev.categoryCode} (+{ev.points} ĐRL)
+                            </span>
+                            <span className="text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
+                              {ev.gpsRadius === "none" ? "Bỏ qua GPS" : `GPS: ${ev.gpsRadius}m`}
                             </span>
                           </div>
                           <h3 className="text-sm font-bold text-slate-800 mt-1">{ev.title}</h3>
-                          <p className="text-xs text-slate-500 mt-0.5">⏰ {ev.time} • 📍 {ev.location}</p>
+                          <p className="text-xs text-slate-500 mt-0.5">{ev.time} • {ev.location}</p>
                         </div>
 
                         <div className="flex items-center gap-2 flex-shrink-0">
-                          {/* NÚT BẬT MÃ QR ĐIỂM DANH ĐỂ CHIẾU LÊN MÀN HÌNH */}
                           <button
                             onClick={() => setActiveQrEvent(ev)}
                             className="bg-[#007A87] hover:bg-[#005a63] text-white font-bold text-xs px-3.5 py-2 rounded-xl transition shadow flex items-center gap-1.5"
                           >
-                            <span></span> Bật Mã QR
+                            <span>📲</span> Bật Mã QR
                           </button>
                           <button
                             onClick={() => handleDeleteEvent(ev.id)}
@@ -657,7 +726,7 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* POPUP MÀN HÌNH MÁY CHIẾU: MÃ QR CODE ĐIỂM DANH SỰ KIỆN */}
+      {/* POPUP MÀN HÌNH MÁY CHIẾU */}
       {activeQrEvent && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-xl w-full p-8 shadow-2xl border-4 border-[#EE6425] text-center animate-in fade-in zoom-in duration-200">
@@ -680,7 +749,6 @@ export default function AdminDashboard() {
               Mục ĐRL: <strong>{activeQrEvent.categoryCode}</strong> • Điểm cộng: <strong>+{activeQrEvent.points} Điểm</strong>
             </p>
 
-            {/* HÌNH ẢNH MÃ QR ĐIỂM DANH TỰ ĐỘNG SINH RA THEO ID SỰ KIỆN */}
             <div className="my-6 p-4 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-300 inline-block shadow-inner">
               <img
                 src={`https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(
@@ -691,10 +759,23 @@ export default function AdminDashboard() {
               />
             </div>
 
-            <div className="space-y-1 text-xs text-slate-600 bg-slate-50 p-3 rounded-xl">
+            <div className="space-y-1.5 text-xs text-slate-600 bg-slate-50 p-3 rounded-xl">
               <p><strong>Địa điểm:</strong> {activeQrEvent.location}</p>
-              <p><strong>Thời gian:</strong> {activeQrEvent.time}</p>
-              <p className="text-[#007A87] font-bold">Mã Check-in dự phòng: <code className="font-mono text-sm text-[#EE6425]">{activeQrEvent.id}</code></p>
+              <p>
+                <strong>Tọa độ ghim:</strong> {activeQrEvent.lat}, {activeQrEvent.lng} (
+                <a
+                  href={`https://www.google.com/maps?q=${activeQrEvent.lat},${activeQrEvent.lng}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[#007A87] font-bold underline ml-1"
+                >
+                  Mở Google Maps
+                </a>
+                )
+              </p>
+              <p className="text-[#EE6425] font-bold">
+                Quy định GPS: {activeQrEvent.gpsRadius === "none" ? "Bỏ qua GPS" : `Bán kính ${activeQrEvent.gpsRadius}m`}
+              </p>
             </div>
 
             <button
