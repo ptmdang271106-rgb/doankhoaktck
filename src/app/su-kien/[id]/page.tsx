@@ -28,7 +28,7 @@ export default function ChiTietSuKienPage() {
   return (
     <main className="min-h-screen bg-white text-slate-800 py-6 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        {/* Breadcrumb Navigation chuẩn UEH */}
+        {/* Breadcrumb Navigation */}
         <nav className="flex items-center gap-2 text-sm text-[#006674] font-medium mb-6">
           <Link href="/" className="hover:underline text-[#006674]">Trang chủ</Link>
           <span className="text-[#006674]">›</span>
@@ -38,12 +38,11 @@ export default function ChiTietSuKienPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           {/* CỘT CHÍNH */}
           <div className="lg:col-span-8">
-            {/* Tiêu đề chuẩn tone cam & font UEH */}
             <h1 className="text-2xl sm:text-[32px] font-extrabold text-[#EE6425] leading-tight tracking-tight mb-5">
               {event.title}
             </h1>
 
-            {/* THANH ĐĂNG KÝ (BẤM VÀO CHUYỂN HƯỚNG ĐẾN TRANG /dang-nhap) */}
+            {/* THANH ĐĂNG KÝ -> BẤM VÀO SẼ CHUYỂN THẲNG QUA TRANG /dang-nhap */}
             <div className="my-6 p-4 sm:p-5 rounded-2xl bg-[#FFF9F5] border border-[#FDE6D7] flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
               <div>
                 <span className="text-xs font-bold text-[#EE6425] uppercase tracking-wider block">
@@ -57,7 +56,7 @@ export default function ChiTietSuKienPage() {
                 href={`/dang-nhap?redirect=/su-kien/${id}`}
                 className="w-full sm:w-auto bg-[#EE6425] hover:bg-[#d85216] text-white text-xs sm:text-sm font-bold px-6 py-3 rounded-xl shadow-md transition-all active:scale-95 uppercase tracking-wider whitespace-nowrap text-center inline-block"
               >
-                ĐĂNG KÝ THAM GIA NGAY
+                👉 ĐĂNG KÝ THAM GIA NGAY
               </Link>
             </div>
 
@@ -74,7 +73,7 @@ export default function ChiTietSuKienPage() {
               ))}
             </div>
 
-            {/* NÚT ĐĂNG KÝ THÊM DƯỚI CUỐI BÀI */}
+            {/* NÚT ĐĂNG KÝ CUỐI BÀI -> CHUYỂN THẲNG QUA TRANG /dang-nhap */}
             <div className="mt-10 pt-6 border-t border-slate-200 text-center">
               <Link
                 href={`/dang-nhap?redirect=/su-kien/${id}`}
