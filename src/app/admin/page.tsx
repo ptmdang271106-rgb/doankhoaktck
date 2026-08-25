@@ -10,7 +10,7 @@ export default function AdminDashboard() {
   const [students, setStudents] = useState<any[]>([]);
   const [posts, setPosts] = useState<any[]>([]);
 
-  // State form tạo sinh viên
+  // State form sinh viên
   const [newMssv, setNewMssv] = useState("");
   const [newName, setNewName] = useState("");
   const [newClass, setNewClass] = useState("");
@@ -39,7 +39,7 @@ export default function AdminDashboard() {
     setPosts(JSON.parse(localStorage.getItem("ctut_custom_posts") || "[]"));
   }, [router]);
 
-  // Xử lý tải ảnh bìa 16:9
+  // Chọn ảnh bìa 16:9 từ máy tính
   const handleCoverUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -51,7 +51,7 @@ export default function AdminDashboard() {
     }
   };
 
-  // Xử lý chèn hình vào trong nội dung bài viết
+  // Chèn ảnh vào trong nội dung bài viết
   const handleInsertBodyImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -63,12 +63,10 @@ export default function AdminDashboard() {
     }
   };
 
-  // Định dạng chữ (Đậm, Nghiêng, Tiêu đề)
   const formatText = (cmd: string, value: string = "") => {
     document.execCommand(cmd, false, value);
   };
 
-  // Lưu bài viết mới
   const handleAddPost = (e: React.FormEvent) => {
     e.preventDefault();
     const contentHtml = editorRef.current ? editorRef.current.innerHTML : "";
@@ -79,6 +77,7 @@ export default function AdminDashboard() {
       category: postCategory,
       coverImage: postCoverImage || "",
       contentHtml: contentHtml,
+      content: editorRef.current ? editorRef.current.innerText : "",
       date: new Date().toLocaleDateString("vi-VN"),
     };
 
@@ -92,7 +91,6 @@ export default function AdminDashboard() {
     alert("Đăng bài viết mới kèm ảnh thành công!");
   };
 
-  // Xóa bài viết
   const handleDeletePost = (id: string) => {
     if (confirm("Bạn có chắc muốn xóa bài viết này?")) {
       const updated = posts.filter((p) => p.id !== id);
@@ -101,7 +99,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // Thêm & Xóa sinh viên
   const handleAddStudent = (e: React.FormEvent) => {
     e.preventDefault();
     const updated = [
@@ -133,11 +130,11 @@ export default function AdminDashboard() {
   return (
     <main className="min-h-screen bg-slate-100 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        {/* HEADER ADMIN */}
+        {/* HEADER */}
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl font-black text-[#004A52]">BẢNG ĐIỀU KHIỂN QUẢN TRỊ VIÊN</h1>
-            <p className="text-xs text-slate-500 mt-0.5">Soạn thảo bài viết đa phương tiện & Quản lý sinh viên</p>
+            <p className="text-xs text-slate-500 mt-0.5">Soạn thảo bài viết & Quản lý tài khoản sinh viên</p>
           </div>
           <div className="flex items-center gap-3">
             <Link href="/" className="text-xs font-bold text-[#007A87] hover:underline">
@@ -179,7 +176,7 @@ export default function AdminDashboard() {
           </button>
         </div>
 
-        {/* TAB 1: SOẠN THẢO BÀI VIẾT CÓ HÌNH BÌA & TRÌNH SOẠN THẢO NHƯ WORD */}
+        {/* TAB 1: BÀI VIẾT */}
         {activeTab === "posts" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
@@ -212,10 +209,10 @@ export default function AdminDashboard() {
                   </select>
                 </div>
 
-                {/* Ô CHỌN ẢNH BÌA TỶ LỆ 16:9 */}
+                {/* Ô TẢI ẢNH BÌA 16:9 */}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Ảnh bìa đại diện (Tỷ lệ 16:9) *
+                    🖼️ Chọn ảnh bìa đại diện (Tỷ lệ 16:9)
                   </label>
                   <input
                     type="file"
@@ -230,29 +227,26 @@ export default function AdminDashboard() {
                   )}
                 </div>
 
-                {/* KHUNG SOẠN THẢO NỘI DUNG NHƯ WORD */}
+                {/* KHUNG SOẠN THẢO CHÈN HÌNH NHƯ WORD */}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Nội dung chi tiết bài viết</label>
                   
-                  {/* Thanh công cụ Word */}
                   <div className="flex flex-wrap items-center gap-1.5 p-2 bg-slate-50 border border-slate-300 rounded-t-xl text-xs font-bold">
                     <button type="button" onClick={() => formatText("bold")} className="px-2.5 py-1 bg-white border border-slate-200 rounded hover:bg-slate-100 font-black">B</button>
                     <button type="button" onClick={() => formatText("italic")} className="px-2.5 py-1 bg-white border border-slate-200 rounded hover:bg-slate-100 italic">I</button>
                     <button type="button" onClick={() => formatText("underline")} className="px-2.5 py-1 bg-white border border-slate-200 rounded hover:bg-slate-100 underline">U</button>
-                    <button type="button" onClick={() => formatText("formatBlock", "h2")} className="px-2.5 py-1 bg-white border border-slate-200 rounded hover:bg-slate-100">Tiêu đề lớn</button>
+                    <button type="button" onClick={() => formatText("formatBlock", "h2")} className="px-2.5 py-1 bg-white border border-slate-200 rounded hover:bg-slate-100">Tiêu đề</button>
                     
                     <label className="px-2.5 py-1 bg-orange-50 text-[#EE6425] border border-orange-200 rounded hover:bg-orange-100 cursor-pointer flex items-center gap-1">
-                      🖼️ Chèn hình ảnh vào bài
+                      📷 Chèn hình ảnh vào bài
                       <input type="file" accept="image/*" onChange={handleInsertBodyImage} className="hidden" />
                     </label>
                   </div>
 
-                  {/* Vùng gõ nội dung */}
                   <div
                     ref={editorRef}
                     contentEditable
-                    className="w-full min-h-[220px] max-h-[400px] overflow-y-auto border border-t-0 border-slate-300 rounded-b-xl p-4 text-sm outline-none bg-white focus:ring-1 focus:ring-[#EE6425]"
-                    placeholder="Nhập nội dung bài viết tại đây..."
+                    className="w-full min-h-[180px] max-h-[350px] overflow-y-auto border border-t-0 border-slate-300 rounded-b-xl p-4 text-sm outline-none bg-white focus:ring-1 focus:ring-[#EE6425]"
                   ></div>
                 </div>
 
@@ -265,7 +259,7 @@ export default function AdminDashboard() {
               </form>
             </div>
 
-            {/* DANH SÁCH BÀI VIẾT ĐÃ ĐĂNG */}
+            {/* DANH SÁCH BÀI ĐÃ ĐĂNG */}
             <div className="lg:col-span-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
               <h2 className="text-base font-bold text-[#004A52] mb-4">Bài viết đã xuất bản ({posts.length})</h2>
               {posts.length === 0 ? (
@@ -275,7 +269,7 @@ export default function AdminDashboard() {
                   {posts.map((p) => (
                     <div key={p.id} className="pt-4 first:pt-0 flex gap-4">
                       {p.coverImage ? (
-                        <div className="w-24 aspect-video rounded-lg overflow-hidden flex-shrink-0 bg-slate-100">
+                        <div className="w-24 aspect-video rounded-lg overflow-hidden flex-shrink-0 bg-slate-100 border border-slate-200">
                           <img src={p.coverImage} alt={p.title} className="w-full h-full object-cover" />
                         </div>
                       ) : (
@@ -304,7 +298,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* TAB 2: QUẢN LÝ TÀI KHOẢN SINH VIÊN */}
+        {/* TAB 2: SINH VIÊN */}
         {activeTab === "students" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
