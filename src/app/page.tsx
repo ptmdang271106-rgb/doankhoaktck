@@ -1,10 +1,25 @@
 "use client";
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 
 export default function CTUTYouthPortal() {
   const [activeCategory, setActiveCategory] = useState("Tất cả");
   const [activeTabRank, setActiveTabRank] = useState("Nổi bật");
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem("ctut_current_user");
+    if (savedUser) {
+      setCurrentUser(JSON.parse(savedUser));
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("ctut_current_user");
+    setCurrentUser(null);
+    window.location.reload();
+  };
 
   const categories = [
     { name: "Tất cả", color: "bg-[#F39C12] text-white" },
@@ -22,49 +37,69 @@ export default function CTUTYouthPortal() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="h-20 grid grid-cols-12 items-center text-[13px] font-medium text-[#2C3E50]">
             
-            {/* Menu Trái */}
-            <div className="col-span-4 hidden lg:flex items-center justify-end space-x-6 pr-4 whitespace-nowrap">
-              <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1">
+            {/* Menu Trái: Điểm danh + Cổng ĐRL + Giới thiệu */}
+            <div className="col-span-4 hidden lg:flex items-center justify-start space-x-3 pr-4 whitespace-nowrap">
+              <button className="bg-[#007A87] text-white px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-[#00606B] transition-colors">
+                Điểm danh
+              </button>
+              
+              <Link
+                href="/tra-cuu"
+                className="bg-[#00707b] hover:bg-[#005a63] text-white px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors inline-block"
+              >
+                Cổng ĐRL
+              </Link>
+
+              <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1 pl-2 text-xs">
                 Giới thiệu <span className="text-[10px]">▼</span>
-              </a>
-              <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1">
-                Chi đoàn / Chi hội <span className="text-[10px]">▼</span>
-              </a>
-              <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1">
-                Hỗ trợ sinh viên <span className="text-[10px]">▼</span>
               </a>
             </div>
 
-            {/* LOGO CHÍNH THỨC */}
+            {/* LOGO CHÍNH THỨC Ở TÂM */}
             <div className="col-span-12 lg:col-span-4 flex items-center justify-center py-1">
               <Link href="/">
                 <img
-                  src="/logo-doankhoa.png"
+                  src="/logodk.png"
                   alt="Tuổi trẻ Khoa Kỹ thuật Cơ khí - Trường Đại học Kỹ thuật - Công nghệ Cần Thơ"
                   className="h-10 sm:h-12 w-auto max-w-full object-contain block mx-auto cursor-pointer"
                 />
               </Link>
             </div>
 
-            {/* Menu Phải */}
-            <div className="col-span-4 hidden lg:flex items-center justify-start space-x-4 pl-4 whitespace-nowrap">
-              <a href="#" className="hover:text-[#007A87] transition-colors">
-                Giao dịch điện tử
-              </a>
-              <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1">
+            {/* Menu Phải: Văn phòng ĐT + Đăng nhập / Tên người dùng */}
+            <div className="col-span-4 hidden lg:flex items-center justify-end space-x-4 pl-4 whitespace-nowrap">
+              <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1 text-xs">
                 Văn phòng điện tử <span className="text-[10px]">▼</span>
               </a>
-              <button className="bg-[#007A87] text-white px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-[#00606B] transition-colors">
-                Điểm danh
-              </button>
-              
-              {/* Nút Cổng ĐRL chuyển sang trang /tra-cuu */}
-              <Link
-                href="/tra-cuu"
-                className="bg-[#00707b] hover:bg-[#005a63] text-white px-4 py-1.5 rounded-full font-bold transition-colors inline-block"
-              >
-                Cổng ĐRL
-              </Link>
+
+              {currentUser ? (
+                <div className="flex items-center gap-2 bg-orange-50 border border-orange-200 px-3 py-1 rounded-full">
+                  <span className="text-xs font-bold text-[#EE6425]">
+                    👤 {currentUser.fullName || currentUser.mssv}
+                  </span>
+                  {currentUser.role === "admin" && (
+                    <Link
+                      href="/admin"
+                      className="bg-[#007A87] text-white text-[10px] font-bold px-2 py-0.5 rounded-full hover:bg-[#005a63]"
+                    >
+                      Quản trị
+                    </Link>
+                  )}
+                  <button
+                    onClick={handleLogout}
+                    className="text-[11px] text-slate-400 hover:text-red-600 font-bold ml-1"
+                  >
+                    (Đăng xuất)
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  href="/dang-nhap"
+                  className="bg-[#EE6425] hover:bg-[#d85216] text-white px-4 py-1.5 rounded-full text-xs font-bold transition-colors inline-block shadow-sm"
+                >
+                  Đăng nhập
+                </Link>
+              )}
             </div>
 
           </div>
@@ -74,7 +109,6 @@ export default function CTUTYouthPortal() {
         <div className="bg-[#F8FCFC] border-t border-b border-[#E6F4F4]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-center space-x-8 py-2.5 text-[13.5px] font-semibold text-[#007A87] overflow-x-auto whitespace-nowrap">
-              {/* Mục Hoạt động – Sự kiện Cơ khí chuyển sang trang /dang-ky */}
               <Link href="/dang-ky" className="hover:text-[#004A52] transition-colors">
                 Hoạt động – Sự kiện Cơ khí
               </Link>
@@ -87,7 +121,7 @@ export default function CTUTYouthPortal() {
         </div>
       </header>
 
-      {/* 3. BANNER CHÀO ĐÓN TÂN SINH VIÊN */}
+      {/* 3. BANNER */}
       <section className="w-full bg-[#0A2540] flex justify-center items-center">
         <div className="w-full max-w-7xl mx-auto px-0 sm:px-4 lg:px-8 py-2 sm:py-4">
           <img
@@ -98,7 +132,7 @@ export default function CTUTYouthPortal() {
         </div>
       </section>
 
-      {/* 4. KHỐI NỘI DUNG: ĐỌC GÌ HÔM NAY VÀ BỘ LỌC */}
+      {/* 4. KHỐI NỘI DUNG CHÍNH */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="flex flex-col md:flex-row md:items-center justify-between border-b-2 border-gray-100 pb-4 gap-4">
           <h2 className="text-2xl font-bold text-[#006674] tracking-tight">
@@ -122,7 +156,6 @@ export default function CTUTYouthPortal() {
           </div>
         </div>
 
-        {/* 5. KHU VỰC BÀI VIẾT (GRID CHÍNH + CỘT PHỤ BÊN PHẢI) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-6">
           {/* Cột chính (8 cột) */}
           <div className="lg:col-span-8 space-y-6">
@@ -262,7 +295,7 @@ export default function CTUTYouthPortal() {
             ĐOÀN KHOA KỸ THUẬT CƠ KHÍ – TRƯỜNG ĐẠI HỌC KỸ THUẬT - CÔNG NGHỆ CẦN THƠ
           </div>
           <div>Địa chỉ: 256 Nguyễn Văn Cừ, Quận Ninh Kiều, Thành phố Cần Thơ</div>
-          <div className="text-gray-500 text-[11px]">Bản quyền © 2026 CTUT Mechanical Youth Portal.</div>
+          <div className="text-gray-500 text-[11px]">Bản quyền © 2026 Phạm Thái Minh Đăng.</div>
         </div>
       </footer>
     </div>
