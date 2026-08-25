@@ -4,31 +4,22 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-// Hàm chuyển tiếng Việt có dấu thành không dấu
+// Hàm chuyển tiếng Việt có dấu sang không dấu CHUẨN TUYỆT ĐỐI cho Email
 function removeVietnameseTones(str: string): string {
-  str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
-  str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
-  str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
-  str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
-  str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
-  str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
-  str = str.replace(/đ/g, "d");
-  str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, "a");
-  str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, "e");
-  str = str.replace(/Ì|Í|Ị|Ỉ|Ĩ/g, "i");
-  str = str.replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, "o");
-  str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "u");
-  str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "y");
-  str = str.replace(/Đ/g, "d");
-  str = str.replace(/\u0300|\u0301|\u0303|\u0309|\u0323/g, "");
-  str = str.replace(/\u02C6|\u0306|\u031B/g, "");
-  return str.trim();
+  if (!str) return "";
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .replace(/[^a-zA-Z0-9\s]/g, "")
+    .trim();
 }
 
 // Hàm tạo Email tự động theo chuẩn sinh viên CTUET
 export function generateCtuetEmail(fullName: string, mssv: string): string {
   if (!fullName || !mssv) return "";
-  const cleanName = removeVietnameseTones(fullName.trim()).toLowerCase();
+  const cleanName = removeVietnameseTones(fullName).toLowerCase();
   const cleanMssv = mssv.trim().toLowerCase();
   const parts = cleanName.split(/\s+/).filter(Boolean);
 
@@ -54,12 +45,12 @@ export default function AdminDashboard() {
   const [students, setStudents] = useState<any[]>([]);
   const [posts, setPosts] = useState<any[]>([]);
 
-  // State form tạo sinh viên thủ công
+  // Form tạo sinh viên thủ công
   const [newMssv, setNewMssv] = useState("");
   const [newName, setNewName] = useState("");
   const [newClass, setNewClass] = useState("");
 
-  // State form bài viết
+  // Form bài viết
   const [postTitle, setPostTitle] = useState("");
   const [postCategory, setPostCategory] = useState("Phong trào");
   const [postCoverImage, setPostCoverImage] = useState("");
@@ -82,15 +73,25 @@ export default function AdminDashboard() {
     setPosts(JSON.parse(localStorage.getItem("ctut_custom_posts") || "[]"));
   }, [router]);
 
-  // 1. NHẬP DANH SÁCH TỪ FILE (TỰ ĐỘNG TẠO PASS = 3 SỐ CUỐI MSSV)
+  // 1. NHẬP FILE EXCEL / CSV CHUẨN TIẾNG VIỆT KHÔNG BỊ LỖI FONT
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
     reader.onload = (evt) => {
-      const text = evt.target?.result as string;
-      if (!text) return;
+      const buffer = evt.target?.result as ArrayBuffer;
+      if (!buffer) return;
+
+      // Tự động nhận diện UTF-8 hoặc Windows-1258 tránh vỡ font tiếng Việt
+      let text = "";
+      try {
+        const utf8Decoder = new TextDecoder("utf-8", { fatal: true });
+        text = utf8Decoder.decode(buffer);
+      } catch (err) {
+        const fallbackDecoder = new TextDecoder("windows-1258");
+        text = fallbackDecoder.decode(buffer);
+      }
 
       const lines = text.split(/\r\n|\n/).filter((l) => l.trim() !== "");
       if (lines.length <= 1) {
@@ -102,11 +103,14 @@ export default function AdminDashboard() {
       const startIndex = lines[0].toLowerCase().includes("mssv") ? 1 : 0;
 
       for (let i = startIndex; i < lines.length; i++) {
-        const row = lines[i].split(",").map((c) => c.trim().replace(/^"|"$/g, ""));
+        // Tách theo dấu phẩy hoặc dấu chấm phẩy do Excel tạo
+        const delimiter = lines[i].includes(";") ? ";" : ",";
+        const row = lines[i].split(delimiter).map((c) => c.trim().replace(/^"|"$/g, ""));
+        
         if (row.length >= 2 && row[0]) {
-          const mssv = row[0];
-          const fullName = row[1] || `Sinh viên ${mssv}`;
-          const studentClass = row[2] || "CK24A1";
+          const mssv = row[0].replace(/\s+/g, "");
+          const fullName = row[1]; // Giữ nguyên tiếng Việt có dấu
+          const studentClass = row[2] || "CK24A1"; // Giữ nguyên tiếng Việt có dấu
           const password = generatePasswordFromMssv(mssv);
           const email = generateCtuetEmail(fullName, mssv);
 
@@ -128,16 +132,16 @@ export default function AdminDashboard() {
 
         setStudents(updated);
         localStorage.setItem("ctut_student_accounts", JSON.stringify(updated));
-        alert(`Đã nhập thành công ${newUnique.length} sinh viên! Mật khẩu mặc định là 3 số cuối MSSV.`);
+        alert(`Đã nhập thành công ${newUnique.length} sinh viên (Đã xử lý đúng dấu tiếng Việt)!`);
       } else {
-        alert("Không tìm thấy dữ liệu hợp lệ!");
+        alert("Không tìm thấy dòng dữ liệu hợp lệ!");
       }
       e.target.value = "";
     };
-    reader.readAsText(file, "UTF-8");
+    reader.readAsArrayBuffer(file);
   };
 
-  // TẢI FILE MẪU TRẮNG (CHỈ CÓ TIÊU ĐỀ 3 CỘT)
+  // Tải file mẫu CSV có gắn thẻ định danh UTF-8 BOM
   const downloadSampleTemplate = () => {
     const csvContent = "MSSV,Họ và tên,Lớp\n";
     const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
@@ -150,7 +154,7 @@ export default function AdminDashboard() {
     document.body.removeChild(link);
   };
 
-  // 2. TẠO SINH VIÊN THỦ CÔNG
+  // 2. TẠO THỦ CÔNG
   const handleAddStudent = (e: React.FormEvent) => {
     e.preventDefault();
     const autoEmail = generateCtuetEmail(newName, newMssv);
@@ -183,7 +187,7 @@ export default function AdminDashboard() {
     }
   };
 
-  // 3. XỬ LÝ BÀI VIẾT
+  // 3. SOẠN THẢO BÀI VIẾT
   const handleCoverUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -276,7 +280,7 @@ export default function AdminDashboard() {
                 : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
             }`}
           >
-            Đăng & Quản lý bài viết
+            📝 Đăng & Quản lý bài viết
           </button>
           <button
             onClick={() => setActiveTab("students")}
@@ -286,7 +290,7 @@ export default function AdminDashboard() {
                 : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
             }`}
           >
-            Quản lý tài khoản Sinh viên ({students.length})
+            🎓 Quản lý tài khoản Sinh viên ({students.length})
           </button>
         </div>
 
@@ -325,7 +329,7 @@ export default function AdminDashboard() {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Chọn ảnh bìa đại diện (Tỷ lệ 16:9)
+                    🖼️ Chọn ảnh bìa đại diện (Tỷ lệ 16:9)
                   </label>
                   <input
                     type="file"
@@ -407,15 +411,15 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* TAB 2: QUẢN LÝ TÀI KHOẢN SINH VIÊN (PASS = 3 SỐ CUỐI MSSV) */}
+        {/* TAB 2: QUẢN LÝ TÀI KHOẢN SINH VIÊN */}
         {activeTab === "students" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-4 space-y-6">
               {/* KHỐI NHẬP FILE EXCEL / CSV */}
               <div className="bg-white p-5 rounded-2xl border border-teal-200 bg-teal-50/40 shadow-sm">
-                <h3 className="text-sm font-bold text-[#004A52] mb-1">Nhập hàng loạt từ Excel / CSV</h3>
+                <h3 className="text-sm font-bold text-[#004A52] mb-1">📊 Nhập hàng loạt từ Excel / CSV</h3>
                 <p className="text-[11px] text-slate-500 mb-3">
-                  Tải file mẫu về, điền 3 cột <strong>MSSV, Họ và tên, Lớp</strong>. Hệ thống tự động tạo Email và đặt mật khẩu là <strong>3 số cuối của MSSV</strong>.
+                  Tải file mẫu về, điền 3 cột <strong>MSSV, Họ và tên, Lớp</strong>. Hệ thống tự động giữ nguyên tiếng Việt có dấu và tạo Email không dấu chuẩn CTUET.
                 </p>
 
                 <div className="space-y-2">
@@ -430,7 +434,7 @@ export default function AdminDashboard() {
                     onClick={downloadSampleTemplate}
                     className="w-full text-center text-xs font-bold text-[#007A87] hover:underline py-1"
                   >
-                    Tải file CSV mẫu (trắng) về máy
+                    📥 Tải file CSV mẫu (trắng) về máy
                   </button>
                 </div>
               </div>
@@ -440,7 +444,7 @@ export default function AdminDashboard() {
                 <h2 className="text-base font-bold text-[#004A52] mb-4">Cấp tài khoản thủ công</h2>
                 <form onSubmit={handleAddStudent} className="space-y-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Họ và tên *</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Họ và tên (có dấu) *</label>
                     <input
                       type="text"
                       required
@@ -470,16 +474,15 @@ export default function AdminDashboard() {
                       required
                       value={newClass}
                       onChange={(e) => setNewClass(e.target.value)}
-                      placeholder="CK24A1"
+                      placeholder="CNKT Tự động hóa K2024"
                       className="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#EE6425]"
                     />
                   </div>
 
-                  {/* THÔNG TIN TỰ ĐỘNG TẠO */}
                   {newMssv && (
                     <div className="p-2.5 bg-orange-50 border border-orange-200 rounded-xl space-y-1 text-xs">
                       <div>
-                        <span className="text-[10px] font-bold text-[#EE6425] uppercase block">Email tự động:</span>
+                        <span className="text-[10px] font-bold text-[#EE6425] uppercase block">Email tự động (không dấu):</span>
                         <span className="font-mono font-bold text-[#004A52] break-all">{previewEmail}</span>
                       </div>
                       <div>
@@ -499,7 +502,7 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* DANH SÁCH TÀI KHOẢN SINH VIÊN */}
+            {/* BẢNG DANH SÁCH SINH VIÊN */}
             <div className="lg:col-span-8 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm overflow-x-auto">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-base font-bold text-[#004A52]">
@@ -508,7 +511,7 @@ export default function AdminDashboard() {
                 {students.length > 0 && (
                   <button
                     onClick={() => {
-                      if (confirm("Bạn có chắc muốn xóa toàn bộ danh sách sinh viên?")) {
+                      if (confirm("Bạn có chắc muốn xóa toàn bộ danh sách sinh viên hiện tại để nhập lại?")) {
                         setStudents([]);
                         localStorage.removeItem("ctut_student_accounts");
                       }
