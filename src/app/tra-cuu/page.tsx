@@ -136,7 +136,11 @@ export default function CongDRLPage() {
             
             {/* Logo & Tên trường */}
             <div className="flex items-center gap-3">
-              <img src="/logodk.png" alt="Logo" className="w-12 h-12 object-contain flex-shrink-0" />
+              <img
+                src="/logo-doankhoa.png"
+                alt="Logo Đoàn Khoa Kỹ thuật Cơ khí"
+                className="w-14 h-14 object-contain flex-shrink-0"
+              />
               <div className="border-l-2 border-orange-500 pl-3">
                 <span className="block text-[11px] font-bold text-blue-900 uppercase">
                   Đoàn Trường ĐH Kỹ thuật - Công nghệ Cần Thơ
