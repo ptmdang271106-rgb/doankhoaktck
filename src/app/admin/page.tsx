@@ -1023,7 +1023,7 @@ const handleProcessPasteData = async () => {
           </div>
         )}
 
-        {/* ================= TAB QUẢN LÝ GIỚI THIỆU (ABOUT US) ================= */}
+       {/* ================= TAB QUẢN LÝ GIỚI THIỆU (ABOUT US) ================= */}
         {activeTab === "about" && (
           <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
             <div>
@@ -1033,21 +1033,100 @@ const handleProcessPasteData = async () => {
 
             <form onSubmit={handleSaveAboutUs} className="space-y-4">
               <div className="flex flex-wrap items-center gap-1.5 p-2 bg-slate-50 border border-slate-300 rounded-t-xl text-xs font-bold">
-                <button type="button" onClick={() => formatAboutText("bold")} className="px-3 py-1 bg-white border border-slate-200 rounded font-black">B</button>
-                <button type="button" onClick={() => formatAboutText("italic")} className="px-3 py-1 bg-white border border-slate-200 rounded italic">I</button>
-                <button type="button" onClick={() => formatAboutText("underline")} className="px-3 py-1 bg-white border border-slate-200 rounded underline">U</button>
-                <button type="button" onClick={() => formatAboutText("formatBlock", "<h2>")} className="px-3 py-1 bg-white border border-slate-200 rounded font-bold">Tiêu đề lớn</button>
-                <button type="button" onClick={() => formatAboutText("formatBlock", "<p>")} className="px-3 py-1 bg-white border border-slate-200 rounded">Đoạn văn</button>
-                <label className="px-3 py-1 bg-orange-50 text-[#EE6425] border border-orange-200 rounded cursor-pointer font-bold">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const selection = window.getSelection();
+                    if (!selection || selection.rangeCount === 0) return;
+                    const range = selection.getRangeAt(0);
+                    const b = document.createElement("strong");
+                    b.appendChild(range.extractContents());
+                    range.insertNode(b);
+                  }}
+                  className="px-3 py-1 bg-white border border-slate-200 rounded font-black hover:bg-slate-100"
+                >
+                  In đậm (B)
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const selection = window.getSelection();
+                    if (!selection || selection.rangeCount === 0) return;
+                    const range = selection.getRangeAt(0);
+                    const em = document.createElement("em");
+                    em.appendChild(range.extractContents());
+                    range.insertNode(em);
+                  }}
+                  className="px-3 py-1 bg-white border border-slate-200 rounded italic hover:bg-slate-100"
+                >
+                  In nghiêng (I)
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (aboutEditorRef.current) {
+                      const h2 = document.createElement("h2");
+                      h2.style.fontSize = "20px";
+                      h2.style.fontWeight = "bold";
+                      h2.style.color = "#004A52";
+                      h2.style.margin = "12px 0";
+                      h2.textContent = "Tiêu đề lớn";
+                      aboutEditorRef.current.appendChild(h2);
+                    }
+                  }}
+                  className="px-3 py-1 bg-white border border-slate-200 rounded font-bold hover:bg-slate-100"
+                >
+                  + Tiêu đề lớn
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (aboutEditorRef.current) {
+                      const p = document.createElement("p");
+                      p.style.margin = "8px 0";
+                      p.textContent = "Đoạn văn mới...";
+                      aboutEditorRef.current.appendChild(p);
+                    }
+                  }}
+                  className="px-3 py-1 bg-white border border-slate-200 rounded hover:bg-slate-100"
+                >
+                  + Đoạn văn
+                </button>
+
+                <label className="px-3 py-1 bg-orange-50 text-[#EE6425] border border-orange-200 rounded cursor-pointer font-bold hover:bg-orange-100">
                   Chèn hình ảnh
-                  <input type="file" accept="image/*" onChange={handleInsertAboutImage} className="hidden" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          if (aboutEditorRef.current) {
+                            const img = document.createElement("img");
+                            img.src = reader.result as string;
+                            img.style.maxWidth = "100%";
+                            img.style.borderRadius = "12px";
+                            img.style.margin = "10px 0";
+                            aboutEditorRef.current.appendChild(img);
+                          }
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    className="hidden"
+                  />
                 </label>
               </div>
 
               <div
                 ref={aboutEditorRef}
                 contentEditable
-                className="w-full min-h-[300px] border border-t-0 border-slate-300 rounded-b-xl p-5 text-sm outline-none bg-white leading-relaxed"
+                className="w-full min-h-[320px] border border-t-0 border-slate-300 rounded-b-xl p-5 text-sm outline-none bg-white leading-relaxed"
               ></div>
 
               <button
