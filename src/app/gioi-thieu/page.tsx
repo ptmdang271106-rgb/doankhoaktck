@@ -53,46 +53,37 @@ export default function GioiThieuPage() {
 
   return (
     <div className="min-h-screen bg-white text-[#333333] font-sans antialiased">
-      {/* THANH ĐIỀU HƯỚNG CHUẨN TRANG CHỦ */}
+      {/* THANH ĐIỀU HƯỚNG CHUẨN ĐÚNG MẪU HÌNH ẢNH */}
       <header className="border-b border-gray-100 bg-white sticky top-0 z-40 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
+        <div className="w-full px-3 sm:px-6 lg:px-10">
+          <div className="py-2.5 sm:py-3 lg:h-24 grid grid-cols-12 items-center text-[13px] font-medium text-[#2C3E50]">
             
-            {/* LOGO & TÊN KHOA */}
-            <Link href="/" className="flex items-center gap-3">
-              <div className="relative w-12 h-12 flex-shrink-0">
-                <img
-                  src="/logodk.png"
-                  alt="Logo Khoa Cơ Khí"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <div className="border-l-2 border-orange-500 pl-3">
-                <span className="block text-[11px] sm:text-xs font-bold text-[#0A2540] uppercase tracking-wide">
-                  ĐOÀN TRƯỜNG ĐH KỸ THUẬT - CÔNG NGHỆ CẦN THƠ
-                </span>
-                <span className="block text-sm sm:text-base font-extrabold text-[#E05A10] uppercase">
-                  ĐOÀN KHOA KỸ THUẬT CƠ KHÍ
-                </span>
-              </div>
-            </Link>
-
-            {/* MENU TRUNG TÂM & PHẢI (DESKTOP) */}
-            <nav className="hidden lg:flex items-center gap-6 font-semibold text-sm text-slate-700">
-              <Link href="/" className="hover:text-[#EE6425] transition-colors py-2">
-                Trang chủ
+            {/* MENU TRÁI (ĐIỂM DANH, CỔNG ĐRL, GIỚI THIỆU, CHI ĐOÀN) */}
+            <div className="col-span-8 hidden lg:flex items-center justify-start space-x-4 whitespace-nowrap">
+              <Link
+                href="/diem-danh"
+                className="bg-[#007A87] hover:bg-[#00606B] text-white px-4 py-2 rounded-full text-xs font-bold transition-colors shadow-sm inline-block"
+              >
+                Điểm danh
+              </Link>
+              
+              <Link
+                href="/tra-cuu"
+                className="bg-[#00707b] hover:bg-[#005a63] text-white px-4 py-2 rounded-full text-xs font-bold transition-colors inline-block shadow-sm"
+              >
+                Cổng ĐRL
               </Link>
 
               {/* DROPDOWN GIỚI THIỆU */}
               <div className="relative group py-2" ref={introDropdownRef}>
-                <div className="flex items-center gap-1 cursor-pointer text-[#EE6425]">
-                  <Link href="/gioi-thieu" className="transition-colors">
+                <div className="flex items-center gap-1 cursor-pointer">
+                  <Link href="/gioi-thieu" className="hover:text-[#EE6425] transition-colors font-bold text-slate-800">
                     Giới thiệu
                   </Link>
                   <button
                     type="button"
                     onClick={() => setIsIntroOpen(!isIntroOpen)}
-                    className="p-0.5 text-xs transition"
+                    className="p-0.5 hover:text-[#EE6425] text-xs transition"
                   >
                     ▾
                   </button>
@@ -118,63 +109,64 @@ export default function GioiThieuPage() {
                 </div>
               </div>
 
-              <Link href="/diem-danh" className="hover:text-[#EE6425] transition-colors py-2">
-                Điểm danh
-              </Link>
-              <Link href="/tra-cuu" className="hover:text-[#EE6425] transition-colors py-2">
-                Cổng ĐRL & CTXH
-              </Link>
-              <Link href="/dang-ky" className="hover:text-[#EE6425] transition-colors py-2">
-                Đăng ký hoạt động
-              </Link>
-            </nav>
+              <a href="#" className="hover:text-[#007A87] transition-colors text-xs font-semibold">
+                Chi đoàn / Chi hội
+              </a>
+            </div>
 
-            {/* THÔNG TIN TÀI KHOẢN */}
-            <div className="hidden lg:flex items-center gap-4">
+            {/* LOGO & TÊN KHOA Ở GIỮA/PHẢI */}
+            <div className="col-span-12 lg:col-span-4 flex items-center justify-end gap-3 py-1">
+              <Link href="/" className="flex items-center gap-3">
+                <div className="border-l-2 border-orange-500 pl-3 text-right hidden xl:block">
+                  <span className="block text-[10px] font-bold text-[#0A2540] uppercase">
+                    ĐOÀN TRƯỜNG ĐH KỸ THUẬT - CÔNG NGHỆ CẦN THƠ
+                  </span>
+                  <span className="block text-xs font-extrabold text-[#E05A10] uppercase">
+                    ĐOÀN KHOA KỸ THUẬT CƠ KHÍ
+                  </span>
+                </div>
+                <img
+                  src="/logo-doankhoa.png"
+                  alt="Logo Khoa Cơ Khí"
+                  className="h-10 sm:h-12 w-auto object-contain cursor-pointer"
+                />
+              </Link>
+
+              {/* TÀI KHOẢN ĐĂNG NHẬP */}
               {currentUser ? (
-                <div className="flex items-center gap-3 bg-orange-50/80 border border-orange-200 px-4 py-2 rounded-2xl shadow-xs">
+                <div className="flex items-center gap-2 bg-orange-50/80 border border-orange-200 px-3 py-1.5 rounded-2xl shadow-xs">
                   <div className="text-right leading-tight">
-                    <span className="block text-xs font-bold text-[#004A52]">
+                    <span className="block text-[11px] font-bold text-[#EE6425]">
                       {currentUser.fullName || currentUser.mssv}
                     </span>
-                    <span className="block text-[10px] text-slate-500 font-semibold">
-                      {currentUser.role === "super_admin" ? "Admin Tối Cao" : currentUser.role === "branch_admin" ? "BCH Chi Đoàn (Bí thư)" : currentUser.mssv}
+                    <span className="block text-[9px] text-slate-500 font-semibold">
+                      {currentUser.role === "super_admin" ? "Admin Tối Cao" : currentUser.role === "branch_admin" ? "Bí thư Chi đoàn" : currentUser.mssv}
                     </span>
                   </div>
                   {(currentUser.role === "super_admin" || currentUser.role === "branch_admin" || currentUser.role === "admin") && (
                     <Link
                       href="/admin"
-                      className="bg-[#004A52] hover:bg-[#00343a] text-white text-xs font-bold px-3.5 py-2 rounded-xl transition shadow-xs"
+                      className="bg-[#004A52] hover:bg-[#00343a] text-white text-[10px] font-bold px-2.5 py-1.5 rounded-xl transition"
                     >
                       Quản trị
                     </Link>
                   )}
                   <button
                     onClick={handleLogout}
-                    className="bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs px-3 py-2 rounded-xl transition"
+                    className="text-[10px] text-red-600 font-bold hover:underline"
                   >
-                    Đăng xuất
+                    (Đăng xuất)
                   </button>
                 </div>
               ) : (
                 <Link
                   href="/dang-nhap"
-                  className="bg-[#EE6425] hover:bg-[#d85216] text-white px-5 py-2.5 rounded-2xl text-xs font-bold transition shadow-md"
+                  className="bg-[#EE6425] hover:bg-[#d85216] text-white px-3.5 py-1.5 rounded-full text-xs font-bold transition shadow-sm"
                 >
                   Đăng nhập
                 </Link>
               )}
             </div>
-
-            {/* NÚT MOBILE MENU */}
-            <button
-              onClick={() => setIsIntroOpen(!isIntroOpen)}
-              className="lg:hidden p-2 rounded-xl bg-orange-50 text-[#EE6425]"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
           </div>
         </div>
 
