@@ -86,7 +86,7 @@ export const DRL_SECTIONS_FULL = [
       { id: "1_9", title: "9. Các cuộc thi khởi nghiệp do Trường tổ chức", subtext: "Cổ vũ: 1đ | BTC: 2đ | Tham gia: 3đ | Giải: 4 đến 7 đ/lần", max: 7, maxLabel: "Tối đa 7 đ" },
       { id: "1_10", title: "10. Các cuộc thi khởi nghiệp do đơn vị ngoài Trường tổ chức", subtext: "Cổ vũ: 2đ | BTC: 3đ | Tham gia: 4đ | Giải: 5 đến 8 đ/lần", max: 8, maxLabel: "Tối đa 8 đ" },
       { id: "1_11", title: "11. Thành viên các câu lạc bộ học thuật cấp Khoa, Trường", subtext: "Minh chứng thành viên CLB", max: 2, maxLabel: "Tối đa 2 đ" },
-      { id: "1_12", title: "12. Các hoạt động học tập khác", subtext: "Tham gia trực tiếp: 3 đ/lần | Tham gia trực tuyến: 1 đ/lần", max: 3, maxLabel: "Tối đa 3 đ" },
+      { id: "1_12", title: "12. Các hoạt động học tập khác", subtext: "Tham gia trực tiếp: 3 đ/lần | Trực tuyến: 1 đ/lần", max: 3, maxLabel: "Tối đa 3 đ" },
     ],
   },
   {
@@ -305,9 +305,17 @@ export default function AdminDashboard() {
   const handleSaveAboutUs = async (e: React.FormEvent) => {
     e.preventDefault();
     const html = aboutEditorRef.current ? aboutEditorRef.current.innerHTML : "";
-    const { error } = await supabase.from("site_settings").upsert([
-      { key: "about_us", value: html, updated_at: new Date().toISOString() }
-    ], { onConflict: "key" });
+    
+    const { data: existing } = await supabase.from("site_settings").select("*").eq("key", "about_us").maybeSingle();
+
+    let error;
+    if (existing) {
+      const res = await supabase.from("site_settings").update({ value: html, updated_at: new Date().toISOString() }).eq("key", "about_us");
+      error = res.error;
+    } else {
+      const res = await supabase.from("site_settings").insert([{ key: "about_us", value: html, updated_at: new Date().toISOString() }]);
+      error = res.error;
+    }
 
     if (error) {
       alert("Lỗi lưu trang Giới thiệu: " + error.message);
