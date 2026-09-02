@@ -343,11 +343,20 @@ export default function CongDRLPage() {
         submitted_at: new Date().toISOString(),
       };
 
-      await supabase.from("drl_submissions").upsert([submission], { onConflict: "mssv,semester_id" });
-      setDrlStatus("Đã nộp - Chờ BCH Chi đoàn duyệt");
-      alert("Nộp phiếu ĐRL thành công!");
+      const { error } = await supabase
+        .from("drl_submissions")
+        .upsert([submission], { onConflict: "mssv,semester_id" });
+
+      if (error) {
+        alert("Lỗi lưu phiếu ĐRL: " + error.message);
+        console.error(error);
+      } else {
+        setDrlStatus("Đã nộp - Chờ BCH Chi đoàn duyệt");
+        alert("Nộp phiếu ĐRL thành công!");
+        loadData(currentUser.mssv, selectedSemester);
+      }
     } catch (err: any) {
-      alert("Lỗi: " + err.message);
+      alert("Lỗi hệ thống: " + err.message);
     }
   };
 
