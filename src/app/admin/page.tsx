@@ -69,8 +69,7 @@ export const EVENT_CRITERIA_OPTIONS = [
   { code: "V.8", label: "V.8 Giấy khen tập thể của Đoàn trao tặng", max: 2 },
 ];
 
-// Cấu trúc đầy đủ chi tiết y hệt trang sinh viên để hiển thị khi lớp chấm
-const DRL_SECTIONS_FULL = [
+export const DRL_SECTIONS_FULL = [
   {
     id: "sec1",
     title: "I. Đánh giá về ý thức tham gia học tập",
@@ -198,21 +197,29 @@ export function generateCtuetEmail(fullName: string, mssv: string): string {
 export default function AdminDashboard() {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<"students" | "officers" | "semesters" | "review" | "events" | "posts">("students");
+  const [activeTab, setActiveTab] = useState<"students" | "officers" | "semesters" | "review" | "events" | "posts" | "about">("students");
   
   const [students, setStudents] = useState<any[]>([]);
   const [officers, setOfficers] = useState<any[]>([]);
   const [posts, setPosts] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
-  const [registrations, setRegistrations] = useState<any[]>([]);
   const [semesters, setSemesters] = useState<any[]>([]);
 
-  // State sinh viên
+  // State sinh viên & thông tin Đoàn viên mở rộng
   const [studentInputMode, setStudentInputMode] = useState<"paste" | "manual" | "file">("paste");
   const [pasteData, setPasteData] = useState("");
   const [manualMssv, setManualMssv] = useState("");
   const [manualFullName, setManualFullName] = useState("");
   const [manualClass, setManualClass] = useState("CNKT Tự động hóa K2024");
+  const [manualBirthPlace, setManualBirthPlace] = useState("");
+  const [manualUnionDate, setManualUnionDate] = useState("");
+  const [manualPartyDate, setManualPartyDate] = useState("");
+  const [manualSoDoan, setManualSoDoan] = useState("Chưa nộp");
+  const [manualChuaKetNap, setManualChuaKetNap] = useState(false);
+
+  // State quản lý Giới thiệu (About Us)
+  const [aboutHtml, setAboutHtml] = useState("");
+  const aboutEditorRef = useRef<HTMLDivElement>(null);
 
   // State tạo tài khoản BCH Chi đoàn
   const [officerUser, setOfficerUser] = useState("");
@@ -232,8 +239,6 @@ export default function AdminDashboard() {
   const [studentProofs, setStudentProofs] = useState<any[]>([]);
   const [studentSubmission, setStudentSubmission] = useState<any>(null);
   const [reviewSemester, setReviewSemester] = useState("hk1_2026_2027");
-
-  // Điểm do lớp (BCH Chi đoàn) chấm cho sinh viên
   const [officerScores, setOfficerScores] = useState<{ [key: string]: number }>({});
 
   // State sự kiện
@@ -271,11 +276,14 @@ export default function AdminDashboard() {
     const { data: evData } = await supabase.from("events").select("*").order("created_at", { ascending: false });
     if (evData) setEvents(evData);
 
-    const { data: regData } = await supabase.from("registrations").select("*").order("id", { ascending: false });
-    if (regData) setRegistrations(regData);
-
     const { data: semData } = await supabase.from("drl_semesters").select("*").order("created_at", { ascending: false });
     if (semData) setSemesters(semData);
+
+    const { data: aboutData } = await supabase.from("site_settings").select("*").eq("key", "about_us").maybeSingle();
+    if (aboutData && aboutData.value) {
+      setAboutHtml(aboutData.value);
+      if (aboutEditorRef.current) aboutEditorRef.current.innerHTML = aboutData.value;
+    }
   };
 
   useEffect(() => {
@@ -294,7 +302,36 @@ export default function AdminDashboard() {
     fetchAllData();
   }, [router]);
 
-  // ================= 1. QUẢN LÝ TÀI KHOẢN BCH CHI ĐOÀN =================
+  // ================= 1. LƯU GIỚI THIỆU (ABOUT US) =================
+  const handleSaveAboutUs = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const html = aboutEditorRef.current ? aboutEditorRef.current.innerHTML : "";
+    const { error } = await supabase.from("site_settings").upsert([
+      { key: "about_us", value: html, updated_at: new Date().toISOString() }
+    ], { onConflict: "key" });
+
+    if (error) {
+      alert("Lỗi lưu trang Giới thiệu: " + error.message);
+    } else {
+      alert("Đã cập nhật trang Giới thiệu thành công!");
+      setAboutHtml(html);
+    }
+  };
+
+  const formatAboutText = (cmd: string, value: string = "") => {
+    document.execCommand(cmd, false, value);
+  };
+
+  const handleInsertAboutImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => document.execCommand("insertImage", false, reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // ================= 2. QUẢN LÝ TÀI KHOẢN CÁN BỘ =================
   const handleCreateOfficer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!officerUser.trim() || !officerPass.trim() || !officerName.trim()) {
@@ -328,7 +365,7 @@ export default function AdminDashboard() {
     }
   };
 
-  // ================= 2. QUẢN LÝ HỌC KỲ ĐRL =================
+  // ================= 3. QUẢN LÝ HỌC KỲ ĐRL =================
   const handleCreateSemester = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!semId.trim() || !semTitle.trim()) return alert("Vui lòng nhập mã và tên học kỳ!");
@@ -357,7 +394,7 @@ export default function AdminDashboard() {
     fetchAllData();
   };
 
-  // ================= 3. BÍ THƯ CHI ĐOÀN CHẤM ĐIỂM CHI TIẾT & DUYỆT MINH CHỨNG =================
+  // ================= 4. BÍ THƯ CHI ĐOÀN CHẤM ĐIỂM CHI TIẾT =================
   const handleSelectStudentForReview = async (st: any) => {
     setSelectedStudent(st);
     try {
@@ -433,7 +470,7 @@ export default function AdminDashboard() {
     }
   };
 
-  // ================= 4. QUẢN LÝ SINH VIÊN =================
+  // ================= 5. QUẢN LÝ SINH VIÊN (KÈM THÔNG TIN ĐOÀN VIÊN) =================
   const handleProcessPasteData = async () => {
     if (!pasteData.trim()) return alert("Vui lòng dán dữ liệu!");
     const rows = pasteData.split(/\r\n|\n/).filter((r) => r.trim() !== "");
@@ -448,7 +485,18 @@ export default function AdminDashboard() {
         const password = mssv.slice(-3);
         const email = generateCtuetEmail(full_name, mssv);
 
-        imported.push({ mssv, full_name, email, student_class, password });
+        imported.push({
+          mssv,
+          full_name,
+          email,
+          student_class,
+          password,
+          birth_place: "Cần Thơ",
+          union_date: "2020-03-26",
+          party_date: "",
+          so_doan: "Đã nộp",
+          chua_ket_nap_doan: false,
+        });
       }
     }
 
@@ -474,7 +522,20 @@ export default function AdminDashboard() {
     const password = mssv.slice(-3);
     const email = generateCtuetEmail(full_name, mssv);
 
-    const { error } = await supabase.from("students").upsert([{ mssv, full_name, email, student_class, password }], { onConflict: "mssv" });
+    const newStudent = {
+      mssv,
+      full_name,
+      email,
+      student_class,
+      password,
+      birth_place: manualBirthPlace || "Cần Thơ",
+      union_date: manualUnionDate || "2020-03-26",
+      party_date: manualPartyDate || "",
+      so_doan: manualSoDoan,
+      chua_ket_nap_doan: manualChuaKetNap,
+    };
+
+    const { error } = await supabase.from("students").upsert([newStudent], { onConflict: "mssv" });
     if (error) {
       alert("Lỗi thêm sinh viên: " + error.message);
     } else {
@@ -482,6 +543,9 @@ export default function AdminDashboard() {
       fetchAllData();
       setManualMssv("");
       setManualFullName("");
+      setManualBirthPlace("");
+      setManualUnionDate("");
+      setManualPartyDate("");
     }
   };
 
@@ -504,7 +568,18 @@ export default function AdminDashboard() {
           const student_class = cols[2] || "CNKT Tự động hóa K2024";
           const password = mssv.slice(-3);
           const email = generateCtuetEmail(full_name, mssv);
-          imported.push({ mssv, full_name, email, student_class, password });
+          imported.push({
+            mssv,
+            full_name,
+            email,
+            student_class,
+            password,
+            birth_place: "Cần Thơ",
+            union_date: "2020-03-26",
+            party_date: "",
+            so_doan: "Đã nộp",
+            chua_ket_nap_doan: false,
+          });
         }
       }
 
@@ -546,7 +621,7 @@ export default function AdminDashboard() {
     }
   };
 
-  // ================= 5. QUẢN LÝ SỰ KIỆN =================
+  // ================= 6. SỰ KIỆN & BÀI VIẾT =================
   const handleSelectCriteria = (selectedCode: string) => {
     setEventCategoryCode(selectedCode);
     const item = EVENT_CRITERIA_OPTIONS.find((c) => c.code === selectedCode);
@@ -625,7 +700,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // ================= 6. QUẢN LÝ BÀI VIẾT =================
   const handleCoverUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -737,6 +811,15 @@ export default function AdminDashboard() {
             Quản lý Sinh viên ({students.length})
           </button>
 
+          <button
+            onClick={() => setActiveTab("about")}
+            className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition ${
+              activeTab === "about" ? "bg-[#EE6425] text-white shadow" : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
+            }`}
+          >
+            Quản lý Giới thiệu
+          </button>
+
           {currentUser?.role === "super_admin" && (
             <button
               onClick={() => setActiveTab("officers")}
@@ -785,12 +868,12 @@ export default function AdminDashboard() {
           </button>
         </div>
 
-        {/* ================= TAB 1: QUẢN LÝ SINH VIÊN ================= */}
+        {/* ================= TAB 1: QUẢN LÝ SINH VIÊN (KÈM THÔNG TIN ĐOÀN VIÊN) ================= */}
         {activeTab === "students" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-5 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
               <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                <h3 className="text-sm font-bold text-[#004A52]">Thêm sinh viên vào hệ thống</h3>
+                <h3 className="text-sm font-bold text-[#004A52]">Thêm sinh viên / Đoàn viên</h3>
                 <button
                   type="button"
                   onClick={handleDownloadSampleTemplate}
@@ -810,7 +893,7 @@ export default function AdminDashboard() {
                 <div className="space-y-2">
                   <p className="text-[11px] text-slate-500">Quét chọn 3 cột (MSSV, Họ tên, Lớp) từ file Excel rồi dán vào đây:</p>
                   <textarea
-                    rows={6}
+                    rows={5}
                     value={pasteData}
                     onChange={(e) => setPasteData(e.target.value)}
                     placeholder="CNDT2411081	Phạm Thái Minh Đăng	CNKT Tự động hóa K2024"
@@ -823,20 +906,54 @@ export default function AdminDashboard() {
               )}
 
               {studentInputMode === "manual" && (
-                <form onSubmit={handleAddManualStudent} className="space-y-3">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Mã số sinh viên (MSSV) *</label>
-                    <input type="text" required value={manualMssv} onChange={(e) => setManualMssv(e.target.value)} placeholder="VD: CNDT2411081" className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono uppercase outline-none focus:border-[#EE6425]" />
+                <form onSubmit={handleAddManualStudent} className="space-y-2.5">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">MSSV *</label>
+                      <input type="text" required value={manualMssv} onChange={(e) => setManualMssv(e.target.value)} placeholder="CNDT2411081" className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono uppercase outline-none" />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Họ và tên *</label>
+                      <input type="text" required value={manualFullName} onChange={(e) => setManualFullName(e.target.value)} placeholder="Phạm Thái Minh Đăng" className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none" />
+                    </div>
                   </div>
+
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Họ và tên sinh viên *</label>
-                    <input type="text" required value={manualFullName} onChange={(e) => setManualFullName(e.target.value)} placeholder="VD: Phạm Thái Minh Đăng" className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none focus:border-[#EE6425]" />
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">Lớp sinh hoạt</label>
+                    <input type="text" value={manualClass} onChange={(e) => setManualClass(e.target.value)} placeholder="CNKT Tự động hóa K2024" className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none" />
                   </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Lớp sinh hoạt</label>
-                    <input type="text" value={manualClass} onChange={(e) => setManualClass(e.target.value)} placeholder="VD: CNKT Tự động hóa K2024" className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none focus:border-[#EE6425]" />
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Nơi sinh</label>
+                      <input type="text" value={manualBirthPlace} onChange={(e) => setManualBirthPlace(e.target.value)} placeholder="Cần Thơ" className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none" />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Sổ Đoàn</label>
+                      <select value={manualSoDoan} onChange={(e) => setManualSoDoan(e.target.value)} className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none bg-white">
+                        <option value="Đã nộp">Đã nộp</option>
+                        <option value="Chưa nộp">Chưa nộp</option>
+                      </select>
+                    </div>
                   </div>
-                  <button type="submit" className="w-full bg-[#007A87] hover:bg-[#005a63] text-white font-bold py-2.5 rounded-xl transition text-xs uppercase shadow">
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Ngày vào Đoàn</label>
+                      <input type="date" value={manualUnionDate} onChange={(e) => setManualUnionDate(e.target.value)} className="w-full border border-slate-300 rounded-xl px-2 py-2 text-xs outline-none" />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Ngày vào Đảng</label>
+                      <input type="date" value={manualPartyDate} onChange={(e) => setManualPartyDate(e.target.value)} className="w-full border border-slate-300 rounded-xl px-2 py-2 text-xs outline-none" />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-1">
+                    <input type="checkbox" id="chuaDoan" checked={manualChuaKetNap} onChange={(e) => setManualChuaKetNap(e.target.checked)} className="rounded" />
+                    <label htmlFor="chuaDoan" className="text-xs font-semibold text-slate-700 cursor-pointer">Chưa kết nạp Đoàn</label>
+                  </div>
+
+                  <button type="submit" className="w-full bg-[#007A87] hover:bg-[#005a63] text-white font-bold py-2.5 rounded-xl transition text-xs uppercase shadow mt-1">
                     Thêm sinh viên này
                   </button>
                 </form>
@@ -868,9 +985,9 @@ export default function AdminDashboard() {
                     <tr>
                       <th className="p-2.5">MSSV</th>
                       <th className="p-2.5">Họ và tên</th>
-                      <th className="p-2.5">Email</th>
                       <th className="p-2.5">Lớp</th>
-                      <th className="p-2.5">Mật khẩu</th>
+                      <th className="p-2.5">Sổ Đoàn</th>
+                      <th className="p-2.5">Đoàn/Đảng</th>
                       <th className="p-2.5 text-center">Thao tác</th>
                     </tr>
                   </thead>
@@ -879,9 +996,15 @@ export default function AdminDashboard() {
                       <tr key={idx} className="hover:bg-slate-50">
                         <td className="p-2.5 font-bold text-[#007A87]">{s.mssv}</td>
                         <td className="p-2.5 font-medium text-slate-800">{s.full_name}</td>
-                        <td className="p-2.5 text-[#EE6425] font-mono text-[11px] font-semibold">{s.email}</td>
                         <td className="p-2.5 text-slate-600">{s.student_class}</td>
-                        <td className="p-2.5 font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded inline-block my-1">{s.password}</td>
+                        <td className="p-2.5">
+                          <span className={`px-2 py-0.5 rounded font-bold text-[10px] ${s.so_doan === "Đã nộp" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>
+                            {s.so_doan || "Chưa nộp"}
+                          </span>
+                        </td>
+                        <td className="p-2.5 text-[11px] text-slate-500">
+                          {s.chua_ket_nap_doan ? <span className="text-red-600 font-bold">Chưa vào Đoàn</span> : `Đoàn: ${s.union_date || "Có"}`}
+                        </td>
                         <td className="p-2.5 text-center">
                           <button onClick={() => handleDeleteSingleStudent(s.mssv, s.full_name)} className="text-red-600 hover:text-red-800 font-bold hover:underline">Xóa</button>
                         </td>
@@ -894,7 +1017,44 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* ================= TAB 2: QUẢN LÝ CÁN BỘ ================= */}
+        {/* ================= TAB QUẢN LÝ GIỚI THIỆU (ABOUT US) ================= */}
+        {activeTab === "about" && (
+          <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+            <div>
+              <h2 className="text-lg font-black text-[#004A52]">SOẠN THẢO TRANG GIỚI THIỆU ĐOÀN KHOA</h2>
+              <p className="text-xs text-slate-500 mt-0.5">Nội dung này sẽ hiển thị trực tiếp khi người dùng bấm vào mục "Giới thiệu" trên thanh Menu chính.</p>
+            </div>
+
+            <form onSubmit={handleSaveAboutUs} className="space-y-4">
+              <div className="flex flex-wrap items-center gap-1.5 p-2 bg-slate-50 border border-slate-300 rounded-t-xl text-xs font-bold">
+                <button type="button" onClick={() => formatAboutText("bold")} className="px-3 py-1 bg-white border border-slate-200 rounded font-black">B</button>
+                <button type="button" onClick={() => formatAboutText("italic")} className="px-3 py-1 bg-white border border-slate-200 rounded italic">I</button>
+                <button type="button" onClick={() => formatAboutText("underline")} className="px-3 py-1 bg-white border border-slate-200 rounded underline">U</button>
+                <button type="button" onClick={() => formatAboutText("formatBlock", "<h2>")} className="px-3 py-1 bg-white border border-slate-200 rounded font-bold">Tiêu đề lớn</button>
+                <button type="button" onClick={() => formatAboutText("formatBlock", "<p>")} className="px-3 py-1 bg-white border border-slate-200 rounded">Đoạn văn</button>
+                <label className="px-3 py-1 bg-orange-50 text-[#EE6425] border border-orange-200 rounded cursor-pointer font-bold">
+                  Chèn hình ảnh
+                  <input type="file" accept="image/*" onChange={handleInsertAboutImage} className="hidden" />
+                </label>
+              </div>
+
+              <div
+                ref={aboutEditorRef}
+                contentEditable
+                className="w-full min-h-[300px] border border-t-0 border-slate-300 rounded-b-xl p-5 text-sm outline-none bg-white leading-relaxed"
+              ></div>
+
+              <button
+                type="submit"
+                className="bg-[#EE6425] hover:bg-[#d85216] text-white font-bold px-8 py-3 rounded-xl text-xs uppercase shadow transition"
+              >
+                Lưu nội dung Giới thiệu
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* ================= TAB QUẢN LÝ CÁN BỘ ================= */}
         {activeTab === "officers" && currentUser?.role === "super_admin" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
@@ -956,7 +1116,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* ================= TAB 3: QUẢN LÝ HỌC KỲ ĐRL ================= */}
+        {/* ================= TAB QUẢN LÝ HỌC KỲ ================= */}
         {activeTab === "semesters" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
@@ -1027,7 +1187,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* ================= TAB 4: DUYỆT ĐRL CHI ĐOÀN (HIỆN BẢNG CHI TIẾT + CỘT LỚP CHẤM Y HỆT HƯỚNG DẪN) ================= */}
+        {/* ================= TAB DUYỆT ĐRL CHI ĐOÀN ================= */}
         {activeTab === "review" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
@@ -1076,7 +1236,6 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  {/* MINH CHỨNG SINH VIÊN NỘP */}
                   <div>
                     <h3 className="text-xs font-bold text-slate-700 uppercase mb-2">Minh chứng sinh viên nộp ({studentProofs.length})</h3>
                     {studentProofs.length === 0 ? (
@@ -1108,7 +1267,6 @@ export default function AdminDashboard() {
                     )}
                   </div>
 
-                  {/* BẢNG ĐÁNH GIÁ CHI TIẾT Y HỆT NỘI DUNG QUY CHẾ ĐỂ LỚP CHẤM */}
                   <div className="space-y-4 pt-2">
                     <h3 className="text-xs font-bold text-[#004A52] uppercase">Bảng chấm điểm chi tiết (BCH Chi đoàn / Lớp chấm):</h3>
                     
@@ -1176,7 +1334,6 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  {/* TỔNG KẾT & NÚT GỬI ĐIỂM */}
                   <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4 bg-orange-50/50 p-4 rounded-2xl">
                     <div>
                       <span className="text-xs text-slate-500 block">TỔNG ĐIỂM LỚP CHẤM CHÍNH THỨC:</span>
@@ -1200,11 +1357,11 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* ================= TAB 5: SỰ KIỆN ================= */}
+        {/* ================= TAB SỰ KIỆN ================= */}
         {activeTab === "events" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-              <h2 className="text-base font-bold text-[#004A52] mb-4">Tạo Sự Kiện Mới (Kèm Hình Bìa & Nội Dung)</h2>
+              <h2 className="text-base font-bold text-[#004A52] mb-4">Tạo Sự Kiện Mới</h2>
               <form onSubmit={handleAddEvent} className="space-y-3.5">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Tên sự kiện *</label>
@@ -1242,21 +1399,16 @@ export default function AdminDashboard() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Nội dung chi tiết sự kiện (Soạn thảo như Word)</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Nội dung chi tiết sự kiện</label>
                   <div className="flex flex-wrap items-center gap-1.5 p-2 bg-slate-50 border border-slate-300 rounded-t-xl text-xs font-bold">
                     <button type="button" onClick={() => formatEventText("bold")} className="px-2.5 py-1 bg-white border border-slate-200 rounded font-black">B</button>
                     <button type="button" onClick={() => formatEventText("italic")} className="px-2.5 py-1 bg-white border border-slate-200 rounded italic">I</button>
-                    <button type="button" onClick={() => formatEventText("underline")} className="px-2.5 py-1 bg-white border border-slate-200 rounded underline">U</button>
                     <label className="px-2.5 py-1 bg-orange-50 text-[#EE6425] border border-orange-200 rounded cursor-pointer">
                       Chèn hình
                       <input type="file" accept="image/*" onChange={handleInsertEventBodyImage} className="hidden" />
                     </label>
                   </div>
-                  <div
-                    ref={eventEditorRef}
-                    contentEditable
-                    className="w-full min-h-[140px] border border-t-0 border-slate-300 rounded-b-xl p-3 text-xs outline-none bg-white"
-                  ></div>
+                  <div ref={eventEditorRef} contentEditable className="w-full min-h-[120px] border border-t-0 border-slate-300 rounded-b-xl p-3 text-xs outline-none bg-white"></div>
                 </div>
 
                 <div>
@@ -1308,11 +1460,11 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* ================= TAB 6: BÀI VIẾT ================= */}
+        {/* ================= TAB BÀI VIẾT ================= */}
         {activeTab === "posts" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-              <h2 className="text-base font-bold text-[#004A52] mb-4">Tạo bài viết mới (Kèm Hình Bìa & Nội Dung)</h2>
+              <h2 className="text-base font-bold text-[#004A52] mb-4">Tạo bài viết mới</h2>
               <form onSubmit={handleAddPost} className="space-y-4">
                 <input
                   type="text"
@@ -1337,73 +1489,37 @@ export default function AdminDashboard() {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Hình ảnh bìa bài viết</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleCoverUpload}
-                    className="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-500"
-                  />
-                  {postCoverImage && <img src={postCoverImage} alt="Cover Preview" className="mt-2 h-24 rounded-xl object-cover" />}
+                  <input type="file" accept="image/*" onChange={handleCoverUpload} className="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-500" />
+                  {postCoverImage && <img src={postCoverImage} alt="" className="mt-2 h-20 rounded-xl object-cover" />}
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Nội dung chi tiết (Soạn thảo như Word)</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Nội dung chi tiết</label>
                   <div className="flex flex-wrap items-center gap-1.5 p-2 bg-slate-50 border border-slate-300 rounded-t-xl text-xs font-bold">
-                    <button type="button" onClick={() => formatText("bold")} className="px-2.5 py-1 bg-white border border-slate-200 rounded font-black">B</button>
-                    <button type="button" onClick={() => formatText("italic")} className="px-2.5 py-1 bg-white border border-slate-200 rounded italic">I</button>
-                    <button type="button" onClick={() => formatText("underline")} className="px-2.5 py-1 bg-white border border-slate-200 rounded underline">U</button>
-                    <label className="px-2.5 py-1 bg-orange-50 text-[#EE6425] border border-orange-200 rounded cursor-pointer">
+                    <button type="button" onClick={() => formatText("bold")} className="px-2.5 py-1 bg-white border rounded font-black">B</button>
+                    <button type="button" onClick={() => formatText("italic")} className="px-2.5 py-1 bg-white border rounded italic">I</button>
+                    <label className="px-2.5 py-1 bg-orange-50 text-[#EE6425] border rounded cursor-pointer">
                       Chèn hình
                       <input type="file" accept="image/*" onChange={handleInsertBodyImage} className="hidden" />
                     </label>
                   </div>
-                  <div
-                    ref={editorRef}
-                    contentEditable
-                    className="w-full min-h-[160px] border border-t-0 border-slate-300 rounded-b-xl p-4 text-sm outline-none bg-white"
-                  ></div>
+                  <div ref={editorRef} contentEditable className="w-full min-h-[140px] border border-t-0 border-slate-300 rounded-b-xl p-4 text-sm outline-none bg-white"></div>
                 </div>
 
-                <button
-                  type="submit"
-                  className="w-full bg-[#EE6425] hover:bg-[#d85216] text-white font-bold py-3 rounded-xl text-xs uppercase shadow"
-                >
+                <button type="submit" className="w-full bg-[#EE6425] text-white font-bold py-3 rounded-xl text-xs uppercase shadow">
                   Xuất bản bài viết
                 </button>
               </form>
             </div>
 
             <div className="lg:col-span-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-2 border-b border-slate-200">
-                <h2 className="text-base font-bold text-[#004A52]">Bài viết đã xuất bản ({posts.length})</h2>
-                {posts.length > 0 && (
-                  <button onClick={handleDeleteAllPosts} className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition shadow">
-                    Xóa tất cả
-                  </button>
-                )}
-              </div>
-
-              {posts.length === 0 ? (
-                <p className="text-xs text-slate-400 py-4">Chưa có bài viết nào.</p>
-              ) : (
-                <div className="divide-y divide-slate-100 space-y-3">
-                  {posts.map((p) => (
-                    <div key={p.id} className="pt-3 first:pt-0 flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-3">
-                        {p.cover_image && <img src={p.cover_image} alt="" className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />}
-                        <div>
-                          <span className="text-[10px] font-bold text-[#007A87] bg-teal-50 px-2 py-0.5 rounded">{p.category}</span>
-                          <h3 className="text-xs font-bold text-slate-800 mt-1">{p.title}</h3>
-                          <span className="text-[10px] text-slate-400 mt-0.5 block">Ngày: {p.date}</span>
-                        </div>
-                      </div>
-                      <button onClick={() => handleDeleteSinglePost(p.id, p.title)} className="text-red-600 hover:text-red-800 text-xs font-bold hover:underline flex-shrink-0">
-                        Xóa
-                      </button>
-                    </div>
-                  ))}
+              <h2 className="text-base font-bold text-[#004A52] mb-4">Bài viết đã xuất bản ({posts.length})</h2>
+              {posts.map((p) => (
+                <div key={p.id} className="flex justify-between items-center py-2 border-b text-xs">
+                  <span className="font-bold">{p.title}</span>
+                  <button onClick={() => handleDeleteSinglePost(p.id, p.title)} className="text-red-600 font-bold">Xóa</button>
                 </div>
-              )}
+              ))}
             </div>
           </div>
         )}
