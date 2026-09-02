@@ -9,7 +9,9 @@ export default function Navbar() {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isIntroOpen, setIsIntroOpen] = useState(false);
+  const [isBranchOpen, setIsBranchOpen] = useState(false);
   const introDropdownRef = useRef<HTMLDivElement>(null);
+  const branchDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const savedUser = localStorage.getItem("ctut_current_user");
@@ -24,6 +26,9 @@ export default function Navbar() {
     const handleClickOutside = (e: MouseEvent) => {
       if (introDropdownRef.current && !introDropdownRef.current.contains(e.target as Node)) {
         setIsIntroOpen(false);
+      }
+      if (branchDropdownRef.current && !branchDropdownRef.current.contains(e.target as Node)) {
+        setIsBranchOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -57,7 +62,7 @@ export default function Navbar() {
               Cổng ĐRL
             </Link>
 
-            {/* GIỚI THIỆU DROPDOWN (2 MỤC: ĐOÀN KHOA KTCK & LIÊN CHI HỘI KTCK) */}
+            {/* GIỚI THIỆU DROPDOWN (CHỈ CÒN ĐOÀN KHOA & LIÊN CHI HỘI) */}
             <div className="relative group py-2" ref={introDropdownRef}>
               <div className="flex items-center gap-1 cursor-pointer">
                 <span className="hover:text-[#EE6425] transition-colors text-xs font-semibold pl-1">
@@ -92,9 +97,33 @@ export default function Navbar() {
               </div>
             </div>
 
-            <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1 text-xs font-semibold">
-              Chi đoàn / Chi hội
-            </a>
+            {/* CHI ĐOÀN / CHI HỘI DROPDOWN (CÓ TRA CỨU THÔNG TIN SINH VIÊN) */}
+            <div className="relative group py-2" ref={branchDropdownRef}>
+              <div className="flex items-center gap-1 cursor-pointer">
+                <span className="hover:text-[#EE6425] transition-colors text-xs font-semibold">
+                  Chi đoàn / Chi hội
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setIsBranchOpen(!isBranchOpen)}
+                  className="p-0.5 hover:text-[#EE6425] text-xs transition"
+                >
+                  ▾
+                </button>
+              </div>
+
+              <div className={`absolute left-0 top-full w-56 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 text-xs font-bold text-slate-700 transition-all ${
+                isBranchOpen ? "block" : "hidden group-hover:block"
+              }`}>
+                <Link
+                  href="/tra-cuu-thong-tin"
+                  onClick={() => setIsBranchOpen(false)}
+                  className="block px-4 py-3 hover:bg-orange-50 hover:text-[#EE6425] transition text-blue-700 font-bold"
+                >
+                  Tra cứu thông tin sinh viên
+                </Link>
+              </div>
+            </div>
           </div>
 
           {/* 2. LOGO NGANG CHUẨN Ở GIỮA */}
