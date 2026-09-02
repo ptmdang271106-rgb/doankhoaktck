@@ -41,26 +41,26 @@ export default function Navbar() {
       <div className="w-full px-3 sm:px-6 lg:px-10">
         <div className="py-2.5 sm:py-3 lg:h-24 grid grid-cols-12 items-center text-[13px] font-medium text-[#2C3E50]">
           
-          {/* MENU TRÁI (DESKTOP) */}
-          <div className="col-span-8 hidden lg:flex items-center justify-start space-x-4 whitespace-nowrap">
+          {/* 1. MENU TRÁI (DESKTOP) */}
+          <div className="col-span-4 hidden lg:flex items-center justify-start space-x-3 whitespace-nowrap">
             <Link
               href="/diem-danh"
-              className="bg-[#007A87] hover:bg-[#00606B] text-white px-4 py-2 rounded-full text-xs font-bold transition-colors shadow-sm inline-block"
+              className="bg-[#007A87] hover:bg-[#00606B] text-white px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors shadow-sm inline-block"
             >
               Điểm danh
             </Link>
             
             <Link
               href="/tra-cuu"
-              className="bg-[#00707b] hover:bg-[#005a63] text-white px-4 py-2 rounded-full text-xs font-bold transition-colors inline-block shadow-sm"
+              className="bg-[#00707b] hover:bg-[#005a63] text-white px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors inline-block shadow-sm"
             >
               Cổng ĐRL
             </Link>
 
-            {/* DROPDOWN GIỚI THIỆU CHUẨN UEH STYLE */}
+            {/* GIỚI THIỆU DROPDOWN (2 MỤC: ĐOÀN KHOA KTCK & LIÊN CHI HỘI KTCK) */}
             <div className="relative group py-2" ref={introDropdownRef}>
               <div className="flex items-center gap-1 cursor-pointer">
-                <span className="hover:text-[#EE6425] transition-colors text-xs font-semibold">
+                <span className="hover:text-[#EE6425] transition-colors text-xs font-semibold pl-1">
                   Giới thiệu
                 </span>
                 <button
@@ -72,33 +72,22 @@ export default function Navbar() {
                 </button>
               </div>
 
-              <div className={`absolute left-0 top-full w-64 bg-white rounded-2xl shadow-xl border border-slate-100 py-2.5 z-50 text-xs font-bold text-slate-700 transition-all ${
+              <div className={`absolute left-0 top-full w-52 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 text-xs font-bold text-slate-700 transition-all ${
                 isIntroOpen ? "block" : "hidden group-hover:block"
               }`}>
-                <div className="px-4 py-2 text-[10px] uppercase text-slate-400 font-extrabold tracking-wider">Cơ cấu nhân sự</div>
                 <Link
                   href="/gioi-thieu?tab=doankhoa"
                   onClick={() => setIsIntroOpen(false)}
-                  className="block px-5 py-2.5 hover:bg-orange-50 hover:text-[#EE6425] transition font-semibold"
+                  className="block px-4 py-2.5 hover:bg-orange-50 hover:text-[#EE6425] transition"
                 >
-                  • Đoàn khoa KTCK
+                  Đoàn khoa KTCK
                 </Link>
                 <Link
                   href="/gioi-thieu?tab=lienchihoi"
                   onClick={() => setIsIntroOpen(false)}
-                  className="block px-5 py-2.5 hover:bg-orange-50 hover:text-[#EE6425] transition font-semibold"
+                  className="block px-4 py-2.5 hover:bg-orange-50 hover:text-[#EE6425] transition border-t border-slate-50"
                 >
-                  • Liên chi hội KTCK
-                </Link>
-
-                <div className="border-t border-slate-100 my-1.5"></div>
-                <div className="px-4 py-2 text-[10px] uppercase text-slate-400 font-extrabold tracking-wider">Chức năng - Tiện ích</div>
-                <Link
-                  href="/tra-cuu-thong-tin"
-                  onClick={() => setIsIntroOpen(false)}
-                  className="block px-5 py-2.5 hover:bg-orange-50 hover:text-[#EE6425] transition font-semibold text-blue-700"
-                >
-                  • Tra cứu thông tin sinh viên
+                  Liên chi hội KTCK
                 </Link>
               </div>
             </div>
@@ -108,7 +97,7 @@ export default function Navbar() {
             </a>
           </div>
 
-          {/* LOGO CHUẨN NGANG (SỬ DỤNG ĐÚNG FILE LOGO NGANG CỦA BẠN) */}
+          {/* 2. LOGO NGANG CHUẨN Ở GIỮA */}
           <div className="col-span-12 lg:col-span-4 flex items-center justify-center py-1">
             <Link href="/">
               <img
@@ -119,7 +108,7 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* MENU PHẢI (DESKTOP) */}
+          {/* 3. MENU PHẢI (DESKTOP): HỖ TRỢ SINH VIÊN | VĂN PHÒNG ĐIỆN TỬ */}
           <div className="col-span-4 hidden lg:flex items-center justify-end space-x-4 whitespace-nowrap">
             <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1 text-xs font-semibold">
               Hỗ trợ sinh viên
@@ -168,11 +157,10 @@ export default function Navbar() {
             <Link href="/dang-ky" className="hover:text-[#004A52] transition-colors font-bold text-[#EE6425]">
               Hoạt động – Sự kiện Cơ khí
             </Link>
-            <Link href="/gioi-thieu?tab=doankhoa" className="hover:text-[#004A52] transition-colors">Đoàn khoa KTCK</Link>
-            <Link href="/gioi-thieu?tab=lienchihoi" className="hover:text-[#004A52] transition-colors">Liên chi hội KTCK</Link>
             <a href="#" className="hover:text-[#004A52] transition-colors">Xem gì hôm nay</a>
             <a href="#" className="hover:text-[#004A52] transition-colors">Bản tin học thuật</a>
             <a href="#" className="hover:text-[#004A52] transition-colors">Mechanical Signal</a>
+            <a href="#" className="hover:text-[#004A52] transition-colors">Gương sáng CTUT</a>
           </div>
         </div>
       </div>
