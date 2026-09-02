@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import Header from "@/components/Header";
+import Navbar from "@/components/Navbar";
 import { supabase } from "@/lib/supabase";
 
 export default function CTUTYouthPortal() {
@@ -35,7 +35,7 @@ export default function CTUTYouthPortal() {
 
   return (
     <div className="min-h-screen bg-white text-[#333333] font-sans antialiased">
-      <Header />
+      <Navbar />
 
       {/* BANNER */}
       <section className="w-full bg-[#0A2540] flex justify-center items-center">
