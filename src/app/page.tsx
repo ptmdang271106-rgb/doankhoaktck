@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
@@ -9,6 +9,8 @@ export default function CTUTYouthPortal() {
   const [activeTabRank, setActiveTabRank] = useState("Nổi bật");
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [allPosts, setAllPosts] = useState<any[]>([]);
+  const [isIntroOpen, setIsIntroOpen] = useState(false);
+  const introDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const savedUser = localStorage.getItem("ctut_current_user");
@@ -23,6 +25,14 @@ export default function CTUTYouthPortal() {
       }
     };
     fetchPosts();
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (introDropdownRef.current && !introDropdownRef.current.contains(e.target as Node)) {
+        setIsIntroOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleLogout = () => {
@@ -46,12 +56,12 @@ export default function CTUTYouthPortal() {
 
   return (
     <div className="min-h-screen bg-white text-[#333333] font-sans antialiased">
-      {/* 1. THANH DIEU HUONG */}
+      {/* 1. THANH ĐIỀU HƯỚNG CHÍNH */}
       <header className="border-b border-gray-100 bg-white sticky top-0 z-40">
         <div className="w-full px-3 sm:px-6 lg:px-10">
           <div className="py-2.5 sm:py-3 lg:h-24 grid grid-cols-12 items-center text-[13px] font-medium text-[#2C3E50]">
             
-            {/* MENU TRAI (DESKTOP) */}
+            {/* MENU TRÁI (DESKTOP) */}
             <div className="col-span-4 hidden lg:flex items-center justify-start space-x-3 whitespace-nowrap">
               <Link
                 href="/diem-danh"
@@ -67,9 +77,44 @@ export default function CTUTYouthPortal() {
                 Cổng ĐRL
               </Link>
 
-              <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1 text-xs font-semibold pl-1">
-                Giới thiệu
-              </a>
+              {/* DROPDOWN GIỚI THIỆU CHUẨN PHONG CÁCH UEH */}
+              <div className="relative group py-2" ref={introDropdownRef}>
+                <div className="flex items-center">
+                  <Link
+                    href="/gioi-thieu"
+                    className="hover:text-[#EE6425] transition-colors text-xs font-bold pl-1 py-1"
+                  >
+                    Giới thiệu
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => setIsIntroOpen(!isIntroOpen)}
+                    className="p-1 hover:text-[#EE6425] transition"
+                  >
+                    ▾
+                  </button>
+                </div>
+
+                {/* MENU XỔ XUỐNG KHI RÊ CHUỘT HOẶC BẤM */}
+                <div className={`absolute left-0 top-full w-56 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 text-xs font-bold text-slate-700 transition-all ${
+                  isIntroOpen ? "block" : "hidden group-hover:block"
+                }`}>
+                  <Link
+                    href="/gioi-thieu"
+                    onClick={() => setIsIntroOpen(false)}
+                    className="block px-4 py-2.5 hover:bg-orange-50 hover:text-[#EE6425] transition"
+                  >
+                    Về Đoàn Khoa Cơ Khí
+                  </Link>
+                  <Link
+                    href="/tra-cuu-thong-tin"
+                    onClick={() => setIsIntroOpen(false)}
+                    className="block px-4 py-2.5 hover:bg-orange-50 hover:text-[#EE6425] transition"
+                  >
+                    Tra cứu Đoàn viên / Sinh viên
+                  </Link>
+                </div>
+              </div>
 
               <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1 text-xs font-semibold">
                 Chi đoàn / Chi hội
@@ -87,7 +132,7 @@ export default function CTUTYouthPortal() {
               </Link>
             </div>
 
-            {/* MENU PHAI (DESKTOP) */}
+            {/* MENU PHẢI (DESKTOP) */}
             <div className="col-span-4 hidden lg:flex items-center justify-end space-x-4 whitespace-nowrap">
               <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1 text-xs font-semibold">
                 Hỗ trợ sinh viên
@@ -102,7 +147,7 @@ export default function CTUTYouthPortal() {
                   <span className="text-xs font-bold text-[#EE6425]">
                     {currentUser.fullName || currentUser.mssv}
                   </span>
-                  {currentUser.role === "admin" && (
+                  {(currentUser.role === "super_admin" || currentUser.role === "branch_admin" || currentUser.role === "admin") && (
                     <Link
                       href="/admin"
                       className="bg-[#007A87] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full hover:bg-[#005a63]"
@@ -144,6 +189,18 @@ export default function CTUTYouthPortal() {
                 Cổng ĐRL
               </Link>
               <Link
+                href="/gioi-thieu"
+                className="bg-orange-500 text-white px-2.5 py-1.5 rounded-lg text-[11px] font-bold shadow-xs"
+              >
+                Giới thiệu
+              </Link>
+              <Link
+                href="/tra-cuu-thong-tin"
+                className="bg-blue-600 text-white px-2.5 py-1.5 rounded-lg text-[11px] font-bold shadow-xs"
+              >
+                Tra cứu ĐV
+              </Link>
+              <Link
                 href="/dang-ky"
                 className="bg-emerald-600 text-white px-2.5 py-1.5 rounded-lg text-[11px] font-bold shadow-xs"
               >
@@ -155,7 +212,7 @@ export default function CTUTYouthPortal() {
               {currentUser ? (
                 <div className="flex items-center gap-1 bg-orange-50 border border-orange-200 px-2 py-1 rounded-lg text-[11px] font-bold text-[#EE6425]">
                   <span className="truncate max-w-[90px]">{currentUser.fullName?.split(" ").slice(-1)[0] || currentUser.mssv}</span>
-                  {currentUser.role === "admin" && (
+                  {(currentUser.role === "super_admin" || currentUser.role === "branch_admin" || currentUser.role === "admin") && (
                     <Link href="/admin" className="bg-[#007A87] text-white text-[9px] px-1.5 py-0.5 rounded">Admin</Link>
                   )}
                   <button onClick={handleLogout} className="text-slate-400 hover:text-red-500 ml-0.5 font-bold">✕</button>
@@ -172,17 +229,22 @@ export default function CTUTYouthPortal() {
           </div>
         </div>
 
-        {/* MENU PHU */}
+        {/* MENU PHỤ */}
         <div className="bg-[#F8FCFC] border-t border-b border-[#E6F4F4]">
           <div className="w-full px-4 sm:px-6 lg:px-10">
             <div className="flex justify-start sm:justify-center space-x-6 sm:space-x-10 py-2.5 text-[12.5px] sm:text-[13.5px] font-semibold text-[#007A87] overflow-x-auto whitespace-nowrap">
               <Link href="/dang-ky" className="hover:text-[#004A52] transition-colors font-bold text-[#EE6425]">
                 Hoạt động – Sự kiện Cơ khí
               </Link>
+              <Link href="/gioi-thieu" className="hover:text-[#004A52] transition-colors">
+                Giới thiệu Đoàn Khoa
+              </Link>
+              <Link href="/tra-cuu-thong-tin" className="hover:text-[#004A52] transition-colors font-bold text-blue-700">
+                Tra cứu Đoàn viên / Sinh viên
+              </Link>
               <a href="#" className="hover:text-[#004A52] transition-colors">Xem gì hôm nay</a>
               <a href="#" className="hover:text-[#004A52] transition-colors">Bản tin học thuật</a>
               <a href="#" className="hover:text-[#004A52] transition-colors">Mechanical Signal</a>
-              <a href="#" className="hover:text-[#004A52] transition-colors">Gương sáng CTUT</a>
             </div>
           </div>
         </div>
@@ -199,7 +261,7 @@ export default function CTUTYouthPortal() {
         </div>
       </section>
 
-      {/* NOI DUNG */}
+      {/* NỘI DUNG CHÍNH */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between border-b-2 border-gray-100 pb-4 gap-4">
           <h2 className="text-xl sm:text-2xl font-bold text-[#006674] tracking-tight">
@@ -319,13 +381,14 @@ export default function CTUTYouthPortal() {
                 href="/tra-cuu"
                 className="w-full bg-[#E67E22] hover:bg-[#D35400] text-white text-xs font-bold py-2 rounded transition-colors uppercase inline-block"
               >
-                Tra cứu ngay
+                Tra cứu ĐRL ngay
               </Link>
             </div>
           </div>
         </div>
       </main>
 
+      {/* FOOTER */}
       <footer className="bg-[#1A252F] text-gray-400 py-8 border-t border-gray-700 text-xs">
         <div className="max-w-7xl mx-auto px-4 text-center space-y-2">
           <div className="text-white font-bold uppercase">
