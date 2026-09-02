@@ -43,10 +43,10 @@ export default function TraCuuThongTinPage() {
         <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-sm border border-slate-200 space-y-6">
           <div className="text-center max-w-lg mx-auto space-y-2">
             <h1 className="text-xl sm:text-2xl font-black text-[#004A52] uppercase">
-              TRA CỨU THÔNG TIN ĐOÀN VIÊN / SINH VIÊN
+              TRA CỨU THÔNG TIN  SINH VIÊN
             </h1>
             <p className="text-xs text-slate-500">
-              Nhập mã số sinh viên (MSSV) để tra cứu thông tin lý lịch đoàn viên và tình trạng sinh hoạt.
+              Nhập mã số sinh viên (MSSV) để tra cứu thông tin lý lịch sinh viên.
             </p>
           </div>
 
@@ -56,7 +56,7 @@ export default function TraCuuThongTinPage() {
               required
               value={mssvInput}
               onChange={(e) => setMssvInput(e.target.value)}
-              placeholder="Nhập MSSV (VD: CNDT2411081)..."
+              placeholder="Nhập MSSV (VD: CNDT0011099)..."
               className="flex-1 border border-slate-300 rounded-xl px-4 py-3 text-xs font-mono uppercase outline-none focus:border-[#EE6425]"
             />
             <button
