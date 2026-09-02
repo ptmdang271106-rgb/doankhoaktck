@@ -22,7 +22,6 @@ export default function GioiThieuPage() {
         setContentHtml(`
           <h2 style="color: #004A52; font-weight: 800; font-size: 24px; margin-bottom: 16px;">Về Đoàn Khoa Kỹ thuật Cơ khí - CTUT</h2>
           <p style="margin-bottom: 12px; line-height: 1.6;">Đoàn Thanh niên - Hội Sinh viên Khoa Kỹ thuật Cơ khí là tổ chức chính trị - xã hội của đoàn viên, sinh viên Khoa Kỹ thuật Cơ khí, Trường Đại học Kỹ thuật - Công nghệ Cần Thơ.</p>
-          <p style="line-height: 1.6;">Chúng tôi luôn tiên phong trong các hoạt động học thuật, nghiên cứu khoa học, phong trào tình nguyện và rèn luyện kỹ năng thực tế cho sinh viên ngành cơ khí thời đại số.</p>
         `);
       }
       setLoading(false);
