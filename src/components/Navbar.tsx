@@ -47,7 +47,6 @@ export default function Navbar() {
     <header className="sticky top-0 z-40 bg-white border-b border-orange-100 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
-          {/* Logo & Tên Đoàn Khoa */}
           <Link href="/" className="flex items-center gap-3">
             <div className="relative w-12 h-12 flex-shrink-0">
               <Image
@@ -69,7 +68,6 @@ export default function Navbar() {
             </div>
           </Link>
 
-          {/* Menu máy tính chuẩn UEH Style */}
           <nav className="hidden md:flex items-center gap-1 font-semibold text-sm text-slate-700">
             <Link
               href="/"
@@ -78,7 +76,7 @@ export default function Navbar() {
               Trang chủ
             </Link>
 
-{/* Dropdown Giới thiệu  */}
+            {/* Dropdown Giới thiệu */}
             <div className="relative group" ref={dropdownRef}>
               <div className="flex items-center">
                 <Link
@@ -135,7 +133,6 @@ export default function Navbar() {
               Đăng ký hoạt động
             </Link>
 
-            {/* Trạng thái Người dùng / Đăng nhập */}
             {user ? (
               <div className="flex items-center gap-3 ml-3 pl-3 border-l border-slate-200">
                 <div className="text-right leading-tight">
@@ -175,7 +172,6 @@ export default function Navbar() {
             )}
           </nav>
 
-          {/* Nút Mobile Menu */}
           <button
             onClick={() => setIsOpen(!isOpen)}
             className="md:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100"
@@ -191,7 +187,6 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Menu xổ xuống trên Điện thoại */}
       {isOpen && (
         <div className="md:hidden bg-white border-t border-slate-100 px-4 pt-2 pb-4 space-y-2 font-medium text-slate-700">
           <Link href="/" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-lg hover:bg-orange-50">
@@ -200,7 +195,7 @@ export default function Navbar() {
           <Link href="/gioi-thieu" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-lg hover:bg-orange-50">
             Giới thiệu Đoàn Khoa
           </Link>
-          <Link href="/tra-cuu-thong tin" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-lg hover:bg-orange-50">
+          <Link href="/tra-cuu-thong-tin" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-lg hover:bg-orange-50">
             Tra cứu Đoàn viên / Sinh viên
           </Link>
           <Link href="/diem-danh" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-lg hover:bg-orange-50">
