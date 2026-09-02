@@ -205,7 +205,7 @@ export default function AdminDashboard() {
   const [events, setEvents] = useState<any[]>([]);
   const [semesters, setSemesters] = useState<any[]>([]);
 
-  // State sinh viên & thông tin Đoàn viên mở rộng
+  // State sinh viên & thông tin Đoàn viên
   const [studentInputMode, setStudentInputMode] = useState<"paste" | "manual" | "file">("paste");
   const [pasteData, setPasteData] = useState("");
   const [manualMssv, setManualMssv] = useState("");
@@ -221,19 +221,19 @@ export default function AdminDashboard() {
   const [aboutHtml, setAboutHtml] = useState("");
   const aboutEditorRef = useRef<HTMLDivElement>(null);
 
-  // State tạo tài khoản BCH Chi đoàn
+  // State tài khoản cán bộ
   const [officerUser, setOfficerUser] = useState("");
   const [officerName, setOfficerName] = useState("");
   const [officerClass, setOfficerClass] = useState("");
   const [officerPass, setOfficerPass] = useState("");
 
-  // State quản lý học kỳ
+  // State học kỳ
   const [semId, setSemId] = useState("");
   const [semTitle, setSemTitle] = useState("");
   const [semStart, setSemStart] = useState("");
   const [semEnd, setSemEnd] = useState("");
 
-  // State giao diện Bí thư Chi đoàn chấm điểm chi tiết
+  // State chấm điểm
   const [classStudents, setClassStudents] = useState<any[]>([]);
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
   const [studentProofs, setStudentProofs] = useState<any[]>([]);
@@ -302,7 +302,6 @@ export default function AdminDashboard() {
     fetchAllData();
   }, [router]);
 
-  // ================= 1. LƯU GIỚI THIỆU (ABOUT US) =================
   const handleSaveAboutUs = async (e: React.FormEvent) => {
     e.preventDefault();
     const html = aboutEditorRef.current ? aboutEditorRef.current.innerHTML : "";
@@ -318,20 +317,6 @@ export default function AdminDashboard() {
     }
   };
 
-  const formatAboutText = (cmd: string, value: string = "") => {
-    document.execCommand(cmd, false, value);
-  };
-
-  const handleInsertAboutImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => document.execCommand("insertImage", false, reader.result as string);
-      reader.readAsDataURL(file);
-    }
-  };
-
-  // ================= 2. QUẢN LÝ TÀI KHOẢN CÁN BỘ =================
   const handleCreateOfficer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!officerUser.trim() || !officerPass.trim() || !officerName.trim()) {
@@ -365,7 +350,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // ================= 3. QUẢN LÝ HỌC KỲ ĐRL =================
   const handleCreateSemester = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!semId.trim() || !semTitle.trim()) return alert("Vui lòng nhập mã và tên học kỳ!");
@@ -394,7 +378,6 @@ export default function AdminDashboard() {
     fetchAllData();
   };
 
-  // ================= 4. BÍ THƯ CHI ĐOÀN CHẤM ĐIỂM CHI TIẾT =================
   const handleSelectStudentForReview = async (st: any) => {
     setSelectedStudent(st);
     try {
@@ -470,8 +453,7 @@ export default function AdminDashboard() {
     }
   };
 
-  // ================= 5. QUẢN LÝ SINH VIÊN (KÈM THÔNG TIN ĐOÀN VIÊN) =================
-const handleProcessPasteData = async () => {
+  const handleProcessPasteData = async () => {
     if (!pasteData.trim()) return alert("Vui lòng dán dữ liệu!");
     const rows = pasteData.split(/\r\n|\n/).filter((r) => r.trim() !== "");
     const imported: any[] = [];
@@ -598,7 +580,7 @@ const handleProcessPasteData = async () => {
     reader.readAsText(file);
   };
 
- const handleDownloadSampleTemplate = () => {
+  const handleDownloadSampleTemplate = () => {
     const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + 
       "MSSV,Họ và tên,Lớp,Nơi sinh,Ngày vào Đoàn,Ngày vào Đảng,Sổ Đoàn,Chưa kết nạp Đoàn\n" +
       "CNDT2411081,Phạm Thái Minh Đăng,CNKT Tự động hóa K2024,Cần Thơ,2020-03-26,,Đã nộp,false\n" +
@@ -627,7 +609,6 @@ const handleProcessPasteData = async () => {
     }
   };
 
-  // ================= 6. SỰ KIỆN & BÀI VIẾT =================
   const handleSelectCriteria = (selectedCode: string) => {
     setEventCategoryCode(selectedCode);
     const item = EVENT_CRITERIA_OPTIONS.find((c) => c.code === selectedCode);
@@ -770,7 +751,6 @@ const handleProcessPasteData = async () => {
     <main className="min-h-screen bg-slate-100 py-8 px-4 sm:px-6 lg:px-8 font-sans antialiased text-slate-800">
       <div className="max-w-7xl mx-auto">
         
-        {/* HEADER */}
         <div className="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-4">
             <Link href="/">
@@ -806,7 +786,6 @@ const handleProcessPasteData = async () => {
           </div>
         </div>
 
-        {/* TABS */}
         <div className="flex flex-wrap gap-2 mb-6">
           <button
             onClick={() => setActiveTab("students")}
@@ -874,7 +853,6 @@ const handleProcessPasteData = async () => {
           </button>
         </div>
 
-        {/* ================= TAB 1: QUẢN LÝ SINH VIÊN (KÈM THÔNG TIN ĐOÀN VIÊN) ================= */}
         {activeTab === "students" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-5 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
@@ -1023,7 +1001,6 @@ const handleProcessPasteData = async () => {
           </div>
         )}
 
-       {/* ================= TAB QUẢN LÝ GIỚI THIỆU (ABOUT US) ================= */}
         {activeTab === "about" && (
           <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
             <div>
@@ -1139,7 +1116,6 @@ const handleProcessPasteData = async () => {
           </div>
         )}
 
-        {/* ================= TAB QUẢN LÝ CÁN BỘ ================= */}
         {activeTab === "officers" && currentUser?.role === "super_admin" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
@@ -1201,7 +1177,6 @@ const handleProcessPasteData = async () => {
           </div>
         )}
 
-        {/* ================= TAB QUẢN LÝ HỌC KỲ ================= */}
         {activeTab === "semesters" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
@@ -1272,7 +1247,6 @@ const handleProcessPasteData = async () => {
           </div>
         )}
 
-        {/* ================= TAB DUYỆT ĐRL CHI ĐOÀN ================= */}
         {activeTab === "review" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
@@ -1442,7 +1416,6 @@ const handleProcessPasteData = async () => {
           </div>
         )}
 
-        {/* ================= TAB SỰ KIỆN ================= */}
         {activeTab === "events" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
@@ -1545,7 +1518,6 @@ const handleProcessPasteData = async () => {
           </div>
         )}
 
-        {/* ================= TAB BÀI VIẾT ================= */}
         {activeTab === "posts" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
@@ -1611,7 +1583,6 @@ const handleProcessPasteData = async () => {
 
       </div>
 
-      {/* POPUP QR */}
       {activeQrEvent && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-xl w-full p-8 shadow-2xl border-4 border-[#EE6425] text-center">
