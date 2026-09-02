@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -10,9 +10,10 @@ export default function Navbar() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Lấy thông tin user hiện tại từ LocalStorage
     const storedUser = localStorage.getItem("ctut_current_user");
     if (storedUser) {
       try {
@@ -21,14 +22,21 @@ export default function Navbar() {
         setUser(null);
       }
     }
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Xử lý đăng xuất sạch cả Supabase, Google Session và LocalStorage
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
     } catch (e) {
-      console.error("Lỗi đăng xuất:", e);
+      console.error(e);
     }
     localStorage.removeItem("ctut_current_user");
     setUser(null);
@@ -61,19 +69,54 @@ export default function Navbar() {
             </div>
           </Link>
 
-          {/* Menu máy tính */}
-          <nav className="hidden md:flex items-center gap-2 font-semibold text-sm text-slate-700">
+          {/* Menu máy tính chuẩn UEH Style */}
+          <nav className="hidden md:flex items-center gap-1 font-semibold text-sm text-slate-700">
             <Link
               href="/"
               className="px-3 py-2 rounded-lg hover:text-[#E05A10] hover:bg-orange-50 transition"
             >
               Trang chủ
             </Link>
+
+            {/* Dropdown Giới thiệu */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="px-3 py-2 rounded-lg hover:text-[#E05A10] hover:bg-orange-50 transition flex items-center gap-1"
+              >
+                Giới thiệu ▾
+              </button>
+              {isDropdownOpen && (
+                <div className="absolute left-0 mt-1 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 text-xs font-bold text-slate-700">
+                  <Link
+                    href="/gioi-thieu"
+                    onClick={() => setIsDropdownOpen(false)}
+                    className="block px-4 py-2.5 hover:bg-orange-50 hover:text-[#E05A10]"
+                  >
+                    Về Đoàn Khoa Cơ Khí
+                  </Link>
+                  <Link
+                    href="/tra-cuu-thong-tin"
+                    onClick={() => setIsDropdownOpen(false)}
+                    className="block px-4 py-2.5 hover:bg-orange-50 hover:text-[#E05A10]"
+                  >
+                    Tra cứu Đoàn viên / Sinh viên
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            <Link
+              href="/diem-danh"
+              className="px-3 py-2 rounded-lg hover:text-[#E05A10] hover:bg-orange-50 transition"
+            >
+              Điểm danh
+            </Link>
             <Link
               href="/tra-cuu"
               className="px-3 py-2 rounded-lg hover:text-[#E05A10] hover:bg-orange-50 transition"
             >
-              Tra cứu ĐRL & CTXH
+              Cổng ĐRL & CTXH
             </Link>
             <Link
               href="/dang-ky"
@@ -141,25 +184,22 @@ export default function Navbar() {
       {/* Menu xổ xuống trên Điện thoại */}
       {isOpen && (
         <div className="md:hidden bg-white border-t border-slate-100 px-4 pt-2 pb-4 space-y-2 font-medium text-slate-700">
-          <Link
-            href="/"
-            onClick={() => setIsOpen(false)}
-            className="block px-3 py-2 rounded-lg hover:bg-orange-50"
-          >
+          <Link href="/" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-lg hover:bg-orange-50">
             Trang chủ
           </Link>
-          <Link
-            href="/tra-cuu"
-            onClick={() => setIsOpen(false)}
-            className="block px-3 py-2 rounded-lg hover:bg-orange-50"
-          >
-            Tra cứu ĐRL & CTXH
+          <Link href="/gioi-thieu" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-lg hover:bg-orange-50">
+            Giới thiệu Đoàn Khoa
           </Link>
-          <Link
-            href="/dang-ky"
-            onClick={() => setIsOpen(false)}
-            className="block px-3 py-2 rounded-lg hover:bg-orange-50"
-          >
+          <Link href="/tra-cuu-thong tin" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-lg hover:bg-orange-50">
+            Tra cứu Đoàn viên / Sinh viên
+          </Link>
+          <Link href="/diem-danh" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-lg hover:bg-orange-50">
+            Điểm danh
+          </Link>
+          <Link href="/tra-cuu" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-lg hover:bg-orange-50">
+            Cổng ĐRL & CTXH
+          </Link>
+          <Link href="/dang-ky" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-lg hover:bg-orange-50">
             Đăng ký hoạt động
           </Link>
 
@@ -170,11 +210,7 @@ export default function Navbar() {
                   {user.fullName || user.mssv}
                 </span>
                 <span className="block text-[10px] text-slate-500 font-mono">
-                  {user.role === "super_admin"
-                    ? "Admin Tối Cao"
-                    : user.role === "branch_admin"
-                    ? "BCH Chi Đoàn"
-                    : user.mssv}
+                  {user.role === "super_admin" ? "Admin Tối Cao" : user.role === "branch_admin" ? "BCH Chi Đoàn" : user.mssv}
                 </span>
               </div>
               {(user.role === "super_admin" || user.role === "branch_admin") && (
