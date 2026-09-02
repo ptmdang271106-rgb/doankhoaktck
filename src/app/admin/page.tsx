@@ -69,6 +69,105 @@ export const EVENT_CRITERIA_OPTIONS = [
   { code: "V.8", label: "V.8 Giấy khen tập thể của Đoàn trao tặng", max: 2 },
 ];
 
+const DRL_SECTIONS_ADMIN = [
+  {
+    id: "sec1",
+    title: "I. Đánh giá về ý thức tham gia học tập",
+    maxPoints: 20,
+    items: [
+      { id: "1_1", title: "1. Điểm TB học tập tích lũy thang 4", max: 5 },
+      { id: "1_2", title: "2. Giấy chứng nhận lớp kỹ năng học tập", max: 3 },
+      { id: "1_3", title: "3. Hội thảo / Tọa đàm cấp Khoa, Trường", max: 3 },
+      { id: "1_4", title: "4. Cuộc thi học thuật cấp Khoa / Trường", max: 7 },
+      { id: "1_5", title: "5. Cuộc thi học thuật ngoài Trường", max: 8 },
+      { id: "1_6", title: "6. Báo cáo khoa học cấp Khoa", max: 8 },
+      { id: "1_7", title: "7. Tham gia đề tài NCKH cấp Trường", max: 10 },
+      { id: "1_8", title: "8. Viết bài báo khoa học", max: 8 },
+      { id: "1_9", title: "9. Cuộc thi khởi nghiệp cấp Trường", max: 7 },
+      { id: "1_10", title: "10. Cuộc thi khởi nghiệp ngoài Trường", max: 8 },
+      { id: "1_11", title: "11. Thành viên CLB học thuật", max: 2 },
+      { id: "1_12", title: "12. Các hoạt động học thuật khác", max: 3 },
+    ],
+  },
+  {
+    id: "sec2",
+    title: "II. Ý thức chấp hành nội quy, quy chế Trường",
+    maxPoints: 25,
+    items: [
+      { id: "2_1", title: "1. Ý thức, thái độ trong học tập", max: 5 },
+      { id: "2_2", title: "2. Chấp hành nội quy, quy chế Trường", max: 5 },
+      { id: "2_3", title: "3. Chấp hành quy chế thi cử", max: 5 },
+      { id: "2_4", title: "4. Chấp hành quy định thư viện", max: 5 },
+      { id: "2_5", title: "5. Chấp hành quy định phòng học, xưởng", max: 5 },
+      { id: "2_6", title: "6. Thực hiện đăng ký ngoại trú", max: 5 },
+      { id: "2_7", title: "7. Mặc đồng phục đúng quy định", max: 5 },
+      { id: "2_8", title: "8. Sinh hoạt lớp với CVHT", max: 5 },
+    ],
+  },
+  {
+    id: "sec3",
+    title: "III. Hoạt động chính trị, xã hội, văn hóa, thể thao",
+    maxPoints: 20,
+    items: [
+      { id: "3_1", title: "1. Hoạt động bắt buộc do Khoa/Trường tổ chức", max: 3 },
+      { id: "3_2", title: "2. Đại hội Chi đoàn/Chi hội, sinh hoạt Chi đoàn", max: 3 },
+      { id: "3_3", title: "3. Báo cáo chuyên đề do Trường tổ chức", max: 4 },
+      { id: "3_4", title: "4. Hoạt động ngoại khóa / Cuộc thi cấp CLB/Khoa/Trường", max: 7 },
+      { id: "3_5", title: "5. Ngoại khóa / Cuộc thi từ cấp Thành phố trở lên", max: 8 },
+      { id: "3_6", title: "6. Được kết nạp Đoàn", max: 5 },
+      { id: "3_7", title: "7. Được kết nạp Đảng", max: 8 },
+      { id: "3_8", title: "8. Hoạt động phong trào do Đoàn/Hội điều động", max: 4 },
+      { id: "3_9", title: "9. Thành viên CLB, đội, nhóm Đoàn - Hội", max: 2 },
+      { id: "3_10", title: "10. Học tập các bài lý luận chính trị", max: 4 },
+      { id: "3_11", title: "11. Đền ơn đáp nghĩa, Thắp nến tri ân", max: 3 },
+      { id: "3_12", title: "12. Lao động tình nguyện tại Trường", max: 3 },
+      { id: "3_13", title: "13. Khen thưởng phong trào cá nhân", max: 7 },
+      { id: "3_14", title: "14. Tập thể được khen thưởng phong trào", max: 1 },
+      { id: "3_15", title: "15. Các hoạt động phong trào khác", max: 3 },
+    ],
+  },
+  {
+    id: "sec4",
+    title: "IV. Ý thức công dân trong quan hệ cộng đồng",
+    maxPoints: 25,
+    items: [
+      { id: "4_1", title: "1. Chấp hành pháp luật Nhà nước", max: 10 },
+      { id: "4_2", title: "2. Hành vi tốt, sẻ chia, giúp đỡ người yếu thế", max: 5 },
+      { id: "4_3", title: "3. Biểu dương, khen thưởng hoạt động xã hội ngoài trường", max: 5 },
+      { id: "4_4", title: "4. Giao lưu các CLB, Đội, Nhóm trực thuộc", max: 5 },
+      { id: "4_5", title: "5. Chương trình Tư vấn tuyển sinh", max: 5 },
+      { id: "4_6", title: "6. Công tác hỗ trợ nhập học sinh viên mới", max: 5 },
+      { id: "4_7", title: "7. Công tác khám sức khỏe sinh viên", max: 5 },
+      { id: "4_8", title: "8. Công tác tổ chức Ngày hội việc làm", max: 5 },
+      { id: "4_9", title: "9. Công tác tổ chức Lễ Tốt nghiệp", max: 5 },
+      { id: "4_10", title: "10. Công tác kiểm tra hồ sơ sinh viên", max: 5 },
+      { id: "4_11", title: "11. Tham gia các phiên giao dịch việc làm", max: 3 },
+      { id: "4_12", title: "12. Hiến máu tình nguyện", max: 10 },
+      { id: "4_13", title: "13. Chương trình Xuân tình nguyện", max: 5 },
+      { id: "4_14", title: "14. Chiến dịch Tình nguyện Mùa hè xanh", max: 7 },
+      { id: "4_15", title: "15. Chương trình Ngày Chủ nhật xanh", max: 5 },
+      { id: "4_16", title: "16. Chương trình Thứ Bảy tình nguyện", max: 5 },
+      { id: "4_17", title: "17. Chương trình Chào đón tân sinh viên", max: 5 },
+      { id: "4_18", title: "18. Trách nhiệm xã hội và phát triển bền vững", max: 3 },
+    ],
+  },
+  {
+    id: "sec5",
+    title: "V. Ý thức và kết quả tham gia công tác cán bộ lớp",
+    maxPoints: 10,
+    items: [
+      { id: "5_1", title: "1. Tham gia tích cực phong trào Lớp, Đoàn, Hội", max: 3 },
+      { id: "5_2", title: "2. Cán bộ Lớp/Đoàn/Hội hoàn thành tốt nhiệm vụ", max: 5 },
+      { id: "5_3", title: "3. Sinh viên đạt giải học tập, NCKH", max: 7 },
+      { id: "5_4", title: "4. Bằng khen UBND Tỉnh/Thành phố trở lên", max: 5 },
+      { id: "5_5", title: "5. Sinh viên 5 Tốt cấp Trường", max: 6 },
+      { id: "5_6", title: "6. Sinh viên 5 Tốt cấp Thành/Trung ương", max: 10 },
+      { id: "5_7", title: "7. Đạt danh hiệu Đoàn viên ưu tú", max: 6 },
+      { id: "5_8", title: "8. Giấy khen tập thể của Đoàn trao tặng", max: 2 },
+    ],
+  },
+];
+
 function removeVietnameseTones(str: string): string {
   if (!str) return "";
   return str
@@ -126,13 +225,15 @@ export default function AdminDashboard() {
   const [semStart, setSemStart] = useState("");
   const [semEnd, setSemEnd] = useState("");
 
-  // State giao diện Bí thư Chi đoàn chấm điểm
+  // State giao diện Bí thư Chi đoàn chấm điểm chi tiết
   const [classStudents, setClassStudents] = useState<any[]>([]);
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
   const [studentProofs, setStudentProofs] = useState<any[]>([]);
   const [studentSubmission, setStudentSubmission] = useState<any>(null);
-  const [officerFinalScore, setOfficerFinalScore] = useState<number>(80);
   const [reviewSemester, setReviewSemester] = useState("hk1_2026_2027");
+
+  // Điểm do lớp (BCH Chi đoàn) chấm cho sinh viên
+  const [officerScores, setOfficerScores] = useState<{ [key: string]: number }>({});
 
   // State sự kiện
   const [eventTitle, setEventTitle] = useState("");
@@ -255,7 +356,7 @@ export default function AdminDashboard() {
     fetchAllData();
   };
 
-  // ================= 3. BÍ THƯ CHI ĐOÀN CHẤM ĐIỂM & DUYỆT MINH CHỨNG =================
+  // ================= 3. BÍ THƯ CHI ĐOÀN CHẤM ĐIỂM CHI TIẾT & DUYỆT MINH CHỨNG =================
   const handleSelectStudentForReview = async (st: any) => {
     setSelectedStudent(st);
     try {
@@ -275,10 +376,15 @@ export default function AdminDashboard() {
 
       if (sub) {
         setStudentSubmission(sub);
-        setOfficerFinalScore(sub.final_score || sub.self_score || 80);
+        // Nếu lớp đã chấm trước đó thì load lên, nếu chưa thì lấy điểm sinh viên tự chấm làm gốc
+        if (sub.scores_detail) {
+          setOfficerScores(sub.scores_detail);
+        } else {
+          setOfficerScores({});
+        }
       } else {
         setStudentSubmission(null);
-        setOfficerFinalScore(80);
+        setOfficerScores({});
       }
     } catch (e) {
       console.error(e);
@@ -291,9 +397,17 @@ export default function AdminDashboard() {
     handleSelectStudentForReview(selectedStudent);
   };
 
+  // Tính điểm tổng lớp chấm theo từng phần
+  const getOfficerSectionScore = (section: any) => {
+    const rawSum = section.items.reduce((sum: number, it: any) => sum + (Number(officerScores[it.id]) || 0), 0);
+    return Math.min(rawSum, section.maxPoints);
+  };
+
+  const grandOfficerTotalScore = DRL_SECTIONS_ADMIN.reduce((total, sec) => total + getOfficerSectionScore(sec), 0);
+
   const handleSendFinalScore = async () => {
     if (!selectedStudent) return;
-    if (!confirm(`Xác nhận gửi điểm rèn luyện chính thức (${officerFinalScore} điểm) về cho sinh viên ${selectedStudent.full_name}?`)) return;
+    if (!confirm(`Xác nhận gửi bảng điểm rèn luyện chính thức (${grandOfficerTotalScore} điểm) về cho sinh viên ${selectedStudent.full_name}?`)) return;
 
     try {
       const submissionData = {
@@ -302,15 +416,19 @@ export default function AdminDashboard() {
         student_class: selectedStudent.student_class,
         semester_id: reviewSemester,
         self_score: studentSubmission?.self_score || 0,
-        final_score: Number(officerFinalScore),
-        scores_detail: studentSubmission?.scores_detail || {},
+        final_score: Number(grandOfficerTotalScore),
+        scores_detail: officerScores,
         proofs_detail: studentSubmission?.proofs_detail || {},
         status: "BCH Chi đoàn đã duyệt & công bố điểm",
       };
 
-      await supabase.from("drl_submissions").upsert([submissionData], { onConflict: "mssv,semester_id" });
-      alert("Đã gửi điểm rèn luyện chính thức về cho sinh viên thành công!");
-      handleSelectStudentForReview(selectedStudent);
+      const { error } = await supabase.from("drl_submissions").upsert([submissionData], { onConflict: "mssv,semester_id" });
+      if (error) {
+        alert("Lỗi khi gửi điểm: " + error.message);
+      } else {
+        alert("Đã gửi điểm rèn luyện chính thức về cho sinh viên thành công!");
+        handleSelectStudentForReview(selectedStudent);
+      }
     } catch (err: any) {
       alert("Lỗi: " + err.message);
     }
@@ -777,7 +895,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* ================= TAB 2: QUẢN LÝ CÁN BỘ (BCH CHI ĐOÀN) ================= */}
+        {/* ================= TAB 2: QUẢN LÝ CÁN BỘ ================= */}
         {activeTab === "officers" && currentUser?.role === "super_admin" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
@@ -910,7 +1028,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* ================= TAB 4: DUYỆT ĐRL CHI ĐOÀN ================= */}
+        {/* ================= TAB 4: DUYỆT ĐRL CHI ĐOÀN (HIỆN BẢNG CHI TIẾT + CỘT LỚP CHẤM) ================= */}
         {activeTab === "review" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
@@ -927,7 +1045,7 @@ export default function AdminDashboard() {
                 </select>
               </div>
 
-              <div className="space-y-2 max-h-[550px] overflow-y-auto pr-1">
+              <div className="space-y-2 max-h-[600px] overflow-y-auto pr-1">
                 {classStudents.map((st, idx) => (
                   <div
                     key={idx}
@@ -959,14 +1077,15 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
+                  {/* MINH CHỨNG SINH VIÊN NỘP */}
                   <div>
                     <h3 className="text-xs font-bold text-slate-700 uppercase mb-2">Minh chứng sinh viên nộp ({studentProofs.length})</h3>
                     {studentProofs.length === 0 ? (
                       <p className="text-xs text-slate-400 italic">Sinh viên chưa nộp minh chứng nào trong học kỳ này.</p>
                     ) : (
-                      <div className="space-y-2 max-h-60 overflow-y-auto">
+                      <div className="space-y-2 max-h-48 overflow-y-auto">
                         {studentProofs.map((p, pIdx) => (
-                          <div key={pIdx} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+                          <div key={pIdx} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
                             <div>
                               <span className="font-bold text-slate-800 block">{p.activity_title}</span>
                               <span className="text-[11px] text-slate-500">{p.category} (+{p.points}đ)</span>
@@ -990,38 +1109,88 @@ export default function AdminDashboard() {
                     )}
                   </div>
 
+                  {/* BẢNG CHI TIẾT ĐỂ BÍ THƯ / LỚP CHẤM ĐIỂM (Y HỆT SINH VIÊN + CỘT LỚP CHẤM) */}
+                  <div className="space-y-4 pt-2">
+                    <h3 className="text-xs font-bold text-[#004A52] uppercase">Bảng chi tiết các tiêu chí (BCH Chi đoàn / Lớp chấm):</h3>
+                    
+                    <div className="space-y-4 max-h-[450px] overflow-y-auto pr-2">
+                      {DRL_SECTIONS_ADMIN.map((section) => {
+                        const secScore = getOfficerSectionScore(section);
+                        return (
+                          <div key={section.id} className="border border-slate-200 rounded-2xl overflow-hidden">
+                            <div className="bg-slate-100 p-3 flex justify-between items-center text-xs font-black text-[#004A52]">
+                              <span>{section.title} (Tối đa {section.maxPoints} đ)</span>
+                              <span className="text-[#EE6425]">Lớp chấm phần này: {secScore} / {section.maxPoints} đ</span>
+                            </div>
+
+                            <table className="w-full text-left text-xs">
+                              <thead>
+                                <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold text-[11px]">
+                                  <th className="py-2 px-3 w-6/12">Tiêu chí</th>
+                                  <th className="py-2 px-2 text-center w-16">Max</th>
+                                  <th className="py-2 px-2 text-center w-20">SV tự chấm</th>
+                                  <th className="py-2 px-3 text-center w-24 text-[#EE6425]">Lớp chấm</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-100">
+                                {section.items.map((item) => {
+                                  const svVal = studentSubmission?.scores_detail?.[item.id] || 0;
+                                  const classVal = officerScores[item.id] !== undefined ? officerScores[item.id] : svVal;
+
+                                  return (
+                                    <tr key={item.id} className="hover:bg-slate-50">
+                                      <td className="py-2.5 px-3 font-semibold text-slate-800">{item.title}</td>
+                                      <td className="py-2.5 px-2 text-center font-bold text-slate-500">{item.max} đ</td>
+                                      <td className="py-2.5 px-2 text-center font-mono text-slate-600">{svVal} đ</td>
+                                      <td className="py-2.5 px-3 text-center">
+                                        <input
+                                          type="number"
+                                          min="0"
+                                          max={item.max}
+                                          value={classVal}
+                                          onChange={(e) => {
+                                            const val = Math.min(Math.max(0, Number(e.target.value) || 0), item.max);
+                                            setOfficerScores((prev) => ({ ...prev, [item.id]: val }));
+                                          }}
+                                          className="w-16 border border-slate-300 rounded-lg py-1 text-center font-bold text-[#EE6425] outline-none"
+                                        />
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* TỔNG KẾT & NÚT GỬI ĐIỂM */}
                   <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4 bg-orange-50/50 p-4 rounded-2xl">
-                    <div className="flex items-center gap-2 w-full sm:w-auto">
-                      <label className="text-xs font-bold text-slate-700 whitespace-nowrap">Điểm chính thức công bố:</label>
-                      <input
-                        type="number"
-                        min="0"
-                        max="100"
-                        value={officerFinalScore}
-                        onChange={(e) => setOfficerFinalScore(Number(e.target.value))}
-                        className="w-20 border border-slate-300 rounded-xl px-3 py-2 text-center font-bold text-lg text-[#EE6425] outline-none"
-                      />
-                      <span className="text-xs text-slate-400">/ 100đ</span>
+                    <div>
+                      <span className="text-xs text-slate-500 block">TỔNG ĐIỂM LỚP CHẤM CHÍNH THỨC:</span>
+                      <span className="text-2xl font-black text-[#EE6425]">{grandOfficerTotalScore} / 100 điểm</span>
                     </div>
 
                     <button
                       onClick={handleSendFinalScore}
-                      className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#004A52] hover:bg-[#00343a] text-white font-bold text-xs shadow transition uppercase tracking-wider"
+                      className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-[#004A52] hover:bg-[#00343a] text-white font-bold text-xs shadow transition uppercase tracking-wider"
                     >
-                      Gửi điểm về cho sinh viên
+                      Gửi bảng điểm chính thức về cho sinh viên
                     </button>
                   </div>
                 </>
               ) : (
                 <div className="py-24 text-center text-xs text-slate-400">
-                  ⬅ Vui lòng chọn một sinh viên ở danh sách bên trái để xem minh chứng và chấm điểm.
+                  ⬅ Vui lòng chọn một sinh viên ở danh sách bên trái để xem phiếu điểm và chấm điểm chi tiết.
                 </div>
               )}
             </div>
           </div>
         )}
 
-        {/* ================= TAB 5: SỰ KIỆN (CÓ ẢNH BÌA & WORD EDITOR) ================= */}
+        {/* ================= TAB 5: SỰ KIỆN ================= */}
         {activeTab === "events" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
@@ -1129,7 +1298,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* ================= TAB 6: BÀI VIẾT (CÓ ẢNH BÌA & WORD EDITOR) ================= */}
+        {/* ================= TAB 6: BÀI VIẾT ================= */}
         {activeTab === "posts" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
