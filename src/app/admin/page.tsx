@@ -471,7 +471,7 @@ export default function AdminDashboard() {
   };
 
   // ================= 5. QUẢN LÝ SINH VIÊN (KÈM THÔNG TIN ĐOÀN VIÊN) =================
-  const handleProcessPasteData = async () => {
+const handleProcessPasteData = async () => {
     if (!pasteData.trim()) return alert("Vui lòng dán dữ liệu!");
     const rows = pasteData.split(/\r\n|\n/).filter((r) => r.trim() !== "");
     const imported: any[] = [];
@@ -482,6 +482,12 @@ export default function AdminDashboard() {
         const mssv = cols[0].replace(/\s+/g, "").toUpperCase();
         const full_name = cols[1];
         const student_class = cols[2] || "CNKT Tự động hóa K2024";
+        const birth_place = cols[3] || "Cần Thơ";
+        const union_date = cols[4] || "2020-03-26";
+        const party_date = cols[5] || "";
+        const so_doan = cols[6] || "Đã nộp";
+        const chua_ket_nap_doan = cols[7] ? cols[7].toLowerCase() === "true" : false;
+        
         const password = mssv.slice(-3);
         const email = generateCtuetEmail(full_name, mssv);
 
@@ -491,11 +497,11 @@ export default function AdminDashboard() {
           email,
           student_class,
           password,
-          birth_place: "Cần Thơ",
-          union_date: "2020-03-26",
-          party_date: "",
-          so_doan: "Đã nộp",
-          chua_ket_nap_doan: false,
+          birth_place,
+          union_date,
+          party_date,
+          so_doan,
+          chua_ket_nap_doan,
         });
       }
     }
@@ -505,7 +511,7 @@ export default function AdminDashboard() {
       if (error) {
         alert("Lỗi lưu dữ liệu: " + error.message);
       } else {
-        alert(`Đã lưu ${imported.length} sinh viên lên hệ thống.`);
+        alert(`Đã lưu thành công ${imported.length} sinh viên / Đoàn viên lên hệ thống.`);
         fetchAllData();
         setPasteData("");
       }
@@ -592,15 +598,15 @@ export default function AdminDashboard() {
     reader.readAsText(file);
   };
 
-  const handleDownloadSampleTemplate = () => {
+ const handleDownloadSampleTemplate = () => {
     const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + 
-      "MSSV,Họ và tên,Lớp\n" +
-      "CNDT2411081,Phạm Thái Minh Đăng,CNKT Tự động hóa K2024\n" +
-      "CNDT2411026,Nguyễn Huỳnh Bảo Châu,CNKT Tự động hóa K2024\n";
+      "MSSV,Họ và tên,Lớp,Nơi sinh,Ngày vào Đoàn,Ngày vào Đảng,Sổ Đoàn,Chưa kết nạp Đoàn\n" +
+      "CNDT2411081,Phạm Thái Minh Đăng,CNKT Tự động hóa K2024,Cần Thơ,2020-03-26,,Đã nộp,false\n" +
+      "CNDT2411026,Nguyễn Huỳnh Bảo Châu,CNKT Tự động hóa K2024,Vĩnh Long,2020-03-26,,Chưa nộp,false\n";
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "Mau_Danh_Sach_Sinh_Vien_CTUT.csv");
+    link.setAttribute("download", "Mau_Danh_Sach_Doan_Vien_CTUT.csv");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
