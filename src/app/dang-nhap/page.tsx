@@ -371,9 +371,7 @@ export default function DangNhapPage() {
           <h1 className="text-xl sm:text-2xl font-black text-[#004A52] tracking-tight">
             ĐĂNG NHẬP HỆ THỐNG
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Đoàn Khoa Kỹ thuật Cơ khí - CTUET
-          </p>
+      
         </div>
 
         <Suspense fallback={<div className="text-center text-xs text-slate-400 py-4">Đang tải...</div>}>
