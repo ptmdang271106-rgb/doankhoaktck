@@ -205,7 +205,7 @@ export default function AdminDashboard() {
   const [events, setEvents] = useState<any[]>([]);
   const [semesters, setSemesters] = useState<any[]>([]);
 
-  // State sinh viên & thông tin Đoàn viên
+  // State sinh viên
   const [studentInputMode, setStudentInputMode] = useState<"paste" | "manual" | "file">("paste");
   const [pasteData, setPasteData] = useState("");
   const [manualMssv, setManualMssv] = useState("");
@@ -217,8 +217,8 @@ export default function AdminDashboard() {
   const [manualSoDoan, setManualSoDoan] = useState("Chưa nộp");
   const [manualChuaKetNap, setManualChuaKetNap] = useState(false);
 
-  // State quản lý Giới thiệu (About Us)
-  const [aboutHtml, setAboutHtml] = useState("");
+  // State quản lý Giới thiệu (Đoàn khoa & Liên chi hội)
+  const [aboutTargetKey, setAboutTargetKey] = useState("about_doankhoa");
   const aboutEditorRef = useRef<HTMLDivElement>(null);
 
   // State tài khoản cán bộ
@@ -260,6 +260,18 @@ export default function AdminDashboard() {
   const [postCoverImage, setPostCoverImage] = useState("");
   const editorRef = useRef<HTMLDivElement>(null);
 
+  const fetchAboutContent = async (key: string) => {
+    const { data } = await supabase
+      .from("site_settings")
+      .select("*")
+      .eq("key", key)
+      .maybeSingle();
+    
+    if (aboutEditorRef.current) {
+      aboutEditorRef.current.innerHTML = data && data.value ? data.value : "";
+    }
+  };
+
   const fetchAllData = async () => {
     const { data: stdData } = await supabase.from("students").select("*").order("id", { ascending: false });
     if (stdData) {
@@ -279,11 +291,7 @@ export default function AdminDashboard() {
     const { data: semData } = await supabase.from("drl_semesters").select("*").order("created_at", { ascending: false });
     if (semData) setSemesters(semData);
 
-    const { data: aboutData } = await supabase.from("site_settings").select("*").eq("key", "about_us").maybeSingle();
-    if (aboutData && aboutData.value) {
-      setAboutHtml(aboutData.value);
-      if (aboutEditorRef.current) aboutEditorRef.current.innerHTML = aboutData.value;
-    }
+    fetchAboutContent(aboutTargetKey);
   };
 
   useEffect(() => {
@@ -302,26 +310,30 @@ export default function AdminDashboard() {
     fetchAllData();
   }, [router]);
 
+  // Khi thay đổi tab Đoàn khoa / Liên chi hội thì load lại dữ liệu tương ứng
+  useEffect(() => {
+    fetchAboutContent(aboutTargetKey);
+  }, [aboutTargetKey]);
+
   const handleSaveAboutUs = async (e: React.FormEvent) => {
     e.preventDefault();
     const html = aboutEditorRef.current ? aboutEditorRef.current.innerHTML : "";
     
-    const { data: existing } = await supabase.from("site_settings").select("*").eq("key", "about_us").maybeSingle();
+    const { data: existing } = await supabase.from("site_settings").select("*").eq("key", aboutTargetKey).maybeSingle();
 
     let error;
     if (existing) {
-      const res = await supabase.from("site_settings").update({ value: html, updated_at: new Date().toISOString() }).eq("key", "about_us");
+      const res = await supabase.from("site_settings").update({ value: html, updated_at: new Date().toISOString() }).eq("key", aboutTargetKey);
       error = res.error;
     } else {
-      const res = await supabase.from("site_settings").insert([{ key: "about_us", value: html, updated_at: new Date().toISOString() }]);
+      const res = await supabase.from("site_settings").insert([{ key: aboutTargetKey, value: html, updated_at: new Date().toISOString() }]);
       error = res.error;
     }
 
     if (error) {
-      alert("Lỗi lưu trang Giới thiệu: " + error.message);
+      alert("Lỗi lưu nội dung: " + error.message);
     } else {
-      alert("Đã cập nhật trang Giới thiệu thành công!");
-      setAboutHtml(html);
+      alert(`Đã lưu nội dung ${aboutTargetKey === "about_lienchihoi" ? "Liên chi hội KTCK" : "Đoàn khoa KTCK"} thành công!`);
     }
   };
 
@@ -759,6 +771,7 @@ export default function AdminDashboard() {
     <main className="min-h-screen bg-slate-100 py-8 px-4 sm:px-6 lg:px-8 font-sans antialiased text-slate-800">
       <div className="max-w-7xl mx-auto">
         
+        {/* HEADER */}
         <div className="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-4">
             <Link href="/">
@@ -794,6 +807,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
+        {/* TAB NAVIGATION */}
         <div className="flex flex-wrap gap-2 mb-6">
           <button
             onClick={() => setActiveTab("students")}
@@ -861,6 +875,7 @@ export default function AdminDashboard() {
           </button>
         </div>
 
+        {/* TAB 1: SINH VIÊN */}
         {activeTab === "students" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-5 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
@@ -1009,11 +1024,38 @@ export default function AdminDashboard() {
           </div>
         )}
 
+        {/* TAB 2: QUẢN LÝ GIỚI THIỆU (ĐOÀN KHOA & LIÊN CHI HỘI) */}
         {activeTab === "about" && (
           <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
-            <div>
-              <h2 className="text-lg font-black text-[#004A52]">SOẠN THẢO TRANG GIỚI THIỆU ĐOÀN KHOA</h2>
-              <p className="text-xs text-slate-500 mt-0.5">Nội dung này sẽ hiển thị trực tiếp khi người dùng bấm vào mục "Giới thiệu" trên thanh Menu chính.</p>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4">
+              <div>
+                <h2 className="text-lg font-black text-[#004A52]">
+                  {aboutTargetKey === "about_lienchihoi" ? "SOẠN THẢO TRANG LIÊN CHI HỘI KTCK" : "SOẠN THẢO TRANG ĐOÀN KHOA KTCK"}
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">Chọn phần muốn chỉnh sửa nội dung bên dưới.</p>
+              </div>
+
+              {/* 2 NÚT CHUYỂN ĐỔI ĐOÀN KHOA / LIÊN CHI HỘI */}
+              <div className="flex gap-2 bg-slate-100 p-1 rounded-xl">
+                <button
+                  type="button"
+                  onClick={() => setAboutTargetKey("about_doankhoa")}
+                  className={`px-4 py-2 rounded-lg text-xs font-bold transition ${
+                    aboutTargetKey === "about_doankhoa" ? "bg-[#EE6425] text-white shadow-sm" : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  Đoàn khoa KTCK
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAboutTargetKey("about_lienchihoi")}
+                  className={`px-4 py-2 rounded-lg text-xs font-bold transition ${
+                    aboutTargetKey === "about_lienchihoi" ? "bg-[#EE6425] text-white shadow-sm" : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  Liên chi hội KTCK
+                </button>
+              </div>
             </div>
 
             <form onSubmit={handleSaveAboutUs} className="space-y-4">
@@ -1032,7 +1074,6 @@ export default function AdminDashboard() {
                 >
                   In đậm (B)
                 </button>
-
                 <button
                   type="button"
                   onClick={() => {
@@ -1047,7 +1088,6 @@ export default function AdminDashboard() {
                 >
                   In nghiêng (I)
                 </button>
-
                 <button
                   type="button"
                   onClick={() => {
@@ -1065,22 +1105,6 @@ export default function AdminDashboard() {
                 >
                   + Tiêu đề lớn
                 </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (aboutEditorRef.current) {
-                      const p = document.createElement("p");
-                      p.style.margin = "8px 0";
-                      p.textContent = "Đoạn văn mới...";
-                      aboutEditorRef.current.appendChild(p);
-                    }
-                  }}
-                  className="px-3 py-1 bg-white border border-slate-200 rounded hover:bg-slate-100"
-                >
-                  + Đoạn văn
-                </button>
-
                 <label className="px-3 py-1 bg-orange-50 text-[#EE6425] border border-orange-200 rounded cursor-pointer font-bold hover:bg-orange-100">
                   Chèn hình ảnh
                   <input
@@ -1111,19 +1135,20 @@ export default function AdminDashboard() {
               <div
                 ref={aboutEditorRef}
                 contentEditable
-                className="w-full min-h-[320px] border border-t-0 border-slate-300 rounded-b-xl p-5 text-sm outline-none bg-white leading-relaxed"
+                className="w-full min-h-[350px] border border-t-0 border-slate-300 rounded-b-xl p-5 text-sm outline-none bg-white leading-relaxed"
               ></div>
 
               <button
                 type="submit"
                 className="bg-[#EE6425] hover:bg-[#d85216] text-white font-bold px-8 py-3 rounded-xl text-xs uppercase shadow transition"
               >
-                Lưu nội dung Giới thiệu
+                Lưu nội dung ({aboutTargetKey === "about_lienchihoi" ? "Liên chi hội KTCK" : "Đoàn khoa KTCK"})
               </button>
             </form>
           </div>
         )}
 
+        {/* TAB 3: CÁN BỘ BCH */}
         {activeTab === "officers" && currentUser?.role === "super_admin" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
@@ -1185,6 +1210,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
+        {/* TAB 4: HỌC KỲ */}
         {activeTab === "semesters" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
@@ -1255,6 +1281,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
+        {/* TAB 5: DUYỆT ĐRL */}
         {activeTab === "review" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
@@ -1424,6 +1451,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
+        {/* TAB 6: SỰ KIỆN */}
         {activeTab === "events" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
@@ -1526,6 +1554,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
+        {/* TAB 7: BÀI VIẾT */}
         {activeTab === "posts" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
