@@ -78,16 +78,26 @@ export default function Navbar() {
               Trang chủ
             </Link>
 
-            {/* Dropdown Giới thiệu */}
-            <div className="relative" ref={dropdownRef}>
-              <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="px-3 py-2 rounded-lg hover:text-[#E05A10] hover:bg-orange-50 transition flex items-center gap-1"
-              >
-                Giới thiệu ▾
-              </button>
+{/* Dropdown Giới thiệu  */}
+            <div className="relative group" ref={dropdownRef}>
+              <div className="flex items-center">
+                <Link
+                  href="/gioi-thieu"
+                  className="px-3 py-2 rounded-lg hover:text-[#E05A10] hover:bg-orange-50 transition font-semibold"
+                >
+                  Giới thiệu
+                </Link>
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="p-1 hover:text-[#E05A10] transition"
+                  aria-label="Toggle menu"
+                >
+                  ▾
+                </button>
+              </div>
+
               {isDropdownOpen && (
-                <div className="absolute left-0 mt-1 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 text-xs font-bold text-slate-700">
+                <div className="absolute left-0 mt-1 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 text-xs font-bold text-slate-700">
                   <Link
                     href="/gioi-thieu"
                     onClick={() => setIsDropdownOpen(false)}
