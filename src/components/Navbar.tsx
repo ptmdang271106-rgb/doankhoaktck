@@ -2,200 +2,180 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 export default function Navbar() {
   const router = useRouter();
-  const [isOpen, setIsOpen] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [activeSubMenu, setActiveSubMenu] = useState<string | null>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isIntroOpen, setIsIntroOpen] = useState(false);
+  const introDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("ctut_current_user");
-    if (storedUser) {
+    const savedUser = localStorage.getItem("ctut_current_user");
+    if (savedUser) {
       try {
-        setUser(JSON.parse(storedUser));
+        setCurrentUser(JSON.parse(savedUser));
       } catch {
-        setUser(null);
+        setCurrentUser(null);
       }
     }
 
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false);
-        setActiveSubMenu(null);
+    const handleClickOutside = (e: MouseEvent) => {
+      if (introDropdownRef.current && !introDropdownRef.current.contains(e.target as Node)) {
+        setIsIntroOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-    } catch (e) {
-      console.error(e);
-    }
+  const handleLogout = () => {
     localStorage.removeItem("ctut_current_user");
-    setUser(null);
-    window.location.href = "/dang-nhap";
+    setCurrentUser(null);
+    window.location.href = "/";
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-gray-100 shadow-xs">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+    <header className="border-b border-gray-100 bg-white sticky top-0 z-40 shadow-xs font-sans">
+      <div className="w-full px-3 sm:px-6 lg:px-10">
+        <div className="py-2.5 sm:py-3 lg:h-24 grid grid-cols-12 items-center text-[13px] font-medium text-[#2C3E50]">
           
-          {/* MENU TRÁI: Điểm danh | Cổng ĐRL | Giới thiệu | Chi đoàn / Chi hội */}
-          <nav className="hidden lg:flex items-center gap-6 font-semibold text-sm text-slate-700">
+          {/* MENU TRÁI (DESKTOP) */}
+          <div className="col-span-8 hidden lg:flex items-center justify-start space-x-4 whitespace-nowrap">
             <Link
               href="/diem-danh"
-              className="bg-[#007A87] hover:bg-[#00606B] text-white px-4 py-2 rounded-full text-xs font-bold transition-colors shadow-sm"
+              className="bg-[#007A87] hover:bg-[#00606B] text-white px-4 py-2 rounded-full text-xs font-bold transition-colors shadow-sm inline-block"
             >
               Điểm danh
             </Link>
             
             <Link
               href="/tra-cuu"
-              className="bg-[#00707b] hover:bg-[#005a63] text-white px-4 py-2 rounded-full text-xs font-bold transition-colors shadow-sm"
+              className="bg-[#00707b] hover:bg-[#005a63] text-white px-4 py-2 rounded-full text-xs font-bold transition-colors inline-block shadow-sm"
             >
               Cổng ĐRL
             </Link>
 
             {/* DROPDOWN GIỚI THIỆU CHUẨN UEH STYLE */}
-            <div 
-              className="relative py-2" 
-              ref={dropdownRef}
-              onMouseEnter={() => setIsDropdownOpen(true)}
-              onMouseLeave={() => {
-                setIsDropdownOpen(false);
-                setActiveSubMenu(null);
-              }}
-            >
-              <div className="flex items-center gap-1 cursor-pointer py-1">
-                <Link href="/gioi-thieu" className="hover:text-[#EE6425] transition-colors font-bold text-slate-800">
+            <div className="relative group py-2" ref={introDropdownRef}>
+              <div className="flex items-center gap-1 cursor-pointer">
+                <span className="hover:text-[#EE6425] transition-colors text-xs font-semibold">
                   Giới thiệu
-                </Link>
-                <span className="text-xs">▾</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setIsIntroOpen(!isIntroOpen)}
+                  className="p-0.5 hover:text-[#EE6425] text-xs transition"
+                >
+                  ▾
+                </button>
               </div>
 
-              {isDropdownOpen && (
-                <div className="absolute left-0 top-full w-56 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 text-xs font-bold text-slate-700">
-                  
-                  {/* Mục 1: Cơ cấu nhân sự (Hover hiện sub-menu) */}
-                  <div 
-                    className="relative px-4 py-3 hover:bg-orange-50 hover:text-[#EE6425] transition cursor-pointer flex justify-between items-center"
-                    onMouseEnter={() => setActiveSubMenu("nhansu")}
-                  >
-                    <span>Cơ cấu nhân sự</span>
-                    <span>▶</span>
+              <div className={`absolute left-0 top-full w-64 bg-white rounded-2xl shadow-xl border border-slate-100 py-2.5 z-50 text-xs font-bold text-slate-700 transition-all ${
+                isIntroOpen ? "block" : "hidden group-hover:block"
+              }`}>
+                <div className="px-4 py-2 text-[10px] uppercase text-slate-400 font-extrabold tracking-wider">Cơ cấu nhân sự</div>
+                <Link
+                  href="/gioi-thieu?tab=doankhoa"
+                  onClick={() => setIsIntroOpen(false)}
+                  className="block px-5 py-2.5 hover:bg-orange-50 hover:text-[#EE6425] transition font-semibold"
+                >
+                  • Đoàn khoa KTCK
+                </Link>
+                <Link
+                  href="/gioi-thieu?tab=lienchihoi"
+                  onClick={() => setIsIntroOpen(false)}
+                  className="block px-5 py-2.5 hover:bg-orange-50 hover:text-[#EE6425] transition font-semibold"
+                >
+                  • Liên chi hội KTCK
+                </Link>
 
-                    {activeSubMenu === "nhansu" && (
-                      <div className="absolute left-full top-0 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 text-xs font-bold text-slate-700">
-                        <Link href="/gioi-thieu" className="block px-4 py-2.5 hover:bg-orange-50 hover:text-[#EE6425]">
-                          Đoàn khoa KTCK
-                        </Link>
-                        <Link href="/gioi-thieu" className="block px-4 py-2.5 hover:bg-orange-50 hover:text-[#EE6425]">
-                          Liên chi hội KTCK
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Mục 2: Chức năng - Tiện ích (Hover hiện sub-menu) */}
-                  <div 
-                    className="relative px-4 py-3 hover:bg-orange-50 hover:text-[#EE6425] transition cursor-pointer flex justify-between items-center border-t border-slate-50"
-                    onMouseEnter={() => setActiveSubMenu("tienich")}
-                  >
-                    <span>Chức năng - Tiện ích</span>
-                    <span>▶</span>
-
-                    {activeSubMenu === "tienich" && (
-                      <div className="absolute left-full top-0 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 text-xs font-bold text-slate-700">
-                        <Link href="/tra-cuu-thong-tin" className="block px-4 py-3 hover:bg-orange-50 hover:text-[#EE6425]">
-                          Tra cứu thông tin sinh viên
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-
-                </div>
-              )}
+                <div className="border-t border-slate-100 my-1.5"></div>
+                <div className="px-4 py-2 text-[10px] uppercase text-slate-400 font-extrabold tracking-wider">Chức năng - Tiện ích</div>
+                <Link
+                  href="/tra-cuu-thong-tin"
+                  onClick={() => setIsIntroOpen(false)}
+                  className="block px-5 py-2.5 hover:bg-orange-50 hover:text-[#EE6425] transition font-semibold text-blue-700"
+                >
+                  • Tra cứu thông tin sinh viên
+                </Link>
+              </div>
             </div>
 
-            <a href="#" className="hover:text-[#007A87] transition-colors text-xs font-semibold">
+            <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1 text-xs font-semibold">
               Chi đoàn / Chi hội
             </a>
-          </nav>
+          </div>
 
-          {/* LOGO CHUẨN NGANG BÊN PHẢI */}
-          <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-3">
-              <div className="relative w-44 sm:w-56 h-12 flex-shrink-0">
-                <Image
-                  src="/logo-doankhoa.png"
-                  alt="Logo Khoa Cơ Khí"
-                  fill
-                  className="object-contain object-right"
-                  priority
-                />
-              </div>
+          {/* LOGO CHUẨN NGANG (SỬ DỤNG ĐÚNG FILE LOGO NGANG CỦA BẠN) */}
+          <div className="col-span-12 lg:col-span-4 flex items-center justify-center py-1">
+            <Link href="/">
+              <img
+                src="/logo-doankhoa.png"
+                alt="Tuổi trẻ Khoa Kỹ thuật Cơ khí - Trường Đại học Kỹ thuật - Công nghệ Cần Thơ"
+                className="h-10 sm:h-14 lg:h-16 w-auto max-w-[290px] sm:max-w-[420px] object-contain block mx-auto cursor-pointer transition-transform hover:scale-105"
+              />
             </Link>
+          </div>
 
-            {/* TÀI KHOẢN ĐĂNG NHẬP */}
-            {user ? (
-              <div className="hidden sm:flex items-center gap-2 bg-orange-50/80 border border-orange-200 px-3 py-1.5 rounded-2xl shadow-xs">
-                <div className="text-right leading-tight">
-                  <span className="block text-[11px] font-bold text-[#EE6425]">
-                    {user.fullName || user.mssv}
-                  </span>
-                  <span className="block text-[9px] text-slate-500 font-semibold">
-                    {user.role === "super_admin" ? "Admin Tối Cao" : user.role === "branch_admin" ? "Bí thư Chi đoàn" : user.mssv}
-                  </span>
-                </div>
-                {(user.role === "super_admin" || user.role === "branch_admin" || user.role === "admin") && (
-                  <Link href="/admin" className="bg-[#004A52] hover:bg-[#00343a] text-white text-[10px] font-bold px-2.5 py-1.5 rounded-xl transition">
+          {/* MENU PHẢI (DESKTOP) */}
+          <div className="col-span-4 hidden lg:flex items-center justify-end space-x-4 whitespace-nowrap">
+            <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1 text-xs font-semibold">
+              Hỗ trợ sinh viên
+            </a>
+            
+            <a href="#" className="hover:text-[#007A87] transition-colors flex items-center gap-1 text-xs font-semibold">
+              Văn phòng điện tử
+            </a>
+
+            {currentUser ? (
+              <div className="flex items-center gap-2 bg-orange-50 border border-orange-200 px-3.5 py-1.5 rounded-full shadow-sm">
+                <span className="text-xs font-bold text-[#EE6425]">
+                  {currentUser.fullName || currentUser.mssv}
+                </span>
+                {(currentUser.role === "super_admin" || currentUser.role === "branch_admin" || currentUser.role === "admin") && (
+                  <Link
+                    href="/admin"
+                    className="bg-[#007A87] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full hover:bg-[#005a63]"
+                  >
                     Quản trị
                   </Link>
                 )}
-                <button onClick={handleLogout} className="text-[10px] text-red-600 font-bold hover:underline">
+                <button
+                  onClick={handleLogout}
+                  className="text-[11px] text-slate-400 hover:text-red-600 font-bold ml-1"
+                >
                   (Đăng xuất)
                 </button>
               </div>
             ) : (
-              <Link href="/dang-nhap" className="bg-[#EE6425] hover:bg-[#d85216] text-white px-3.5 py-1.5 rounded-full text-xs font-bold transition shadow-sm">
+              <Link
+                href="/dang-nhap"
+                className="bg-[#EE6425] hover:bg-[#d85216] text-white px-4 py-2 rounded-full text-xs font-bold transition-all inline-block shadow-md"
+              >
                 Đăng nhập
               </Link>
             )}
-
-            {/* NÚT MOBILE MENU */}
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="lg:hidden p-2 rounded-xl bg-orange-50 text-[#EE6425]"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
           </div>
         </div>
       </div>
 
-      {/* MOBILE DRAWER */}
-      {isOpen && (
-        <div className="lg:hidden bg-white border-t border-slate-100 px-4 py-4 space-y-2 text-sm font-semibold text-slate-700 shadow-xl">
-          <Link href="/" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-xl hover:bg-orange-50">Trang chủ</Link>
-          <Link href="/gioi-thieu" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-xl hover:bg-orange-50">Cơ cấu nhân sự (Đoàn khoa & Liên chi hội)</Link>
-          <Link href="/tra-cuu-thong-tin" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-xl hover:bg-orange-50">Tra cứu thông tin sinh viên</Link>
-          <Link href="/diem-danh" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-xl hover:bg-orange-50">Điểm danh</Link>
-          <Link href="/tra-cuu" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-xl hover:bg-orange-50">Cổng ĐRL & CTXH</Link>
-          <Link href="/dang-ky" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-xl hover:bg-orange-50">Đăng ký hoạt động</Link>
+      {/* MENU PHỤ BÊN DƯỚI */}
+      <div className="bg-[#F8FCFC] border-t border-b border-[#E6F4F4]">
+        <div className="w-full px-4 sm:px-6 lg:px-10">
+          <div className="flex justify-start sm:justify-center space-x-6 sm:space-x-10 py-2.5 text-[12.5px] sm:text-[13.5px] font-semibold text-[#007A87] overflow-x-auto whitespace-nowrap">
+            <Link href="/dang-ky" className="hover:text-[#004A52] transition-colors font-bold text-[#EE6425]">
+              Hoạt động – Sự kiện Cơ khí
+            </Link>
+            <Link href="/gioi-thieu?tab=doankhoa" className="hover:text-[#004A52] transition-colors">Đoàn khoa KTCK</Link>
+            <Link href="/gioi-thieu?tab=lienchihoi" className="hover:text-[#004A52] transition-colors">Liên chi hội KTCK</Link>
+            <a href="#" className="hover:text-[#004A52] transition-colors">Xem gì hôm nay</a>
+            <a href="#" className="hover:text-[#004A52] transition-colors">Bản tin học thuật</a>
+            <a href="#" className="hover:text-[#004A52] transition-colors">Mechanical Signal</a>
+          </div>
         </div>
-      )}
+      </div>
     </header>
   );
 }
