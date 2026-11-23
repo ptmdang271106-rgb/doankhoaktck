@@ -192,8 +192,7 @@ export default function Navbar() {
             </Link>
             <a href="#" className="hover:text-[#004A52] transition-colors">Xem gì hôm nay</a>
             <a href="#" className="hover:text-[#004A52] transition-colors">Bản tin học thuật</a>
-            <a href="#" className="hover:text-[#004A52] transition-colors">Mechanical Signal</a>
-            <a href="#" className="hover:text-[#004A52] transition-colors">Gương sáng CTUT</a>
+            <a href="#" className="hover:text-[#004A52] transition-colors">Gương sáng FME</a>
           </div>
         </div>
       </div>
