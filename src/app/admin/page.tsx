@@ -1946,20 +1946,6 @@ export default function AdminDashboard() {
                       </div>
                     )}
                   </div>
-
-                  {/* ĐƯỜNG DẪN LIÊN KẾT */}
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">
-                      Liên kết khi bấm vào Banner <span className="font-normal text-slate-400">(Tùy chọn - chuyển hướng trang khi người dùng click vào ảnh)</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="VD: /dang-ky hoặc https://..."
-                      value={newBannerLink}
-                      onChange={(e) => setNewBannerLink(e.target.value)}
-                      className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-[#EE6425]"
-                    />
-                  </div>
                 </div>
 
                 <div className="flex gap-3 justify-end pt-2">
@@ -2016,9 +2002,6 @@ export default function AdminDashboard() {
                       <div className="flex-1 min-w-0 space-y-1 text-center sm:text-left">
                         <div className="font-bold text-slate-800 text-sm truncate">
                           Banner #{index + 1}
-                        </div>
-                        <div className="text-slate-500 text-[11px] truncate font-mono">
-                          🔗 Link: {banner.link || "(Không có liên kết)"}
                         </div>
                         <div className="text-slate-400 text-[10px] truncate">
                           🖼️ URL: {banner.image}

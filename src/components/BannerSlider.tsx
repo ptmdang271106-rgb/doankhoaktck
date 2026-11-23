@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
 import { siteImages } from "@/lib/site-images";
 import { supabase } from "@/lib/supabase";
 
@@ -106,36 +105,12 @@ export default function BannerSlider() {
           >
             {banners.map((banner, idx) => (
               <div key={banner.id || idx} className="w-full flex-shrink-0 relative">
-                {banner.link ? (
-                  banner.link.startsWith("http") ? (
-                    <a
-                      href={banner.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block w-full cursor-pointer"
-                    >
-                      <img
-                        src={banner.image}
-                        alt="Banner Khoa Kỹ thuật Cơ khí"
-                        className="w-full h-auto block"
-                      />
-                    </a>
-                  ) : (
-                    <Link href={banner.link} className="block w-full cursor-pointer">
-                      <img
-                        src={banner.image}
-                        alt="Banner Khoa Kỹ thuật Cơ khí"
-                        className="w-full h-auto block"
-                      />
-                    </Link>
-                  )
-                ) : (
-                  <img
-                    src={banner.image}
-                    alt="Banner Khoa Kỹ thuật Cơ khí"
-                    className="w-full h-auto block"
-                  />
-                )}
+                <img
+                  src={banner.image}
+                  alt="Banner Khoa Kỹ thuật Cơ khí"
+                  className="w-full h-auto block select-none pointer-events-none"
+                  draggable={false}
+                />
               </div>
             ))}
           </div>
