@@ -28,7 +28,6 @@ export default function CTUTYouthPortal() {
     { name: "Phong trào", color: "bg-[#D35400] text-white" },
     { name: "Học thuật - NCKH", color: "bg-[#16A085] text-white" },
     { name: "Tổ chức - Đoàn thể", color: "bg-[#E67E22] text-white" },
-    { name: "Hội thảo Cơ khí", color: "bg-[#2C3E50] text-white" },
     { name: "Tình nguyện", color: "bg-[#7F8C8D] text-white" },
   ];
 
@@ -141,9 +140,8 @@ export default function CTUTYouthPortal() {
 
             <div className="divide-y divide-gray-100 mt-2">
               {[
-                { title: "[Thông báo] Mở cổng tự đánh giá Điểm Rèn Luyện Học kỳ II", date: "25/08/2026" },
-                { title: "Kế hoạch tổ chức Hội thi Thiết kế xe tiết kiệm nhiên liệu CTUT 2026", date: "23/08/2026" },
-                { title: "Danh sách sinh viên Khoa Cơ khí nhận học bổng Khuyến khích Tài năng đợt 1", date: "21/08/2026" },
+                { title: "[Thông báo] Mở cổng tự đánh giá Điểm Rèn Luyện Học kỳ I, năm học 2026-2027", date: "29/10/2026" },
+                { title: "Kế hoạch tổ chức Cuộc thi Hòa An - Dấu ấn thanh xuân năm 2026", date: "23/08/2026" },
               ].map((post, i) => (
                 <div key={i} className="py-3 group cursor-pointer">
                   <h4 className="text-xs font-semibold text-gray-800 leading-snug group-hover:text-[#007A87] transition-colors">
@@ -158,12 +156,12 @@ export default function CTUTYouthPortal() {
 
             <div className="mt-6 bg-[#006674] text-white p-4 rounded-xl text-center space-y-2">
               <div className="text-xs font-bold uppercase tracking-wide">Cổng Dịch Vụ Sinh Viên</div>
-              <p className="text-[11px] text-teal-100">Tra cứu kết quả rèn luyện & Check-in sự kiện bằng mã QR</p>
+              <p className="text-[11px] text-teal-100">Tra cứu kết quả rèn luyện & Điểm danh hoạt động bằng mã QR</p>
               <Link
                 href="/tra-cuu"
                 className="w-full bg-[#E67E22] hover:bg-[#D35400] text-white text-xs font-bold py-2 rounded transition-colors uppercase inline-block"
               >
-                Tra cứu ĐRL ngay
+                Tra cứu Điểm rèn luyện ngay
               </Link>
             </div>
           </div>
