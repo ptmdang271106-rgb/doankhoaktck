@@ -9,6 +9,7 @@ import { studentColumns } from "@/lib/student-import";
 import { searchStudents } from "@/lib/student-search";
 import { generateCtuetEmail } from "@/lib/student-email";
 import { ProofLinks } from "@/components/ProofLinks";
+import { DRLStatusBadge, getDRLStatus } from "@/components/DRLStatusBadge";
 import { storeRemoteImage, uploadImage } from "@/lib/cloudinary";
 import { getEventQr } from "@/app/image-upload";
 import { eventWithImages, packEventDescription } from "@/lib/event-images";
@@ -564,7 +565,7 @@ export default function AdminDashboard() {
         final_score: Number(grandOfficerTotalScore),
         scores_detail: officerScores,
         proofs_detail: studentSubmission?.proofs_detail || {},
-        status: "BCH Chi đoàn đã duyệt & công bố điểm",
+        status: "Đã duyệt",
       };
 
       const { error } = await supabase.from("drl_submissions").upsert([submissionData], { onConflict: "mssv,semester_id" });
@@ -1406,14 +1407,17 @@ export default function AdminDashboard() {
             <div className="lg:col-span-8 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
               {selectedStudent ? (
                 <>
-                  <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                  <div className="flex justify-between items-center border-b border-slate-100 pb-3 gap-3">
                     <div>
-                      <h2 className="text-sm font-black text-[#004A52] uppercase">
-                        Chấm điểm cho: {selectedStudent.full_name}
-                      </h2>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h2 className="text-sm font-black text-[#004A52] uppercase">
+                          Chấm điểm cho: {selectedStudent.full_name}
+                        </h2>
+                        <DRLStatusBadge status={getDRLStatus(studentSubmission)} size="sm" />
+                      </div>
                       <span className="text-xs text-slate-500 font-mono">{selectedStudent.mssv} | {selectedStudent.student_class}</span>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right flex-shrink-0">
                       <span className="text-xs text-slate-400 block">Điểm SV tự chấm:</span>
                       <span className="text-lg font-black text-[#EE6425]">{studentSubmission?.self_score || 0} đ</span>
                     </div>

@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { storeRemoteImage, uploadProofFile } from "@/lib/cloudinary";
 import { ProofLinks, proofUrls } from "@/components/ProofLinks";
+import { DRLStatusBadge, getDRLStatus } from "@/components/DRLStatusBadge";
 
 async function uploadProofFiles(files: File[]) {
   const urls: string[] = [];
@@ -240,7 +241,7 @@ export default function CongDRLPage() {
         .maybeSingle();
 
       if (drlData) {
-        setDrlStatus(drlData.status || "Đã nộp, chờ BCH duyệt");
+        setDrlStatus(getDRLStatus(drlData));
         setFinalScore(drlData.final_score);
         if (drlData.scores_detail) setScores(drlData.scores_detail);
         for (const [item, value] of Object.entries(drlData.proofs_detail || {})) {
@@ -401,7 +402,7 @@ export default function CongDRLPage() {
         proofs_detail: Object.fromEntries(await Promise.all(Object.entries(itemProofs).map(
           async ([id, links]) => [id, await storeProofImages(links)]
         ))),
-        status: "Đã nộp - Chờ BCH Chi đoàn duyệt",
+        status: "Đã nộp",
         submitted_at: new Date().toISOString(),
       };
 
@@ -413,8 +414,8 @@ export default function CongDRLPage() {
         alert("Lỗi lưu phiếu ĐRL: " + error.message);
         console.error(error);
       } else {
-        setDrlStatus("Đã nộp - Chờ BCH Chi đoàn duyệt");
-        alert("Nộp phiếu ĐRL thành công!");
+        setDrlStatus("Đã nộp");
+        alert("Nộp phiếu ĐRL thành công! BCH Chi đoàn sẽ sớm kiểm tra và duyệt điểm của bạn.");
         loadData(currentUser.mssv, selectedSemester);
       }
     } catch (err: any) {
@@ -510,9 +511,10 @@ export default function CongDRLPage() {
             <span className="text-4xl font-black my-1 text-white">
               {finalScore !== null ? finalScore : "--"}
             </span>
-            <span className="text-[11px] text-teal-200 font-medium">
-              Trạng thái: {drlStatus}
-            </span>
+            <div className="mt-2 flex flex-col items-center gap-1">
+              <span className="text-[10px] text-teal-200">Trạng thái ĐRL:</span>
+              <DRLStatusBadge status={drlStatus} size="sm" />
+            </div>
           </div>
         </div>
 
@@ -689,14 +691,28 @@ export default function CongDRLPage() {
         {/* TAB 2: PHIẾU ĐRL (CHO PHÉP NHẬP TRỰC TIẾP SỐ ĐIỂM) */}
         {activeTab === "form" && (
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 space-y-6">
-            <div className="border-b border-slate-100 pb-4">
-              <h2 className="text-base font-black text-[#004A52] uppercase">
-                PHIẾU ĐÁNH GIÁ ĐIỂM RÈN LUYỆN ({selectedSemester})
-              </h2>
-              <p className="text-xs text-slate-500 mt-1">
-                Sinh viên tự nhập trực tiếp tổng số điểm đạt được cho từng tiểu mục (hệ thống tự động kiểm tra tổng điểm toàn phần không vượt quá giới hạn quy định).
-              </p>
+            <div className="border-b border-slate-100 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+              <div>
+                <h2 className="text-base font-black text-[#004A52] uppercase">
+                  PHIẾU ĐÁNH GIÁ ĐIỂM RÈN LUYỆN ({selectedSemester})
+                </h2>
+                <p className="text-xs text-slate-500 mt-1">
+                  Sinh viên tự nhập trực tiếp tổng số điểm đạt được cho từng tiểu mục (hệ thống tự động kiểm tra tổng điểm toàn phần không vượt quá giới hạn quy định).
+                </p>
+              </div>
+              <div className="flex-shrink-0">
+                <DRLStatusBadge status={drlStatus} size="md" />
+              </div>
             </div>
+
+            {drlStatus === "Đã duyệt" && (
+              <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-3">
+                <svg className="w-5 h-5 flex-shrink-0 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Phiếu đánh giá ĐRL đã được phê duyệt chính thức (<strong>{finalScore} điểm</strong>).</span>
+              </div>
+            )}
 
             <div className="space-y-6">
               {DRL_SECTIONS.map((section) => {
@@ -819,8 +835,16 @@ export default function CongDRLPage() {
               </span>
             </div>
 
-            <div className="p-4 rounded-2xl bg-teal-50 border border-teal-200 max-w-md mx-auto text-xs text-teal-800 font-medium leading-relaxed">
-              Trạng thái xét duyệt: <strong>{drlStatus}</strong>.
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 max-w-md mx-auto text-xs space-y-3">
+              <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                <span className="text-slate-600 font-bold">Trạng thái hồ sơ:</span>
+                <DRLStatusBadge status={drlStatus} size="sm" />
+              </div>
+              <div className="text-[11px] text-slate-600 leading-relaxed text-left">
+                {drlStatus === "Chưa nộp" && "Bạn chưa gửi phiếu tự chấm điểm rèn luyện cho học kỳ này. Vui lòng chuyển sang Tab 2 để hoàn thành phiếu và nộp minh chứng."}
+                {drlStatus === "Đã nộp" && "Phiếu tự chấm ĐRL của bạn đã được gửi thành công và đang trong danh sách chờ BCH Chi đoàn / Ban Quản trị chấm điểm và phê duyệt."}
+                {drlStatus === "Đã duyệt" && `Điểm rèn luyện chính thức của bạn đã được công bố: ${finalScore} điểm.`}
+              </div>
             </div>
           </div>
         )}

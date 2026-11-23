@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { ProofLinks } from "@/components/ProofLinks";
 import { searchStudents } from "@/lib/student-search";
+import { DRLStatusBadge, getDRLStatus } from "@/components/DRLStatusBadge";
 
 export default function ChiDoanDashboard() {
   const router = useRouter();
@@ -17,6 +18,7 @@ export default function ChiDoanDashboard() {
   const [studentProofs, setStudentProofs] = useState<any[]>([]);
   const [studentSubmission, setStudentSubmission] = useState<any>(null);
   const [officerFinalScore, setOfficerFinalScore] = useState<number>(0);
+  const [submissionsMap, setSubmissionsMap] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -44,6 +46,13 @@ export default function ChiDoanDashboard() {
       }
       const { data } = await query;
       if (data) setStudentsInClass(data);
+
+      const { data: subs } = await supabase.from("drl_submissions").select("mssv,status,final_score,self_score");
+      if (subs) {
+        const map: Record<string, any> = {};
+        subs.forEach((s) => { map[s.mssv] = s; });
+        setSubmissionsMap(map);
+      }
     } catch (e) {
       console.error(e);
     }
@@ -104,11 +113,13 @@ export default function ChiDoanDashboard() {
         student_name: selectedStudent.full_name,
         student_class: selectedStudent.student_class,
         final_score: Number(officerFinalScore),
-        status: "BCH Chi đoàn đã duyệt & công bố điểm",
+        status: "Đã duyệt",
       };
 
       await supabase.from("drl_submissions").upsert([updateData], { onConflict: "mssv" });
-      alert("Đã gửi điểm rèn luyện chính thức về cho sinh viên thành công!");
+      setStudentSubmission((prev: any) => ({ ...prev, ...updateData }));
+      setSubmissionsMap((prev) => ({ ...prev, [selectedStudent.mssv]: updateData }));
+      alert("Đã duyệt và công bố điểm rèn luyện chính thức cho sinh viên thành công!");
       loadClassStudents(currentOfficer.studentClass);
     } catch (err: any) {
       alert("Lỗi: " + err.message);
@@ -150,20 +161,27 @@ export default function ChiDoanDashboard() {
             ) : (
               <div className="space-y-2 max-h-[600px] overflow-y-auto pr-1">
                 {!matchingStudents.length && <p className="text-xs text-slate-500">{reviewSearch.trim() ? "Không tìm thấy sinh viên phù hợp." : "Chưa có sinh viên trong danh sách này."}</p>}
-                {matchingStudents.map(st => (
-                  <div
-                    key={st.mssv}
-                    onClick={() => handleSelectStudent(st)}
-                    className={`p-3 rounded-2xl border cursor-pointer transition text-xs ${
-                      selectedStudent?.mssv === st.mssv
-                        ? "bg-orange-50 border-[#EE6425] shadow-xs"
-                        : "bg-slate-50 border-slate-200 hover:bg-slate-100"
-                    }`}
-                  >
-                    <div className="font-bold text-slate-800">{st.full_name}</div>
-                    <div className="text-slate-500 font-mono text-[11px] mt-0.5">{st.mssv}</div>
-                  </div>
-                ))}
+                {matchingStudents.map(st => {
+                  const sub = submissionsMap[st.mssv];
+                  const stStatus = getDRLStatus(sub);
+                  return (
+                    <div
+                      key={st.mssv}
+                      onClick={() => handleSelectStudent(st)}
+                      className={`p-3 rounded-2xl border cursor-pointer transition text-xs flex justify-between items-center gap-2 ${
+                        selectedStudent?.mssv === st.mssv
+                          ? "bg-orange-50 border-[#EE6425] shadow-xs"
+                          : "bg-slate-50 border-slate-200 hover:bg-slate-100"
+                      }`}
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="font-bold text-slate-800 truncate">{st.full_name}</div>
+                        <div className="text-slate-500 font-mono text-[11px] mt-0.5">{st.mssv}</div>
+                      </div>
+                      <DRLStatusBadge status={stStatus} size="sm" />
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -174,14 +192,17 @@ export default function ChiDoanDashboard() {
               <>
                 {/* THÔNG TIN SINH VIÊN ĐANG CHẤM */}
                 <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 space-y-4">
-                  <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                  <div className="flex justify-between items-center border-b border-slate-100 pb-3 gap-3">
                     <div>
-                      <h2 className="text-sm font-black text-[#004A52] uppercase">
-                        Đang chấm điểm cho: {selectedStudent.full_name}
-                      </h2>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h2 className="text-sm font-black text-[#004A52] uppercase">
+                          Đang chấm điểm cho: {selectedStudent.full_name}
+                        </h2>
+                        <DRLStatusBadge status={getDRLStatus(studentSubmission)} size="sm" />
+                      </div>
                       <span className="text-xs text-slate-500 font-mono">{selectedStudent.mssv} - {selectedStudent.student_class}</span>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right flex-shrink-0">
                       <span className="text-xs text-slate-400 block">Điểm SV tự chấm:</span>
                       <span className="text-lg font-black text-[#EE6425]">
                         {studentSubmission?.self_score || "--"} điểm
