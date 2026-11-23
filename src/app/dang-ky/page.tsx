@@ -178,7 +178,7 @@ export default function SuKienHoatDongPage() {
                       <div className="mt-4 pt-3">
                         {isRegistered ? (
                           <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold px-4 py-2 rounded-lg">
-                            ✓ Đã đăng ký tham gia
+                            Đã đăng ký tham gia
                           </span>
                         ) : (
                           <button
