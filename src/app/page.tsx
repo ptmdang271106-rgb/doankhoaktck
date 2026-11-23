@@ -4,6 +4,7 @@ import { siteImages } from "@/lib/site-images";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import BannerSlider from "@/components/BannerSlider";
 import Footer from "@/components/Footer";
 import { supabase } from "@/lib/supabase";
 
@@ -39,16 +40,8 @@ export default function CTUTYouthPortal() {
     <div className="min-h-screen bg-white text-[#333333] font-sans antialiased">
       <Navbar />
 
-      {/* BANNER */}
-      <section className="w-full bg-[#0A2540] flex justify-center items-center">
-        <div className="w-full max-w-7xl mx-auto px-0 sm:px-4 lg:px-8 py-1 sm:py-4">
-          <img
-            src={siteImages.banner}
-            alt="Chương trình Chào đón Tân sinh viên"
-            className="w-full h-auto block rounded-none sm:rounded-lg shadow-sm"
-          />
-        </div>
-      </section>
+      {/* BANNER SLIDER */}
+      <BannerSlider />
 
       {/* NỘI DUNG CHÍNH */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
