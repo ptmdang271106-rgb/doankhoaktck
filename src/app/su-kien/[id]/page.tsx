@@ -4,6 +4,7 @@ import { siteImages } from "@/lib/site-images";
 import React from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import Footer from "@/components/Footer";
 
 const EVENT_DETAILS: Record<string, any> = {
   "ipmc-2026": {
@@ -27,7 +28,8 @@ export default function ChiTietSuKienPage() {
   const event = EVENT_DETAILS[id] || EVENT_DETAILS["ipmc-2026"];
 
   return (
-    <main className="min-h-screen bg-white text-slate-800 py-6 px-4 sm:px-6 lg:px-8">
+    <>
+      <main className="min-h-screen bg-white text-slate-800 py-6 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center gap-2 text-sm text-[#006674] font-medium mb-6">
@@ -129,5 +131,7 @@ export default function ChiTietSuKienPage() {
         </div>
       </div>
     </main>
+    <Footer />
+  </>
   );
 }

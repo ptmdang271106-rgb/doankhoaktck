@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { supabase } from "@/lib/supabase";
 
 export default function TraCuuThongTinPage() {
@@ -105,6 +106,7 @@ export default function TraCuuThongTinPage() {
           )}
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

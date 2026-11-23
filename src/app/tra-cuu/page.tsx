@@ -8,6 +8,7 @@ import { supabase } from "@/lib/supabase";
 import { storeRemoteImage, uploadProofFile } from "@/lib/cloudinary";
 import { ProofLinks, proofUrls } from "@/components/ProofLinks";
 import { DRLStatusBadge, getDRLStatus } from "@/components/DRLStatusBadge";
+import Footer from "@/components/Footer";
 
 async function uploadProofFiles(files: File[]) {
   const urls: string[] = [];
@@ -850,6 +851,7 @@ export default function CongDRLPage() {
         )}
 
       </div>
+      <Footer />
     </div>
   );
 }

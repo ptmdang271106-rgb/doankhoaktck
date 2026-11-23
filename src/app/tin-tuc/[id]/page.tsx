@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import DOMPurify from "dompurify";
+import Footer from "@/components/Footer";
 
 export default function ChiTietTinTucPage() {
   const params = useParams();
@@ -35,7 +36,8 @@ export default function ChiTietTinTucPage() {
   if (!post) return <div className="p-8 text-center text-sm font-bold text-slate-500">Đang tải bài viết...</div>;
 
   return (
-    <main className="min-h-screen bg-white text-slate-800 py-8 px-4 sm:px-6 lg:px-8">
+    <>
+      <main className="min-h-screen bg-white text-slate-800 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <nav className="flex items-center gap-2 text-xs font-bold text-[#007A87] mb-6">
           <Link href="/" className="hover:underline">Trang chủ</Link>
@@ -75,5 +77,7 @@ export default function ChiTietTinTucPage() {
         </div>
       </div>
     </main>
+    <Footer />
+  </>
   );
 }

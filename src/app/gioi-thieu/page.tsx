@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { supabase } from "@/lib/supabase";
 
 function GioiThieuContent() {
@@ -91,16 +92,7 @@ export default function GioiThieuPage() {
         <GioiThieuContent />
       </Suspense>
 
-      {/* FOOTER */}
-      <footer className="bg-[#1A252F] text-gray-400 py-8 border-t border-gray-700 text-xs mt-12">
-        <div className="max-w-7xl mx-auto px-4 text-center space-y-2">
-          <div className="text-white font-bold uppercase">
-            ĐOÀN KHOA KỸ THUẬT CƠ KHÍ – TRƯỜNG ĐẠI HỌC KỸ THUẬT - CÔNG NGHỆ CẦN THƠ
-          </div>
-          <div>Địa chỉ: 256 Nguyễn Văn Cừ, Phường An Hòa, Quận Ninh Kiều, TP. Cần Thơ</div>
-          <div className="text-gray-500 text-[11px]">Bản quyền 2026 CTUT Mechanical Youth Portal.</div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import DOMPurify from "dompurify";
 import { eventWithImages } from "@/lib/event-images";
+import Footer from "@/components/Footer";
 
 export default function SuKienHoatDongPage() {
   const router = useRouter();
@@ -238,6 +239,8 @@ export default function SuKienHoatDongPage() {
           </div>
         </div>
       </main>
+
+      <Footer />
 
       {/* MODAL POPUP */}
       {selectedEventToRegister && (
