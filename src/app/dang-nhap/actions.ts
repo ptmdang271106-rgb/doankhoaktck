@@ -65,7 +65,8 @@ export async function loginWithGoogleSession(accessToken: string) {
   const { data: { user } } = await supabase.auth.getUser(accessToken);
   const email = user?.email?.toLowerCase().trim();
   if (!email || !user?.email_confirmed_at) return null;
-  const studentDb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!, {
+  const pubKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  const studentDb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, pubKey, {
     accessToken: async () => accessToken,
   });
   const columns = "mssv,full_name,student_class,email";
