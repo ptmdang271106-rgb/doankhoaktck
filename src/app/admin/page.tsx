@@ -1,11 +1,20 @@
 "use client";
 
+import { siteImages } from "@/lib/site-images";
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { studentColumns } from "@/lib/student-import";
+import { searchStudents } from "@/lib/student-search";
+import { generateCtuetEmail } from "@/lib/student-email";
+import { ProofLinks } from "@/components/ProofLinks";
+import { storeRemoteImage, uploadImage } from "@/lib/cloudinary";
+import { getEventQr } from "@/app/image-upload";
+import { eventWithImages, packEventDescription } from "@/lib/event-images";
+import { endImageSession } from "@/app/dang-nhap/actions";
 
-export const EVENT_CRITERIA_OPTIONS = [
+const EVENT_CRITERIA_OPTIONS = [
   { code: "I.1", label: "I.1 Điểm TB học tập tích lũy thang 4", max: 5 },
   { code: "I.2", label: "I.2 Giấy chứng nhận lớp kỹ năng học tập", max: 3 },
   { code: "I.3", label: "I.3 Hội thảo / Tọa đàm cấp Khoa, Trường", max: 3 },
@@ -69,7 +78,7 @@ export const EVENT_CRITERIA_OPTIONS = [
   { code: "V.8", label: "V.8 Giấy khen tập thể của Đoàn trao tặng", max: 2 },
 ];
 
-export const DRL_SECTIONS_FULL = [
+const DRL_SECTIONS_FULL = [
   {
     id: "sec1",
     title: "I. Đánh giá về ý thức tham gia học tập",
@@ -168,31 +177,6 @@ export const DRL_SECTIONS_FULL = [
   },
 ];
 
-function removeVietnameseTones(str: string): string {
-  if (!str) return "";
-  return str
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/đ/g, "d")
-    .replace(/Đ/g, "d")
-    .replace(/[^a-zA-Z0-9\s]/g, "")
-    .trim();
-}
-
-export function generateCtuetEmail(fullName: string, mssv: string): string {
-  if (!fullName || !mssv) return "";
-  const cleanName = removeVietnameseTones(fullName).toLowerCase();
-  const cleanMssv = mssv.trim().toLowerCase();
-  const parts = cleanName.split(/\s+/).filter(Boolean);
-
-  if (parts.length === 0) return "";
-  if (parts.length === 1) return `${parts[0]}${cleanMssv}@student.ctuet.edu.vn`;
-
-  const initials = parts.slice(0, -1).map((p) => p[0]).join("");
-  const lastName = parts[parts.length - 1];
-
-  return `${initials}${lastName}${cleanMssv}@student.ctuet.edu.vn`;
-}
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -210,7 +194,7 @@ export default function AdminDashboard() {
   const [pasteData, setPasteData] = useState("");
   const [manualMssv, setManualMssv] = useState("");
   const [manualFullName, setManualFullName] = useState("");
-  const [manualClass, setManualClass] = useState("CNKT Tự động hóa K2024");
+  const [enrollmentClass, setEnrollmentClass] = useState("");
   const [manualBirthPlace, setManualBirthPlace] = useState("");
   const [manualUnionDate, setManualUnionDate] = useState("");
   const [manualPartyDate, setManualPartyDate] = useState("");
@@ -234,7 +218,17 @@ export default function AdminDashboard() {
   const [semEnd, setSemEnd] = useState("");
 
   // State chấm điểm
-  const [classStudents, setClassStudents] = useState<any[]>([]);
+  const [savedClasses, setSavedClasses] = useState<string[]>([]);
+  const [newClass, setNewClass] = useState("");
+  const [addingClass, setAddingClass] = useState(false);
+  const [studentClassFilter, setStudentClassFilter] = useState("");
+  const [reviewClass, setReviewClass] = useState("");
+  const [reviewSearch, setReviewSearch] = useState("");
+  const reviewRequest = useRef(0);
+  const classNames = Array.from(new Set<string>([...savedClasses, ...students.map(s => s.student_class?.trim()).filter(Boolean)]))
+    .sort((a, b) => a.localeCompare(b, "vi"));
+  const visibleStudents = students.filter(s => !studentClassFilter || s.student_class?.trim() === studentClassFilter);
+  const classStudents = searchStudents(students.filter(s => !reviewClass || s.student_class?.trim() === reviewClass), reviewSearch);
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
   const [studentProofs, setStudentProofs] = useState<any[]>([]);
   const [studentSubmission, setStudentSubmission] = useState<any>(null);
@@ -259,24 +253,89 @@ export default function AdminDashboard() {
   const [postCategory, setPostCategory] = useState("Phong trào");
   const [postCoverImage, setPostCoverImage] = useState("");
   const editorRef = useRef<HTMLDivElement>(null);
+  const [savingContent, setSavingContent] = useState(false);
+  const previewUrls = useRef(new Set<string>());
 
-  const fetchAboutContent = async (key: string) => {
-    const { data } = await supabase
-      .from("site_settings")
-      .select("*")
-      .eq("key", key)
-      .maybeSingle();
-    
-    if (aboutEditorRef.current) {
-      aboutEditorRef.current.innerHTML = data && data.value ? data.value : "";
+  useEffect(() => {
+    const urls = previewUrls.current;
+    return () => urls.forEach(url => URL.revokeObjectURL(url));
+  }, []);
+
+  function releasePreview(url: string) {
+    if (previewUrls.current.delete(url)) URL.revokeObjectURL(url);
+  }
+
+  function pickImage(input: HTMLInputElement, onPick: (url: string) => void) {
+    const file = input.files?.[0];
+    input.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      alert("Vui lòng chọn tệp hình ảnh.");
+      return;
     }
-  };
+    const url = URL.createObjectURL(file);
+    previewUrls.current.add(url);
+    onPick(url);
+  }
+
+  function insertImage(input: HTMLInputElement, editor: HTMLDivElement | null) {
+    if (!editor) return;
+    pickImage(input, url => {
+      const image = document.createElement("img");
+      image.src = url;
+      image.style.maxWidth = "100%";
+      image.style.borderRadius = "12px";
+      image.style.margin = "10px 0";
+      const selection = window.getSelection();
+      const range = selection?.rangeCount ? selection.getRangeAt(0) : null;
+      if (range && editor.contains(range.commonAncestorContainer)) {
+        range.deleteContents();
+        range.insertNode(image);
+        range.setStartAfter(image);
+        range.collapse(true);
+      } else {
+        editor.appendChild(image);
+      }
+    });
+  }
+
+  async function publishImage(src: string) {
+    if (!src) return "";
+    if (!src.startsWith("blob:") && !src.startsWith("data:image/")) return storeRemoteImage(src);
+    const response = await fetch(src);
+    if (!response.ok) throw new Error("Không đọc được ảnh đã chọn.");
+    return uploadImage(await response.blob());
+  }
+
+  async function publishEditorImages(editor: HTMLDivElement | null) {
+    if (!editor) return "";
+    for (const image of editor.querySelectorAll<HTMLImageElement>("img[src]")) {
+      const preview = image.currentSrc || image.src;
+      image.src = await publishImage(preview);
+      image.removeAttribute("srcset");
+      image.closest("picture")?.querySelectorAll("source").forEach(source => source.remove());
+      releasePreview(preview);
+    }
+    return editor.innerHTML;
+  }
+
+  async function saveContent(e: React.FormEvent, save: () => Promise<void>) {
+    e.preventDefault();
+    if (savingContent) return;
+    setSavingContent(true);
+    try {
+      await save();
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Không lưu được nội dung. Vui lòng thử lại.");
+    } finally {
+      setSavingContent(false);
+    }
+  }
 
   const fetchAllData = async () => {
     const { data: stdData } = await supabase.from("students").select("*").order("id", { ascending: false });
     if (stdData) {
       setStudents(stdData);
-      setClassStudents(stdData);
     }
 
     const { data: offData } = await supabase.from("branch_officers").select("*").order("id", { ascending: false });
@@ -286,13 +345,37 @@ export default function AdminDashboard() {
     if (postData) setPosts(postData);
 
     const { data: evData } = await supabase.from("events").select("*").order("created_at", { ascending: false });
-    if (evData) setEvents(evData);
+    if (evData) setEvents(evData.map(eventWithImages));
 
     const { data: semData } = await supabase.from("drl_semesters").select("*").order("created_at", { ascending: false });
     if (semData) setSemesters(semData);
 
-    fetchAboutContent(aboutTargetKey);
   };
+
+  async function addClass(e: React.FormEvent) {
+    e.preventDefault();
+    const name = newClass.trim().replace(/\s+/g, " ").normalize("NFC");
+    if (!name || addingClass) return;
+    if (classNames.some(c => c.localeCompare(name, "vi", { sensitivity: "accent" }) === 0)) {
+      alert("Lớp này đã có trong danh sách.");
+      return;
+    }
+    setAddingClass(true);
+    try {
+      const { error } = await supabase.from("site_settings").insert({
+        key: "class:" + name.toLocaleLowerCase("vi"), value: name, updated_at: new Date().toISOString(),
+      });
+      if (error) throw new Error(error.code === "23505" ? "Lớp này đã tồn tại." : error.message);
+      setSavedClasses(prev => [...prev, name]);
+      setStudentClassFilter(name);
+      setEnrollmentClass(name);
+      setNewClass("");
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Không thêm được lớp.");
+    } finally {
+      setAddingClass(false);
+    }
+  }
 
   useEffect(() => {
     const userStr = localStorage.getItem("ctut_current_user");
@@ -307,17 +390,28 @@ export default function AdminDashboard() {
       return;
     }
     setCurrentUser(user);
+    supabase.from("site_settings").select("value").like("key", "class:%").then(({ data, error }) => {
+      if (error) alert("Không tải được danh sách lớp: " + error.message);
+      if (data) setSavedClasses(prev => [...new Set([...prev, ...data.map(row => row.value)])]);
+    });
     fetchAllData();
   }, [router]);
 
   // Khi thay đổi tab Đoàn khoa / Liên chi hội thì load lại dữ liệu tương ứng
   useEffect(() => {
-    fetchAboutContent(aboutTargetKey);
-  }, [aboutTargetKey]);
+    if (activeTab !== "about") return;
+    const controller = new AbortController();
+    supabase.from("site_settings").select("value").eq("key", aboutTargetKey)
+      .abortSignal(controller.signal).maybeSingle().then(({ data }) => {
+        if (!controller.signal.aborted && aboutEditorRef.current) {
+          aboutEditorRef.current.innerHTML = data?.value || "";
+        }
+      });
+    return () => controller.abort();
+  }, [activeTab, aboutTargetKey]);
 
-  const handleSaveAboutUs = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const html = aboutEditorRef.current ? aboutEditorRef.current.innerHTML : "";
+  const handleSaveAboutUs = async () => {
+    const html = await publishEditorImages(aboutEditorRef.current);
     
     const { data: existing } = await supabase.from("site_settings").select("*").eq("key", aboutTargetKey).maybeSingle();
 
@@ -399,14 +493,14 @@ export default function AdminDashboard() {
   };
 
   const handleSelectStudentForReview = async (st: any) => {
-    setSelectedStudent(st);
+    const request = ++reviewRequest.current;
+    setSelectedStudent(null);
     try {
       const { data: proofs } = await supabase
         .from("proofs")
         .select("*")
         .eq("mssv", st.mssv)
         .eq("semester_id", reviewSemester);
-      if (proofs) setStudentProofs(proofs);
 
       const { data: sub } = await supabase
         .from("drl_submissions")
@@ -415,6 +509,9 @@ export default function AdminDashboard() {
         .eq("semester_id", reviewSemester)
         .maybeSingle();
 
+      if (request !== reviewRequest.current) return;
+      setSelectedStudent(st);
+      setStudentProofs(proofs || []);
       if (sub) {
         setStudentSubmission(sub);
         if (sub.scores_detail) {
@@ -432,9 +529,17 @@ export default function AdminDashboard() {
   };
 
   const handleApproveProof = async (proofId: string, currentStatus: string) => {
+    const request = reviewRequest.current;
     const nextStatus = currentStatus === "Đã duyệt" ? "Chờ duyệt" : "Đã duyệt";
     await supabase.from("proofs").update({ status: nextStatus }).eq("id", proofId);
-    handleSelectStudentForReview(selectedStudent);
+    if (request === reviewRequest.current) handleSelectStudentForReview(selectedStudent);
+  };
+
+  const handleDeleteProof = async (proofId: string, title: string) => {
+    if (!confirm(`Xác nhận xóa minh chứng "${title}" của sinh viên này?`)) return;
+    const request = reviewRequest.current;
+    await supabase.from("proofs").delete().eq("id", proofId);
+    if (request === reviewRequest.current) handleSelectStudentForReview(selectedStudent);
   };
 
   const getOfficerSectionScore = (section: any) => {
@@ -445,6 +550,7 @@ export default function AdminDashboard() {
   const grandOfficerTotalScore = DRL_SECTIONS_FULL.reduce((total, sec) => total + getOfficerSectionScore(sec), 0);
 
   const handleSendFinalScore = async () => {
+    const request = reviewRequest.current;
     if (!selectedStudent) return;
     if (!confirm(`Xác nhận gửi bảng điểm rèn luyện chính thức (${grandOfficerTotalScore} điểm) về cho sinh viên ${selectedStudent.full_name}?`)) return;
 
@@ -466,7 +572,7 @@ export default function AdminDashboard() {
         alert("Lỗi khi gửi điểm: " + error.message);
       } else {
         alert("Đã gửi điểm rèn luyện chính thức về cho sinh viên thành công!");
-        handleSelectStudentForReview(selectedStudent);
+        if (request === reviewRequest.current) handleSelectStudentForReview(selectedStudent);
       }
     } catch (err: any) {
       alert("Lỗi: " + err.message);
@@ -474,16 +580,18 @@ export default function AdminDashboard() {
   };
 
   const handleProcessPasteData = async () => {
+    if (!enrollmentClass) return alert("Vui lòng chọn lớp trước khi thêm sinh viên.");
     if (!pasteData.trim()) return alert("Vui lòng dán dữ liệu!");
     const rows = pasteData.split(/\r\n|\n/).filter((r) => r.trim() !== "");
     const imported: any[] = [];
 
     for (const row of rows) {
-      const cols = row.split(/\t|,/).map((c) => c.trim().replace(/^"|"$/g, ""));
+      const cols = studentColumns(row, enrollmentClass);
+      if (/^mssv\b/i.test(row.trim())) continue;
+      if (!cols[0] || !cols[1]) return alert("Không đọc được MSSV và họ tên ở dòng: " + row);
       if (cols.length >= 2 && cols[0] && !cols[0].toLowerCase().includes("mssv")) {
         const mssv = cols[0].replace(/\s+/g, "").toUpperCase();
         const full_name = cols[1];
-        const student_class = cols[2] || "CNKT Tự động hóa K2024";
         const birth_place = cols[3] || "Cần Thơ";
         const union_date = cols[4] || "2020-03-26";
         const party_date = cols[5] || "";
@@ -497,7 +605,7 @@ export default function AdminDashboard() {
           mssv,
           full_name,
           email,
-          student_class,
+          student_class: enrollmentClass,
           password,
           birth_place,
           union_date,
@@ -522,11 +630,11 @@ export default function AdminDashboard() {
 
   const handleAddManualStudent = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!enrollmentClass) return alert("Vui lòng chọn lớp trước khi thêm sinh viên.");
     if (!manualMssv.trim() || !manualFullName.trim()) return alert("Vui lòng nhập đầy đủ MSSV và Họ tên!");
 
     const mssv = manualMssv.trim().toUpperCase();
     const full_name = manualFullName.trim();
-    const student_class = manualClass.trim() || "CNKT Tự động hóa K2024";
     const password = mssv.slice(-3);
     const email = generateCtuetEmail(full_name, mssv);
 
@@ -534,7 +642,7 @@ export default function AdminDashboard() {
       mssv,
       full_name,
       email,
-      student_class,
+      student_class: enrollmentClass,
       password,
       birth_place: manualBirthPlace || "Cần Thơ",
       union_date: manualUnionDate || "2020-03-26",
@@ -558,7 +666,9 @@ export default function AdminDashboard() {
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!enrollmentClass) return alert("Vui lòng chọn lớp trước khi thêm sinh viên.");
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
 
     const reader = new FileReader();
@@ -569,18 +679,19 @@ export default function AdminDashboard() {
       const imported: any[] = [];
 
       for (const row of rows) {
-        const cols = row.split(/,|\t/).map((c) => c.trim().replace(/^"|"$/g, ""));
+        const cols = studentColumns(row, enrollmentClass);
+        if (/^mssv\b/i.test(row.trim())) continue;
+        if (!cols[0] || !cols[1]) return alert("Không đọc được MSSV và họ tên ở dòng: " + row);
         if (cols.length >= 2 && cols[0] && !cols[0].toLowerCase().includes("mssv")) {
           const mssv = cols[0].replace(/\s+/g, "").toUpperCase();
           const full_name = cols[1];
-          const student_class = cols[2] || "CNKT Tự động hóa K2024";
           const password = mssv.slice(-3);
           const email = generateCtuetEmail(full_name, mssv);
           imported.push({
             mssv,
             full_name,
             email,
-            student_class,
+            student_class: enrollmentClass,
             password,
             birth_place: "Cần Thơ",
             union_date: "2020-03-26",
@@ -592,7 +703,8 @@ export default function AdminDashboard() {
       }
 
       if (imported.length > 0) {
-        await supabase.from("students").upsert(imported, { onConflict: "mssv" });
+        const { error } = await supabase.from("students").upsert(imported, { onConflict: "mssv" });
+        if (error) return alert("Lỗi lưu danh sách: " + error.message);
         alert(`Đã nạp thành công ${imported.length} sinh viên.`);
         fetchAllData();
       }
@@ -635,32 +747,16 @@ export default function AdminDashboard() {
     if (item) setEventPoints(item.max);
   };
 
-  const handleEventCoverUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setEventCoverImage(reader.result as string);
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleInsertEventBodyImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => document.execCommand("insertImage", false, reader.result as string);
-      reader.readAsDataURL(file);
-    }
-  };
-
   const formatEventText = (cmd: string, value: string = "") => {
     document.execCommand(cmd, false, value);
   };
 
-  const handleAddEvent = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleAddEvent = async () => {
     const criteriaItem = EVENT_CRITERIA_OPTIONS.find((c) => c.code === eventCategoryCode);
-    const descHtml = eventEditorRef.current ? eventEditorRef.current.innerHTML : "";
+    const descHtml = await publishEditorImages(eventEditorRef.current);
+    const coverUrl = await publishImage(eventCoverImage);
+    setEventCoverImage(coverUrl);
+    releasePreview(eventCoverImage);
 
     const newEvent = {
       id: "ev-" + Date.now().toString(),
@@ -672,9 +768,7 @@ export default function AdminDashboard() {
       time: eventTime || "07:30 - Ngày 30/08/2026",
       location: eventLocation,
       deadline: eventDeadline || "23:59 - Ngày 29/08/2026",
-      cover_image: eventCoverImage || "",
-      description_html: descHtml,
-      description: eventEditorRef.current ? eventEditorRef.current.innerText : eventDesc,
+      description: packEventDescription(coverUrl, descHtml, eventDesc),
       lat: 10.0469,
       lng: 105.7681,
       gps_radius: "200",
@@ -707,35 +801,19 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleCoverUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setPostCoverImage(reader.result as string);
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleInsertBodyImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => document.execCommand("insertImage", false, reader.result as string);
-      reader.readAsDataURL(file);
-    }
-  };
-
   const formatText = (cmd: string, value: string = "") => {
     document.execCommand(cmd, false, value);
   };
 
-  const handleAddPost = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const contentHtml = editorRef.current ? editorRef.current.innerHTML : "";
+  const handleAddPost = async () => {
+    const contentHtml = await publishEditorImages(editorRef.current);
+    const coverUrl = await publishImage(postCoverImage);
+    setPostCoverImage(coverUrl);
+    releasePreview(postCoverImage);
     const newPost = {
       title: postTitle,
       category: postCategory,
-      cover_image: postCoverImage || "",
+      cover_image: coverUrl,
       content_html: contentHtml,
       content: editorRef.current ? editorRef.current.innerText : "",
       date: new Date().toLocaleDateString("vi-VN"),
@@ -776,7 +854,7 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-4">
             <Link href="/">
               <img
-                src="/logo-doankhoa.png"
+                src={siteImages.logo}
                 alt="Logo Đoàn Khoa"
                 className="h-12 sm:h-14 w-auto object-contain cursor-pointer"
               />
@@ -796,7 +874,9 @@ export default function AdminDashboard() {
               Về trang chủ
             </Link>
             <button
-              onClick={() => {
+              onClick={async () => {
+                await endImageSession();
+                await supabase.auth.signOut({ scope: "local" });
                 localStorage.removeItem("ctut_current_user");
                 router.push("/dang-nhap");
               }}
@@ -808,7 +888,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* TAB NAVIGATION */}
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div inert={savingContent} className="flex flex-wrap gap-2 mb-6">
           <button
             onClick={() => setActiveTab("students")}
             className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition ${
@@ -879,6 +959,13 @@ export default function AdminDashboard() {
         {activeTab === "students" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-5 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+              <form onSubmit={addClass} className="space-y-2 border-b border-slate-100 pb-4">
+                <label htmlFor="new-class" className="text-sm font-bold text-[#004A52]">Thêm lớp học</label>
+                <div className="flex gap-2">
+                  <input id="new-class" required value={newClass} onChange={e => setNewClass(e.target.value)} placeholder="Tên lớp học" className="min-w-0 flex-1 rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+                  <button disabled={addingClass || !newClass.trim()} className="rounded-xl bg-[#007A87] px-4 py-2 text-xs font-bold text-white disabled:opacity-50">{addingClass ? "Đang lưu…" : "Thêm lớp"}</button>
+                </div>
+              </form>
               <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                 <h3 className="text-sm font-bold text-[#004A52]">Thêm sinh viên / Đoàn viên</h3>
                 <button
@@ -890,6 +977,14 @@ export default function AdminDashboard() {
                 </button>
               </div>
 
+              <label className="block text-xs font-bold text-slate-700">
+                Lớp nhận sinh viên *
+                <select required value={enrollmentClass} onChange={e => setEnrollmentClass(e.target.value)} className="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2">
+                  <option value="">Chọn lớp học</option>
+                  {classNames.map(name => <option key={name} value={name}>{name}</option>)}
+                </select>
+              </label>
+              <fieldset disabled={!enrollmentClass} className="space-y-4 disabled:opacity-60">
               <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 rounded-xl text-xs font-bold text-slate-600">
                 <button type="button" onClick={() => setStudentInputMode("paste")} className={`py-1.5 rounded-lg transition ${studentInputMode === "paste" ? "bg-white text-[#EE6425] shadow-xs" : ""}`}>Dán từ Excel</button>
                 <button type="button" onClick={() => setStudentInputMode("manual")} className={`py-1.5 rounded-lg transition ${studentInputMode === "manual" ? "bg-white text-[#EE6425] shadow-xs" : ""}`}>Nhập thủ công</button>
@@ -898,7 +993,7 @@ export default function AdminDashboard() {
 
               {studentInputMode === "paste" && (
                 <div className="space-y-2">
-                  <p className="text-[11px] text-slate-500">Quét chọn 3 cột (MSSV, Họ tên, Lớp) từ file Excel rồi dán vào đây:</p>
+                  <p className="text-[11px] text-slate-500">Dán cột MSSV và họ tên từ Excel. Tất cả sinh viên trong lần nhập này sẽ vào lớp đã chọn.</p>
                   <textarea
                     rows={5}
                     value={pasteData}
@@ -923,11 +1018,6 @@ export default function AdminDashboard() {
                       <label className="block text-[11px] font-bold text-slate-700 mb-1">Họ và tên *</label>
                       <input type="text" required value={manualFullName} onChange={(e) => setManualFullName(e.target.value)} placeholder="Phạm Thái Minh Đăng" className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none" />
                     </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-700 mb-1">Lớp sinh hoạt</label>
-                    <input type="text" value={manualClass} onChange={(e) => setManualClass(e.target.value)} placeholder="CNKT Tự động hóa K2024" className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none" />
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
@@ -968,23 +1058,30 @@ export default function AdminDashboard() {
 
               {studentInputMode === "file" && (
                 <div className="space-y-3 p-4 bg-slate-50 border border-dashed border-slate-300 rounded-2xl text-center">
-                  <p className="text-xs font-bold text-slate-700">Chọn file danh sách (.csv / .txt)</p>
+                  <p className="text-xs font-bold text-slate-700">Chọn file .csv hoặc .txt. Toàn bộ danh sách sẽ vào lớp {enrollmentClass}.</p>
                   <input type="file" accept=".csv, .txt" onChange={handleFileUpload} className="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#EE6425] file:text-white cursor-pointer" />
                 </div>
               )}
+              </fieldset>
             </div>
 
             <div className="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm overflow-x-auto">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-slate-200">
-                <h2 className="text-base font-bold text-[#004A52]">Danh sách sinh viên ({students.length})</h2>
-                {students.length > 0 && (
+                <h2 className="text-base font-bold text-[#004A52]">Danh sách sinh viên ({visibleStudents.length})</h2>
+                {students.length > 0 && !studentClassFilter && (
                   <button onClick={handleDeleteAllStudents} className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition shadow">
                     Xóa tất cả danh sách
                   </button>
                 )}
               </div>
 
-              {students.length === 0 ? (
+              <label className="mb-3 block text-xs font-bold text-slate-700">Lớp học
+                <select value={studentClassFilter} onChange={e => setStudentClassFilter(e.target.value)} className="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2">
+                  <option value="">Tất cả lớp</option>
+                  {classNames.map(name => <option key={name} value={name}>{name}</option>)}
+                </select>
+              </label>
+              {visibleStudents.length === 0 ? (
                 <div className="py-12 text-center text-xs text-slate-400 border border-dashed border-slate-200 rounded-xl">Chưa có sinh viên nào.</div>
               ) : (
                 <table className="w-full text-left text-xs">
@@ -999,7 +1096,7 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {students.map((s, idx) => (
+                    {visibleStudents.map((s, idx) => (
                       <tr key={idx} className="hover:bg-slate-50">
                         <td className="p-2.5 font-bold text-[#007A87]">{s.mssv}</td>
                         <td className="p-2.5 font-medium text-slate-800">{s.full_name}</td>
@@ -1036,7 +1133,7 @@ export default function AdminDashboard() {
               </div>
 
               {/* 2 NÚT CHUYỂN ĐỔI ĐOÀN KHOA / LIÊN CHI HỘI */}
-              <div className="flex gap-2 bg-slate-100 p-1 rounded-xl">
+              <div inert={savingContent} className="flex gap-2 bg-slate-100 p-1 rounded-xl">
                 <button
                   type="button"
                   onClick={() => setAboutTargetKey("about_doankhoa")}
@@ -1058,7 +1155,7 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <form onSubmit={handleSaveAboutUs} className="space-y-4">
+            <form inert={savingContent} aria-busy={savingContent} onSubmit={e => saveContent(e, handleSaveAboutUs)} className="space-y-4">
               <div className="flex flex-wrap items-center gap-1.5 p-2 bg-slate-50 border border-slate-300 rounded-t-xl text-xs font-bold">
                 <button
                   type="button"
@@ -1110,23 +1207,7 @@ export default function AdminDashboard() {
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                          if (aboutEditorRef.current) {
-                            const img = document.createElement("img");
-                            img.src = reader.result as string;
-                            img.style.maxWidth = "100%";
-                            img.style.borderRadius = "12px";
-                            img.style.margin = "10px 0";
-                            aboutEditorRef.current.appendChild(img);
-                          }
-                        };
-                        reader.readAsDataURL(file);
-                      }
-                    }}
+                    onChange={(e) => insertImage(e.currentTarget, aboutEditorRef.current)}
                     className="hidden"
                   />
                 </label>
@@ -1142,7 +1223,7 @@ export default function AdminDashboard() {
                 type="submit"
                 className="bg-[#EE6425] hover:bg-[#d85216] text-white font-bold px-8 py-3 rounded-xl text-xs uppercase shadow transition"
               >
-                Lưu nội dung ({aboutTargetKey === "about_lienchihoi" ? "Liên chi hội KTCK" : "Đoàn khoa KTCK"})
+                {savingContent ? "Đang lưu…" : `Lưu nội dung (${aboutTargetKey === "about_lienchihoi" ? "Liên chi hội KTCK" : "Đoàn khoa KTCK"})`}
               </button>
             </form>
           </div>
@@ -1289,7 +1370,7 @@ export default function AdminDashboard() {
                 <h3 className="text-sm font-black text-[#004A52] uppercase">Danh sách sinh viên lớp</h3>
                 <select
                   value={reviewSemester}
-                  onChange={(e) => setReviewSemester(e.target.value)}
+                  onChange={e => { reviewRequest.current++; setSelectedStudent(null); setReviewSemester(e.target.value); }}
                   className="border border-slate-300 rounded-lg px-2 py-1 text-[11px] font-bold text-[#EE6425] outline-none"
                 >
                   {semesters.map((s) => (
@@ -1298,10 +1379,18 @@ export default function AdminDashboard() {
                 </select>
               </div>
 
+              <label className="mb-3 block text-xs font-bold text-slate-700">Lớp học
+                <select value={reviewClass} onChange={e => { reviewRequest.current++; setSelectedStudent(null); setReviewClass(e.target.value); }} className="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2">
+                  <option value="">Tất cả lớp</option>
+                  {classNames.map(name => <option key={name} value={name}>{name}</option>)}
+                </select>
+              </label>
               <div className="space-y-2 max-h-[600px] overflow-y-auto pr-1">
-                {classStudents.map((st, idx) => (
+                <input type="search" aria-label="Tìm sinh viên theo tên hoặc MSSV" placeholder="Tìm theo họ tên hoặc MSSV" value={reviewSearch} onChange={e => setReviewSearch(e.target.value)} className="sticky top-0 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm" />
+                {!classStudents.length && <p className="text-xs text-slate-500">{reviewSearch.trim() ? "Không tìm thấy sinh viên phù hợp." : "Chưa có sinh viên trong danh sách này."}</p>}
+                {classStudents.map(st => (
                   <div
-                    key={idx}
+                    key={st.mssv}
                     onClick={() => handleSelectStudentForReview(st)}
                     className={`p-3 rounded-2xl border cursor-pointer transition text-xs ${
                       selectedStudent?.mssv === st.mssv ? "bg-orange-50 border-[#EE6425] shadow-xs" : "bg-slate-50 border-slate-200 hover:bg-slate-100"
@@ -1339,20 +1428,27 @@ export default function AdminDashboard() {
                         {studentProofs.map((p, pIdx) => (
                           <div key={pIdx} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
                             <div>
-                              <span className="font-bold text-slate-800 block">{p.activity_title}</span>
-                              <span className="text-[11px] text-slate-500">{p.category} (+{p.points}đ)</span>
+                              <span className="font-bold text-slate-800 block">{p.title}</span>
+                              <span className="text-[11px] text-slate-500">{p.category_code} (+{p.points}đ)</span>
                             </div>
-                            <div className="flex items-center gap-3">
-                              {p.proof_url && (
-                                <a href={p.proof_url} target="_blank" rel="noreferrer" className="text-blue-600 font-bold hover:underline">Xem tệp</a>
-                              )}
+                            <div className="flex items-center gap-2">
+                              <ProofLinks value={p.image} />
                               <button
                                 onClick={() => handleApproveProof(p.id, p.status)}
                                 className={`px-3 py-1.5 rounded-lg font-bold text-[11px] transition ${
-                                  p.status === "Đã duyệt" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
+                                  p.status === "Đã duyệt" ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-amber-100 text-amber-700 hover:bg-amber-200"
                                 }`}
                               >
                                 {p.status || "Chờ duyệt"}
+                              </button>
+                              <button
+                                onClick={() => handleDeleteProof(p.id, p.title)}
+                                className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition"
+                                title="Xóa minh chứng"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
                               </button>
                             </div>
                           </div>
@@ -1456,7 +1552,7 @@ export default function AdminDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
               <h2 className="text-base font-bold text-[#004A52] mb-4">Tạo Sự Kiện Mới</h2>
-              <form onSubmit={handleAddEvent} className="space-y-3.5">
+              <form inert={savingContent} aria-busy={savingContent} onSubmit={e => saveContent(e, handleAddEvent)} className="space-y-3.5">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Tên sự kiện *</label>
                   <input type="text" required value={eventTitle} onChange={(e) => setEventTitle(e.target.value)} placeholder="VD: Hội thảo..." className="w-full border border-slate-300 rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[#EE6425]" />
@@ -1488,7 +1584,7 @@ export default function AdminDashboard() {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Hình ảnh bìa sự kiện</label>
-                  <input type="file" accept="image/*" onChange={handleEventCoverUpload} className="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-500" />
+                  <input type="file" accept="image/*" onChange={(e) => pickImage(e.currentTarget, url => { releasePreview(eventCoverImage); setEventCoverImage(url); })} className="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-500" />
                   {eventCoverImage && <img src={eventCoverImage} alt="Cover Preview" className="mt-2 h-24 rounded-xl object-cover" />}
                 </div>
 
@@ -1499,7 +1595,7 @@ export default function AdminDashboard() {
                     <button type="button" onClick={() => formatEventText("italic")} className="px-2.5 py-1 bg-white border border-slate-200 rounded italic">I</button>
                     <label className="px-2.5 py-1 bg-orange-50 text-[#EE6425] border border-orange-200 rounded cursor-pointer">
                       Chèn hình
-                      <input type="file" accept="image/*" onChange={handleInsertEventBodyImage} className="hidden" />
+                      <input type="file" accept="image/*" onChange={(e) => insertImage(e.currentTarget, eventEditorRef.current)} className="hidden" />
                     </label>
                   </div>
                   <div ref={eventEditorRef} contentEditable className="w-full min-h-[120px] border border-t-0 border-slate-300 rounded-b-xl p-3 text-xs outline-none bg-white"></div>
@@ -1515,7 +1611,7 @@ export default function AdminDashboard() {
                 </div>
 
                 <button type="submit" className="w-full bg-[#EE6425] hover:bg-[#d85216] text-white font-bold py-3 rounded-xl transition text-xs uppercase shadow">
-                  Đăng sự kiện lên hệ thống
+                  {savingContent ? "Đang lưu…" : "Đăng sự kiện lên hệ thống"}
                 </button>
               </form>
             </div>
@@ -1542,7 +1638,15 @@ export default function AdminDashboard() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <button onClick={() => setActiveQrEvent(ev)} className="bg-[#007A87] text-white font-bold text-xs px-3 py-1.5 rounded-xl">Mã QR</button>
+                          <button onClick={async () => {
+                            try {
+                              const result = await getEventQr(String(ev.id));
+                              if (result.error) return alert(result.error);
+                              setActiveQrEvent({ ...ev, qrUrl: result.url });
+                            } catch {
+                              alert("Không tải được mã QR. Vui lòng thử lại.");
+                            }
+                          }} className="bg-[#007A87] text-white font-bold text-xs px-3 py-1.5 rounded-xl">Mã QR</button>
                           <button onClick={() => handleDeleteSingleEvent(ev.id, ev.title)} className="text-red-600 text-xs font-bold hover:underline">Xóa</button>
                         </div>
                       </div>
@@ -1559,7 +1663,7 @@ export default function AdminDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
               <h2 className="text-base font-bold text-[#004A52] mb-4">Tạo bài viết mới</h2>
-              <form onSubmit={handleAddPost} className="space-y-4">
+              <form inert={savingContent} aria-busy={savingContent} onSubmit={e => saveContent(e, handleAddPost)} className="space-y-4">
                 <input
                   type="text"
                   required
@@ -1583,7 +1687,7 @@ export default function AdminDashboard() {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Hình ảnh bìa bài viết</label>
-                  <input type="file" accept="image/*" onChange={handleCoverUpload} className="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-500" />
+                  <input type="file" accept="image/*" onChange={(e) => pickImage(e.currentTarget, url => { releasePreview(postCoverImage); setPostCoverImage(url); })} className="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-500" />
                   {postCoverImage && <img src={postCoverImage} alt="" className="mt-2 h-20 rounded-xl object-cover" />}
                 </div>
 
@@ -1594,14 +1698,14 @@ export default function AdminDashboard() {
                     <button type="button" onClick={() => formatText("italic")} className="px-2.5 py-1 bg-white border rounded italic">I</button>
                     <label className="px-2.5 py-1 bg-orange-50 text-[#EE6425] border rounded cursor-pointer">
                       Chèn hình
-                      <input type="file" accept="image/*" onChange={handleInsertBodyImage} className="hidden" />
+                      <input type="file" accept="image/*" onChange={(e) => insertImage(e.currentTarget, editorRef.current)} className="hidden" />
                     </label>
                   </div>
                   <div ref={editorRef} contentEditable className="w-full min-h-[140px] border border-t-0 border-slate-300 rounded-b-xl p-4 text-sm outline-none bg-white"></div>
                 </div>
 
                 <button type="submit" className="w-full bg-[#EE6425] text-white font-bold py-3 rounded-xl text-xs uppercase shadow">
-                  Xuất bản bài viết
+                  {savingContent ? "Đang lưu…" : "Xuất bản bài viết"}
                 </button>
               </form>
             </div>
@@ -1629,7 +1733,7 @@ export default function AdminDashboard() {
             </div>
             <h2 className="text-xl font-black text-[#004A52]">{activeQrEvent.title}</h2>
             <div className="my-6 p-4 bg-slate-50 rounded-2xl inline-block">
-              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(activeQrEvent.id)}`} alt="QR" className="w-56 h-56 mx-auto rounded-xl" />
+              <img src={activeQrEvent.qrUrl} alt="QR" className="w-56 h-56 mx-auto rounded-xl" />
             </div>
             <p className="text-xs text-[#007A87] font-bold">Mã Check-in: <code className="text-[#EE6425]">{activeQrEvent.id}</code></p>
           </div>

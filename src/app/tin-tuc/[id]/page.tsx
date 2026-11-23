@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+import DOMPurify from "dompurify";
 
 export default function ChiTietTinTucPage() {
   const params = useParams();
@@ -10,20 +12,24 @@ export default function ChiTietTinTucPage() {
   const [post, setPost] = useState<any>(null);
 
   useEffect(() => {
-    const customPosts = JSON.parse(localStorage.getItem("ctut_custom_posts") || "[]");
-    const found = customPosts.find((p: any) => p.id === id);
-    if (found) {
-      setPost(found);
-    } else {
-      // Dữ liệu mẫu nếu bấm vào bài mặc định
+    const controller = new AbortController();
+    async function loadPost() {
+      const { data } = await supabase.from("posts").select("*").eq("id", id)
+        .abortSignal(controller.signal).maybeSingle();
+      if (controller.signal.aborted) return;
+      const found = data ?? JSON.parse(localStorage.getItem("ctut_custom_posts") || "[]")
+        .find((p: { id: string | number }) => String(p.id) === id);
       setPost({
-        title: "Thông tin chi tiết bài viết - Đoàn Khoa Cơ khí CTUT",
-        category: "Tin tức",
-        coverImage: "",
-        date: "25/08/2026",
-        contentHtml: "<p>Nội dung chi tiết đang được Ban biên tập cập nhật...</p>",
+        title: found?.title ?? "Thông tin chi tiết bài viết - Đoàn Khoa Cơ khí CTUT",
+        category: found?.category ?? "Tin tức",
+        coverImage: found?.cover_image ?? found?.coverImage,
+        date: found?.date ?? "25/08/2026",
+        contentHtml: DOMPurify.sanitize(found?.content_html || found?.contentHtml || "", { USE_PROFILES: { html: true } }),
+        content: found?.content || "Nội dung chi tiết đang được Ban biên tập cập nhật...",
       });
     }
+    loadPost();
+    return () => controller.abort();
   }, [id]);
 
   if (!post) return <div className="p-8 text-center text-sm font-bold text-slate-500">Đang tải bài viết...</div>;
@@ -54,10 +60,10 @@ export default function ChiTietTinTucPage() {
         )}
 
         {/* NỘI DUNG VÀ HÌNH ẢNH MINH HỌA DO ADMIN SOẠN */}
-        <div
+        {post.contentHtml ? <div
           className="prose prose-slate max-w-none text-slate-700 leading-relaxed text-sm sm:text-base space-y-4 [&_img]:rounded-xl [&_img]:my-4 [&_img]:mx-auto [&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-[#004A52]"
           dangerouslySetInnerHTML={{ __html: post.contentHtml }}
-        />
+        /> : <p className="whitespace-pre-line">{post.content}</p>}
 
         <div className="mt-12 pt-6 border-t border-slate-200 flex justify-between items-center">
           <Link

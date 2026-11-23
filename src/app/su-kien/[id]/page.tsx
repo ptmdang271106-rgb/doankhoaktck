@@ -1,5 +1,6 @@
 "use client";
 
+import { siteImages } from "@/lib/site-images";
 import React from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -10,7 +11,7 @@ const EVENT_DETAILS: Record<string, any> = {
     date: "25 tháng 10 2026",
     time: "08:00 - 17:00",
     location: "Hội trường A & Sân cờ Trường ĐH Kỹ thuật - Công nghệ Cần Thơ",
-    banner: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=1200&auto=format&fit=crop&q=80",
+    banner: siteImages.event,
     subHeading: "Mechanical Innovation Festival – Nơi tuổi trẻ cơ khí kiến tạo tương lai số",
     content: [
       "Với thông điệp 'Kiến tạo tương lai cùng công nghệ Cơ khí thông minh', Tech Festival 2026 được định hướng trở thành ngày hội triển lãm, tranh tài quy mô lớn nhất trong năm học của Đoàn Khoa Kỹ thuật Cơ khí.",
@@ -95,17 +96,17 @@ export default function ChiTietSuKienPage() {
                   {
                     title: "Hội thảo quốc tế Sinh viên nghiên cứu khoa học các Trường Đại học Kỹ thuật (SR-ICYREB 2026)",
                     date: "10 tháng 10 2026",
-                    img: "https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=200&auto=format&fit=crop&q=60",
+                    img: siteImages.conference,
                   },
                   {
                     title: "UEH Alumni Homecoming Day 2026: Ngày hội trở về dành cho cựu sinh viên toàn quốc",
                     date: "03 tháng 10 2026",
-                    img: "https://images.unsplash.com/photo-1511578314322-379afb476865?w=200&auto=format&fit=crop&q=60",
+                    img: siteImages.festival,
                   },
                   {
                     title: "[Diễn đàn] VIỆT LÀ VƯỢT: Phiên đối thoại Khát vọng Tuổi trẻ Công nghệ",
                     date: "25 tháng 08 2026",
-                    img: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=200&auto=format&fit=crop&q=60",
+                    img: siteImages.forum,
                   },
                 ].map((item, index) => (
                   <div key={index} className="pt-4 first:pt-0 flex gap-3 group cursor-pointer">

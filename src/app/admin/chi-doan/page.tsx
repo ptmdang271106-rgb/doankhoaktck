@@ -4,11 +4,15 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { ProofLinks } from "@/components/ProofLinks";
+import { searchStudents } from "@/lib/student-search";
 
 export default function ChiDoanDashboard() {
   const router = useRouter();
   const [currentOfficer, setCurrentOfficer] = useState<any>(null);
   const [studentsInClass, setStudentsInClass] = useState<any[]>([]);
+  const [reviewSearch, setReviewSearch] = useState("");
+  const matchingStudents = searchStudents(studentsInClass, reviewSearch);
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
   const [studentProofs, setStudentProofs] = useState<any[]>([]);
   const [studentSubmission, setStudentSubmission] = useState<any>(null);
@@ -82,6 +86,13 @@ export default function ChiDoanDashboard() {
     handleSelectStudent(selectedStudent);
   };
 
+  // Bí thư xóa minh chứng
+  const handleDeleteProof = async (proofId: string, title: string) => {
+    if (!confirm(`Xác nhận xóa minh chứng "${title}" của sinh viên này?`)) return;
+    await supabase.from("proofs").delete().eq("id", proofId);
+    handleSelectStudent(selectedStudent);
+  };
+
   // Bí thư gửi điểm chính thức về cho sinh viên
   const handleSendScoreToStudent = async () => {
     if (!selectedStudent) return;
@@ -130,16 +141,18 @@ export default function ChiDoanDashboard() {
           {/* CỘT 1: DANH SÁCH SINH VIÊN TRONG LỚP */}
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 space-y-4">
             <h2 className="text-sm font-black text-[#004A52] uppercase">
-              Danh sách sinh viên lớp ({studentsInClass.length})
+              Danh sách sinh viên lớp ({matchingStudents.length})
             </h2>
 
+            <input type="search" aria-label="Tìm sinh viên theo tên hoặc MSSV" placeholder="Tìm theo họ tên hoặc MSSV" value={reviewSearch} onChange={e => setReviewSearch(e.target.value)} className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
             {loading ? (
               <div className="text-center py-6 text-xs text-slate-400">Đang tải danh sách...</div>
             ) : (
               <div className="space-y-2 max-h-[600px] overflow-y-auto pr-1">
-                {studentsInClass.map((st, idx) => (
+                {!matchingStudents.length && <p className="text-xs text-slate-500">{reviewSearch.trim() ? "Không tìm thấy sinh viên phù hợp." : "Chưa có sinh viên trong danh sách này."}</p>}
+                {matchingStudents.map(st => (
                   <div
-                    key={idx}
+                    key={st.mssv}
                     onClick={() => handleSelectStudent(st)}
                     className={`p-3 rounded-2xl border cursor-pointer transition text-xs ${
                       selectedStudent?.mssv === st.mssv
@@ -188,15 +201,11 @@ export default function ChiDoanDashboard() {
                         {studentProofs.map((p, pIdx) => (
                           <div key={pIdx} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs">
                             <div>
-                              <span className="font-bold text-slate-800 block">{p.activity_title}</span>
-                              <span className="text-[11px] text-slate-500">{p.category} (+{p.points}đ)</span>
+                              <span className="font-bold text-slate-800 block">{p.title}</span>
+                              <span className="text-[11px] text-slate-500">{p.category_code} (+{p.points}đ)</span>
                             </div>
-                            <div className="flex items-center gap-3">
-                              {p.proof_url && (
-                                <a href={p.proof_url} target="_blank" rel="noreferrer" className="text-blue-600 font-bold hover:underline">
-                                  Xem tệp
-                                </a>
-                              )}
+                            <div className="flex items-center gap-2">
+                              <ProofLinks value={p.image} />
                               <button
                                 onClick={() => handleApproveProof(p.id, p.status)}
                                 className={`px-3 py-1.5 rounded-lg font-bold text-[11px] transition ${
@@ -206,6 +215,15 @@ export default function ChiDoanDashboard() {
                                 }`}
                               >
                                 {p.status || "Chờ duyệt"}
+                              </button>
+                              <button
+                                onClick={() => handleDeleteProof(p.id, p.title)}
+                                className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition"
+                                title="Xóa minh chứng"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
                               </button>
                             </div>
                           </div>

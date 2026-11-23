@@ -1,9 +1,11 @@
 "use client";
 
+import { siteImages } from "@/lib/site-images";
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { endImageSession } from "@/app/dang-nhap/actions";
 
 export default function Navbar() {
   const router = useRouter();
@@ -35,7 +37,9 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await endImageSession();
+    await supabase.auth.signOut({ scope: "local" });
     localStorage.removeItem("ctut_current_user");
     setCurrentUser(null);
     window.location.href = "/";
@@ -130,7 +134,7 @@ export default function Navbar() {
           <div className="col-span-12 lg:col-span-4 flex items-center justify-center py-1">
             <Link href="/">
               <img
-                src="/logo-doankhoa.png"
+                src={siteImages.logo}
                 alt="Tuổi trẻ Khoa Kỹ thuật Cơ khí - Trường Đại học Kỹ thuật - Công nghệ Cần Thơ"
                 className="h-10 sm:h-14 lg:h-16 w-auto max-w-[290px] sm:max-w-[420px] object-contain block mx-auto cursor-pointer transition-transform hover:scale-105"
               />

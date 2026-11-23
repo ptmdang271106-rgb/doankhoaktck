@@ -1,5 +1,6 @@
 "use client";
 
+import { siteImages } from "@/lib/site-images";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
@@ -41,7 +42,7 @@ export default function CTUTYouthPortal() {
       <section className="w-full bg-[#0A2540] flex justify-center items-center">
         <div className="w-full max-w-7xl mx-auto px-0 sm:px-4 lg:px-8 py-1 sm:py-4">
           <img
-            src="/banner-ctut.png"
+            src={siteImages.banner}
             alt="Chương trình Chào đón Tân sinh viên"
             className="w-full h-auto block rounded-none sm:rounded-lg shadow-sm"
           />

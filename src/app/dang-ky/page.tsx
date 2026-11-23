@@ -1,9 +1,12 @@
 "use client";
 
+import { siteImages } from "@/lib/site-images";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import DOMPurify from "dompurify";
+import { eventWithImages } from "@/lib/event-images";
 
 export default function SuKienHoatDongPage() {
   const router = useRouter();
@@ -18,7 +21,10 @@ export default function SuKienHoatDongPage() {
     // 1. Tải danh sách sự kiện từ Supabase
     const { data: evData } = await supabase.from("events").select("*").order("created_at", { ascending: false });
     if (evData && evData.length > 0) {
-      setEvents(evData);
+      setEvents(evData.map(eventWithImages).map(event => ({
+        ...event,
+        description_html: DOMPurify.sanitize(event.description_html || "", { USE_PROFILES: { html: true } }),
+      })));
     } else {
       setEvents([
         {
@@ -95,7 +101,7 @@ export default function SuKienHoatDongPage() {
       <div className="border-b border-gray-100 bg-white sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <img src="/logo-doankhoa.png" alt="Logo Đoàn Khoa" className="h-10 w-auto object-contain" />
+            <img src={siteImages.logo} alt="Logo Đoàn Khoa" className="h-10 w-auto object-contain" />
           </Link>
           <div className="flex items-center gap-4 text-xs font-semibold">
             {currentUser ? (
@@ -134,7 +140,7 @@ export default function SuKienHoatDongPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 items-start">
                     <div className="sm:col-span-4 aspect-video sm:aspect-square w-full rounded-lg overflow-hidden bg-slate-100 flex-shrink-0">
                       <img
-                        src={ev.cover_image || "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=500&auto=format&fit=crop&q=60"}
+                        src={ev.cover_image || siteImages.event}
                         alt={ev.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                       />
@@ -155,9 +161,11 @@ export default function SuKienHoatDongPage() {
                           {ev.title}
                         </h2>
 
-                        <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-line mt-2">
-                          {ev.description}
-                        </p>
+                        {ev.description_html ? (
+                          <div className="text-xs text-slate-600 leading-relaxed mt-2 [&_img]:max-w-full" dangerouslySetInnerHTML={{ __html: ev.description_html }} />
+                        ) : (
+                          <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-line mt-2">{ev.description}</p>
+                        )}
 
                         <div className="mt-3 text-xs text-slate-500 space-y-1 font-medium">
                           <div><strong>Thời gian:</strong> {ev.time}</div>

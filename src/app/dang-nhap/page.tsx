@@ -1,9 +1,11 @@
 "use client";
 
+import { siteImages } from "@/lib/site-images";
 import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { endImageSession, loginWithGoogleSession, loginWithPassword } from "./actions";
 
 function LoginForm() {
   const router = useRouter();
@@ -18,32 +20,18 @@ function LoginForm() {
 
   // LẮNG NGHE SỰ KIỆN XÁC THỰC GOOGLE VÀ ĐỐI CHIẾU VỚI DATABASE
   useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === "SIGNED_IN" && session?.user?.email) {
+    let active = true;
+    let pending = false;
+    async function finishGoogleLogin(accessToken: string, userEmail: string) {
+        if (!active || pending) return;
+        pending = true;
         setLoading(true);
         setErrorMsg("");
 
-        const userEmail = session.user.email.toLowerCase().trim();
-
-        // Trích xuất mã số sinh viên từ email nếu có (VD: pmdangcndt2411081@... -> CNDT2411081)
-        const match = userEmail.match(/(cndt|ck|tdh|cd)\d+/i);
-        const extractedMssv = match ? match[0].toUpperCase() : "";
-
         try {
-          // 1. ĐỐI CHIẾU TRỰC TIẾP VỚI BẢNG STUDENTS DO ADMIN TẠO
-          let query = supabase.from("students").select("*");
-          if (extractedMssv) {
-            query = query.or(`email.ilike.${userEmail},mssv.eq.${extractedMssv}`);
-          } else {
-            query = query.ilike("email", userEmail);
-          }
-
-          const { data: studentList, error: fetchErr } = await query;
-
-          // 2. NẾU KHÔNG CÓ TRONG DANH SÁCH -> LẬP TỨC ĐĂNG XUẤT VÀ BÁO LỖI
-          if (fetchErr || !studentList || studentList.length === 0) {
+          const loggedInUser = await loginWithGoogleSession(accessToken);
+          if (!active) return;
+          if (!loggedInUser) {
             await supabase.auth.signOut();
             localStorage.removeItem("ctut_current_user");
 
@@ -58,16 +46,6 @@ function LoginForm() {
             return;
           }
 
-          // 3. NẾU CÓ TRONG DANH SÁCH -> ĐĂNG NHẬP THÀNH CÔNG VỚI DỮ LIỆU ĐÃ TẠO
-          const validStudent = studentList[0];
-          const loggedInUser = {
-            mssv: validStudent.mssv,
-            fullName: validStudent.full_name,
-            studentClass: validStudent.student_class,
-            email: validStudent.email || userEmail,
-            role: "student",
-          };
-
           localStorage.setItem("ctut_current_user", JSON.stringify(loggedInUser));
 
           if (typeof window !== "undefined") {
@@ -81,11 +59,19 @@ function LoginForm() {
           localStorage.removeItem("ctut_current_user");
           setErrorMsg("Lỗi kiểm tra dữ liệu: " + err.message);
           setLoading(false);
+        } finally {
+          pending = false;
         }
+    }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      const email = session?.user.email;
+      if ((event === "INITIAL_SESSION" || event === "SIGNED_IN") && session && email) {
+        setTimeout(() => { void finishGoogleLogin(session.access_token, email); }, 0);
       }
     });
 
     return () => {
+      active = false;
       subscription.unsubscribe();
     };
   }, [redirectUrl, router]);
@@ -95,6 +81,7 @@ function LoginForm() {
     setErrorMsg("");
     setLoading(true);
     try {
+      await endImageSession();
       await supabase.auth.signOut();
       localStorage.removeItem("ctut_current_user");
 
@@ -128,86 +115,18 @@ function LoginForm() {
     const cleanUser = username.trim();
     const cleanPass = password.trim();
 
-    // 1. Phân quyền Quản trị & BCH Chi đoàn
-    if (loginRole === "admin") {
-      if (cleanUser.toLowerCase() === "adminktck" && cleanPass === "doankhoaktck") {
-        const adminUser = {
-          mssv: "ADMINKTCK",
-          username: "adminktck",
-          fullName: "Ban Chấp hành Đoàn Khoa (Admin Tối Cao)",
-          studentClass: "Đoàn Khoa Cơ Khí",
-          role: "super_admin",
-        };
-        localStorage.setItem("ctut_current_user", JSON.stringify(adminUser));
-        setLoading(false);
-        router.push("/admin");
-        return;
-      }
-
-      const { data: officerData } = await supabase
-        .from("branch_officers")
-        .select("*")
-        .eq("username", cleanUser)
-        .eq("password", cleanPass)
-        .single();
-
-      if (officerData) {
-        const officerUser = {
-          mssv: officerData.username.toUpperCase(),
-          username: officerData.username,
-          fullName: officerData.full_name,
-          studentClass: officerData.branch_class,
-          role: "branch_admin",
-        };
-        localStorage.setItem("ctut_current_user", JSON.stringify(officerUser));
-        setLoading(false);
-        router.push("/admin");
-        return;
-      }
-
-      setLoading(false);
-      setErrorMsg("Tài khoản hoặc mật khẩu Quản trị viên / Cán bộ không chính xác.");
-      return;
-    }
-
-    // 2. Phân quyền Sinh viên
     try {
-      let query = supabase.from("students").select("*");
-      if (cleanUser.includes("@")) {
-        query = query.ilike("email", cleanUser.toLowerCase());
-      } else {
-        query = query.eq("mssv", cleanUser.toUpperCase());
-      }
-
-      const { data: studentData, error } = await query.single();
-
-      if (error || !studentData) {
-        setLoading(false);
-        setErrorMsg("Mã số sinh viên hoặc Email chưa có trong danh sách được cấp quyền.");
+      const result = await loginWithPassword(cleanUser, cleanPass, loginRole);
+      if (!result.user) {
+        setErrorMsg(result.error);
         return;
       }
-
-      const expectedPassword = studentData.password || studentData.mssv.slice(-3);
-      if (cleanPass !== expectedPassword && cleanPass !== studentData.mssv.slice(-3)) {
-        setLoading(false);
-        setErrorMsg("Mật khẩu không chính xác. Mặc định là 3 số cuối MSSV.");
-        return;
-      }
-
-      const loggedInStudent = {
-        mssv: studentData.mssv,
-        fullName: studentData.full_name,
-        studentClass: studentData.student_class,
-        email: studentData.email,
-        role: "student",
-      };
-
-      localStorage.setItem("ctut_current_user", JSON.stringify(loggedInStudent));
+      localStorage.setItem("ctut_current_user", JSON.stringify(result.user));
+      router.push(loginRole === "admin" ? "/admin" : redirectUrl);
+    } catch {
+      setErrorMsg("Không thể kết nối đến máy chủ. Vui lòng thử lại.");
+    } finally {
       setLoading(false);
-      router.push(redirectUrl);
-    } catch (err: any) {
-      setLoading(false);
-      setErrorMsg("Lỗi máy chủ: " + err.message);
     }
   };
 
@@ -311,7 +230,7 @@ function LoginForm() {
             onChange={(e) => setUsername(e.target.value)}
             placeholder={
               loginRole === "admin"
-                ? "VD: adminktck hoặc tài khoản Chi đoàn"
+                ? "Tài khoản quản trị hoặc Chi đoàn"
                 : "VD: CNDT2411081"
             }
             className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#EE6425]"
@@ -363,7 +282,7 @@ export default function DangNhapPage() {
         <div className="text-center mb-6">
           <Link href="/">
             <img
-              src="/logo-doankhoa.png"
+              src={siteImages.logo}
               alt="Logo Đoàn Khoa Kỹ thuật Cơ khí"
               className="h-14 mx-auto object-contain mb-3 cursor-pointer"
             />

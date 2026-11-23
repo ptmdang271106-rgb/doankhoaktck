@@ -1,9 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
 
-// Đường dẫn Project URL của bạn (đã bỏ phần đuôi /rest/v1)
-const supabaseUrl = "https://sgbkodqnmghpwzyiaamt.supabase.co";
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabasePublishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
-// Publishable API Key của bạn
-const supabaseAnonKey = "sb_publishable_2O-GKGLaoKRQzH5IO25yFA_6QQC8cDx";
+if (!supabaseUrl || !supabasePublishableKey) {
+  throw new Error("Thiếu NEXT_PUBLIC_SUPABASE_URL hoặc NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY.");
+}
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabasePublishableKey);

@@ -1,9 +1,38 @@
 "use client";
 
+import { siteImages } from "@/lib/site-images";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { storeRemoteImage, uploadProofFile } from "@/lib/cloudinary";
+import { ProofLinks, proofUrls } from "@/components/ProofLinks";
+
+async function uploadProofFiles(files: File[]) {
+  const urls: string[] = [];
+  const errors: string[] = [];
+  for (const file of files) {
+    try {
+      urls.push(await uploadProofFile(file));
+    } catch (error) {
+      errors.push(`${file.name}: ${error instanceof Error ? error.message : "Tải thất bại"}`);
+    }
+  }
+  if (errors.length) alert(errors.join("\n"));
+  return urls.join("\n");
+}
+
+function combineProofs(...values: string[]) {
+  return proofUrls(values.filter(Boolean).join("\n")).join("\n");
+}
+
+async function storeProofImages(value: string) {
+  const links = await Promise.all(proofUrls(value).map(url =>
+    /^https?:\/\//i.test(url) && /\.(?:jpe?g|png|webp|gif|avif|heic|heif|bmp|tiff?|ico)(?:[?#]|$)/i.test(url)
+      ? storeRemoteImage(url) : url
+  ));
+  return links.join("\n");
+}
 
 // Dữ liệu tiêu chí đầy đủ chuẩn Quyết định 147/QĐ-ĐHKTCN
 const DRL_SECTIONS = [
@@ -105,6 +134,15 @@ const DRL_SECTIONS = [
   },
 ];
 
+function criterionCode(itemId: string) {
+  const [section, item] = itemId.split("_");
+  return `${["I", "II", "III", "IV", "V"][Number(section) - 1]}.${item}`;
+}
+
+const itemIdsByCode = new Map(DRL_SECTIONS.flatMap(section =>
+  section.items.map(item => [criterionCode(item.id), item.id] as const)
+));
+
 export default function CongDRLPage() {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -126,6 +164,7 @@ export default function CongDRLPage() {
 
   const [itemProofs, setItemProofs] = useState<{ [key: string]: string }>({});
   const [uploadingItemId, setUploadingItemId] = useState<string | null>(null);
+  const [deletingProofId, setDeletingProofId] = useState<string | number | null>(null);
 
   // Sinh viên tự nhập trực tiếp số điểm đạt được
   const [scores, setScores] = useState<{ [key: string]: number }>({
@@ -181,11 +220,14 @@ export default function CongDRLPage() {
         .eq("semester_id", semesterId)
         .order("created_at", { ascending: false });
 
+      const proofMap: Record<string, string> = {};
       if (proofData) {
         setProofs(proofData);
-        const proofMap: { [key: string]: string } = {};
         proofData.forEach((p) => {
-          if (p.item_id && p.proof_url) proofMap[p.item_id] = p.proof_url;
+          const itemId = itemIdsByCode.get(p.category_code);
+          if (p.source === "Phiếu đánh giá ĐRL" && itemId && p.image) {
+            proofMap[itemId] = combineProofs(proofMap[itemId], p.image);
+          }
         });
         setItemProofs(proofMap);
       }
@@ -201,7 +243,10 @@ export default function CongDRLPage() {
         setDrlStatus(drlData.status || "Đã nộp, chờ BCH duyệt");
         setFinalScore(drlData.final_score);
         if (drlData.scores_detail) setScores(drlData.scores_detail);
-        if (drlData.proofs_detail) setItemProofs(drlData.proofs_detail);
+        for (const [item, value] of Object.entries(drlData.proofs_detail || {})) {
+          if (typeof value === "string") proofMap[item] = combineProofs(proofMap[item], value);
+        }
+        setItemProofs({ ...proofMap });
       } else {
         setDrlStatus("Chưa nộp");
         setFinalScore(null);
@@ -226,67 +271,51 @@ export default function CongDRLPage() {
   };
 
   const handleFileUploadTab1 = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+    const files = Array.from(e.currentTarget.files || []);
+    e.currentTarget.value = "";
+    if (!files.length) return;
     setUploadingFile(true);
     try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${currentUser.mssv}_${selectedSemester}_${Date.now()}.${fileExt}`;
-      const filePath = `proofs/${fileName}`;
-
-      const { error } = await supabase.storage.from("documents").upload(filePath, file);
-      if (!error) {
-        const { data: urlData } = supabase.storage.from("documents").getPublicUrl(filePath);
-        setProofUrl(urlData.publicUrl);
-        alert("Tải file thành công!");
-      }
-    } catch (err: any) {
-      alert("Lỗi tải file: " + err.message);
+      const uploaded = await uploadProofFiles(files);
+      setProofUrl(prev => combineProofs(prev, uploaded));
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Lỗi tải minh chứng. Vui lòng thử lại.");
+    } finally {
+      setUploadingFile(false);
     }
-    setUploadingFile(false);
   };
 
   const handleFileUploadItem = async (itemId: string, itemTitle: string, itemMax: number, e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.currentTarget.files || []);
+    e.currentTarget.value = "";
+    if (!files.length) return;
 
     setUploadingItemId(itemId);
     try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${currentUser.mssv}_${selectedSemester}_${itemId}_${Date.now()}.${fileExt}`;
-      const filePath = `proofs/${fileName}`;
-
-      const { error } = await supabase.storage.from("documents").upload(filePath, file);
-      if (!error) {
-        const { data: urlData } = supabase.storage.from("documents").getPublicUrl(filePath);
-        const uploadedUrl = urlData.publicUrl;
-
-        setItemProofs((prev) => ({ ...prev, [itemId]: uploadedUrl }));
-
-        const newProof = {
-          mssv: currentUser.mssv,
-          student_name: currentUser.fullName,
-          student_class: currentUser.studentClass,
-          activity_title: itemTitle,
-          category: itemTitle,
-          item_id: itemId,
-          semester_id: selectedSemester,
-          points: scores[itemId] || itemMax,
-          proof_url: uploadedUrl,
-          source: "Phiếu đánh giá ĐRL",
-          status: "Đã nạp theo phiếu",
-          created_at: new Date().toISOString(),
-        };
-
-        await supabase.from("proofs").insert([newProof]);
-        loadData(currentUser.mssv, selectedSemester);
-        alert("Nạp minh chứng thành công!");
-      }
-    } catch (err: any) {
-      alert("Lỗi: " + err.message);
+      const uploadedUrl = await uploadProofFiles(files);
+      if (!uploadedUrl) return;
+      const record = {
+        mssv: currentUser.mssv,
+        full_name: currentUser.fullName,
+        title: itemTitle,
+        category_code: criterionCode(itemId),
+        semester_id: selectedSemester,
+        points: scores[itemId] || itemMax,
+        image: uploadedUrl,
+        source: "Phiếu đánh giá ĐRL",
+        status: "Đã nạp theo phiếu",
+        created_at: new Date().toISOString(),
+      };
+      const { error } = await supabase.from("proofs").insert([record]);
+      if (error) throw new Error(error.message);
+      setProofs(prev => [record, ...prev]);
+      setItemProofs(prev => ({ ...prev, [itemId]: combineProofs(prev[itemId], uploadedUrl) }));
+      alert("Nạp minh chứng thành công!");
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Lỗi tải minh chứng. Vui lòng thử lại.");
+    } finally {
+      setUploadingItemId(null);
     }
-    setUploadingItemId(null);
   };
 
   const getSectionScore = (section: any) => {
@@ -296,27 +325,58 @@ export default function CongDRLPage() {
 
   const grandTotalScore = DRL_SECTIONS.reduce((total, sec) => total + getSectionScore(sec), 0);
 
+  const handleDeleteProof = async (proof: any) => {
+    if (!confirm(`Bạn có chắc chắn muốn xóa minh chứng "${proof.title}" không?`)) return;
+
+    setDeletingProofId(proof.id);
+    try {
+      const { error } = await supabase.from("proofs").delete().eq("id", proof.id);
+      if (error) throw new Error(error.message);
+
+      setProofs((prev) => prev.filter((item) => item.id !== proof.id));
+
+      const itemId = itemIdsByCode.get(proof.category_code);
+      if (itemId && itemProofs[itemId]) {
+        const remainingUrls = proofUrls(itemProofs[itemId]).filter((u) => !proofUrls(proof.image).includes(u));
+        setItemProofs((prev) => ({ ...prev, [itemId]: remainingUrls.join("\n") }));
+      }
+
+      alert("Đã xóa minh chứng thành công!");
+      if (currentUser?.mssv) {
+        loadData(currentUser.mssv, selectedSemester);
+      }
+    } catch (err: any) {
+      alert("Lỗi khi xóa minh chứng: " + (err.message || "Không thể xóa"));
+    } finally {
+      setDeletingProofId(null);
+    }
+  };
+
   const handleUploadProofTab1 = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isSemesterOpen) return;
 
+    if (!proofUrls(proofUrl).length || proofUrls(proofUrl).some(url => !/^https?:\/\//i.test(url))) {
+      alert("Vui lòng nhập một liên kết http hoặc https trên mỗi dòng.");
+      return;
+    }
     setSubmittingProof(true);
     try {
       const newProof = {
         mssv: currentUser.mssv,
-        student_name: currentUser.fullName,
-        student_class: currentUser.studentClass,
-        activity_title: proofTitle,
-        category: proofCategory,
+        full_name: currentUser.fullName,
+        title: proofTitle,
+        category_code: proofCategory.split(". ")[0],
         semester_id: selectedSemester,
         points: Number(proofPoints),
-        proof_url: proofUrl,
+        image: await storeProofImages(proofUrl),
         source: "Hoạt động ngoài khoa",
         status: "Chờ duyệt",
         created_at: new Date().toISOString(),
       };
 
-      await supabase.from("proofs").insert([newProof]);
+      const { error } = await supabase.from("proofs").insert([newProof]);
+      if (error) throw new Error(error.message);
       alert("Nộp minh chứng thành công!");
       setProofTitle("");
       setProofUrl("");
@@ -338,7 +398,9 @@ export default function CongDRLPage() {
         semester_id: selectedSemester,
         self_score: grandTotalScore,
         scores_detail: scores,
-        proofs_detail: itemProofs,
+        proofs_detail: Object.fromEntries(await Promise.all(Object.entries(itemProofs).map(
+          async ([id, links]) => [id, await storeProofImages(links)]
+        ))),
         status: "Đã nộp - Chờ BCH Chi đoàn duyệt",
         submitted_at: new Date().toISOString(),
       };
@@ -371,7 +433,7 @@ export default function CongDRLPage() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center">
               <img
-                src="/logo-doankhoa.png"
+                src={siteImages.logo}
                 alt="Logo Đoàn Khoa Kỹ thuật Cơ khí"
                 className="h-12 sm:h-14 w-auto object-contain"
               />
@@ -398,6 +460,7 @@ export default function CongDRLPage() {
             <span className="text-xs font-bold text-slate-700 whitespace-nowrap">Đang xem học kỳ:</span>
             <select
               value={selectedSemester}
+              disabled={uploadingFile || uploadingItemId !== null}
               onChange={(e) => handleSelectSemester(e.target.value)}
               className="border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-[#004A52] outline-none bg-slate-50"
             >
@@ -535,19 +598,20 @@ export default function CongDRLPage() {
                   <div>
                     <label className="block font-bold text-slate-700 mb-1">Link hình ảnh hoặc Tải file *</label>
                     <div className="flex gap-2">
-                      <input
-                        type="text"
+                      <textarea
+                        rows={3}
                         required
                         value={proofUrl}
                         onChange={(e) => setProofUrl(e.target.value)}
-                        placeholder="Dán link hoặc tải file ->"
+                        placeholder="Mỗi dòng một liên kết, hoặc chọn nhiều tệp"
                         className="flex-1 border border-slate-300 rounded-xl px-3 py-2.5 outline-none focus:border-[#EE6425]"
                       />
                       <label className="cursor-pointer bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-bold px-3 py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition flex-shrink-0 text-xs">
                         <span>{uploadingFile ? "Đang tải..." : "Tải tệp"}</span>
-                        <input type="file" accept="image/*,.pdf" onChange={handleFileUploadTab1} className="hidden" />
+                        <input type="file" multiple disabled={uploadingFile || submittingProof} accept="image/*,.pdf" onChange={handleFileUploadTab1} className="hidden" />
                       </label>
                     </div>
+                    <ProofLinks value={proofUrl} />
                   </div>
 
                   <div className="md:col-span-2 pt-2">
@@ -578,14 +642,15 @@ export default function CongDRLPage() {
                         <th className="py-2.5">Hạng mục</th>
                         <th className="py-2.5">Điểm</th>
                         <th className="py-2.5">Trạng thái</th>
-                        <th className="py-2.5 text-right">Minh chứng</th>
+                        <th className="py-2.5 text-center">Minh chứng</th>
+                        <th className="py-2.5 text-right">Thao tác</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {proofs.map((p, idx) => (
-                        <tr key={idx} className="hover:bg-slate-50">
-                          <td className="py-3 font-semibold text-slate-800">{p.activity_title}</td>
-                          <td className="py-3 text-slate-600">{p.category}</td>
+                        <tr key={p.id || idx} className="hover:bg-slate-50">
+                          <td className="py-3 font-semibold text-slate-800">{p.title}</td>
+                          <td className="py-3 text-slate-600">{p.category_code}</td>
                           <td className="py-3 font-bold text-[#EE6425]">+{p.points}</td>
                           <td className="py-3">
                             <span className={`px-2 py-0.5 rounded-md font-bold text-[10px] ${
@@ -594,12 +659,22 @@ export default function CongDRLPage() {
                               {p.status || "Đã ghi nhận"}
                             </span>
                           </td>
+                          <td className="py-3 text-center">
+                            <ProofLinks value={p.image} />
+                          </td>
                           <td className="py-3 text-right">
-                            {p.proof_url && (
-                              <a href={p.proof_url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline font-bold">
-                                Xem tệp
-                              </a>
-                            )}
+                            <button
+                              type="button"
+                              disabled={deletingProofId === p.id}
+                              onClick={() => handleDeleteProof(p)}
+                              className="text-red-500 hover:text-red-700 hover:bg-red-50 px-2 py-1 rounded-lg text-[11px] font-bold transition inline-flex items-center gap-1 disabled:opacity-50"
+                              title="Xóa minh chứng này"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                              <span>{deletingProofId === p.id ? "..." : "Xóa"}</span>
+                            </button>
                           </td>
                         </tr>
                       ))}
@@ -674,30 +749,27 @@ export default function CongDRLPage() {
                                 <td className="py-3 px-4 align-top pt-3">
                                   {isSemesterOpen ? (
                                     <div className="flex items-center gap-1.5">
-                                      <input
-                                        type="text"
+                                      <textarea
+                                        rows={2}
                                         value={itemProofs[item.id] || ""}
                                         onChange={(e) => setItemProofs((prev) => ({ ...prev, [item.id]: e.target.value }))}
-                                        placeholder="Link Drive/ảnh..."
+                                        placeholder="Mỗi dòng một liên kết minh chứng"
                                         className="flex-1 border border-slate-300 rounded-lg px-2 py-1 text-[11px] outline-none focus:border-[#EE6425]"
                                       />
                                       <label className="cursor-pointer bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 px-2 py-1 rounded-lg flex items-center justify-center gap-1 text-[11px] font-bold transition flex-shrink-0">
                                         <span>{uploadingItemId === item.id ? "..." : "Tải tệp"}</span>
                                         <input
                                           type="file"
+                                          multiple
                                           accept="image/*,.pdf"
+                                          disabled={uploadingItemId !== null}
                                           onChange={(e) => handleFileUploadItem(item.id, item.title, item.max, e)}
                                           className="hidden"
                                         />
                                       </label>
                                     </div>
-                                  ) : (
-                                    itemProofs[item.id] && (
-                                      <a href={itemProofs[item.id]} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline text-[11px] font-bold">
-                                        Xem file minh chứng
-                                      </a>
-                                    )
-                                  )}
+                                  ) : null}
+                                  <ProofLinks value={itemProofs[item.id]} />
                                 </td>
                               </tr>
                             );
@@ -718,6 +790,7 @@ export default function CongDRLPage() {
 
               {isSemesterOpen ? (
                 <button
+                  disabled={uploadingItemId !== null}
                   onClick={handleSubmitDRLForm}
                   className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-[#004A52] hover:bg-[#00343a] text-white font-bold text-xs shadow-md transition uppercase tracking-wider"
                 >

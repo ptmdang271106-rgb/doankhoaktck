@@ -1,5 +1,6 @@
 "use client";
 
+import { siteImages } from "@/lib/site-images";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -128,7 +129,7 @@ export default function DiemDanhPage() {
       <div className="max-w-lg mx-auto bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200">
         <div className="text-center mb-6">
           <Link href="/">
-            <img src="/logo-doankhoa.png" alt="Logo" className="h-12 mx-auto object-contain mb-3 cursor-pointer" />
+            <img src={siteImages.logo} alt="Logo" className="h-12 mx-auto object-contain mb-3 cursor-pointer" />
           </Link>
           <h1 className="text-xl sm:text-2xl font-black text-[#004A52]">QUÉT MÃ QR ĐIỂM DANH</h1>
           <p className="text-xs text-slate-500 mt-1">Hệ thống xác thực tọa độ GPS Cloud Realtime</p>

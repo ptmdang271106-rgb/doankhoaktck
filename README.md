@@ -2,6 +2,8 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+Điền `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` và `CLOUDINARY_API_SECRET` trong `.env` theo [.env.example](.env.example). Máy chủ ký từng lượt tải ảnh cho người dùng đã đăng nhập. Khi triển khai, đặt ba biến này trong môi trường máy chủ.
+
 First, run the development server:
 
 ```bash
