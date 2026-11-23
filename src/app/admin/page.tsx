@@ -1947,24 +1947,10 @@ export default function AdminDashboard() {
                     )}
                   </div>
 
-                  {/* TIÊU ĐỀ BANNER */}
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">
-                      Tiêu đề / Chú thích Banner <span className="font-normal text-slate-400">(Tùy chọn)</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="VD: Chương trình Chào đón Tân sinh viên 2026..."
-                      value={newBannerTitle}
-                      onChange={(e) => setNewBannerTitle(e.target.value)}
-                      className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-[#EE6425]"
-                    />
-                  </div>
-
                   {/* ĐƯỜNG DẪN LIÊN KẾT */}
                   <div>
                     <label className="block font-bold text-slate-700 mb-1">
-                      Liên kết khi bấm vào Banner <span className="font-normal text-slate-400">(Tùy chọn)</span>
+                      Liên kết khi bấm vào Banner <span className="font-normal text-slate-400">(Tùy chọn - chuyển hướng trang khi người dùng click vào ảnh)</span>
                     </label>
                     <input
                       type="text"
@@ -2029,7 +2015,7 @@ export default function AdminDashboard() {
                       {/* CHI TIẾT */}
                       <div className="flex-1 min-w-0 space-y-1 text-center sm:text-left">
                         <div className="font-bold text-slate-800 text-sm truncate">
-                          {banner.title || "(Không có tiêu đề)"}
+                          Banner #{index + 1}
                         </div>
                         <div className="text-slate-500 text-[11px] truncate font-mono">
                           🔗 Link: {banner.link || "(Không có liên kết)"}

@@ -16,7 +16,6 @@ const DEFAULT_BANNERS: BannerItem[] = [
   {
     id: "default-1",
     image: siteImages.banner,
-    title: "Chương trình Chào đón Tân sinh viên Khóa 2026",
     link: "/dang-ky",
   },
 ];
@@ -124,7 +123,7 @@ export default function BannerSlider() {
                         >
                           <img
                             src={banner.image}
-                            alt={banner.title || "Banner CTUT FME"}
+                            alt="Banner CTUT FME"
                             className="w-full h-full object-cover object-center"
                           />
                         </a>
@@ -132,7 +131,7 @@ export default function BannerSlider() {
                         <Link href={banner.link} className="block w-full h-full cursor-pointer">
                           <img
                             src={banner.image}
-                            alt={banner.title || "Banner CTUT FME"}
+                            alt="Banner CTUT FME"
                             className="w-full h-full object-cover object-center"
                           />
                         </Link>
@@ -140,15 +139,9 @@ export default function BannerSlider() {
                     ) : (
                       <img
                         src={banner.image}
-                        alt={banner.title || "Banner CTUT FME"}
+                        alt="Banner CTUT FME"
                         className="w-full h-full object-cover object-center"
                       />
-                    )}
-
-                    {banner.title && (
-                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-3 sm:p-4 text-white text-xs sm:text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <p className="line-clamp-1">{banner.title}</p>
-                      </div>
                     )}
                   </div>
                 ))}
