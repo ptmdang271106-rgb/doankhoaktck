@@ -265,7 +265,7 @@ export default function BannerSlider() {
                         Sự kiện tháng này
                       </h3>
                       <span className="text-[10px] text-slate-500 font-medium">
-                        Tháng {currentMonthNumber}/{currentYearNumber} • Đoàn Khoa Cơ khí
+                        Tháng {currentMonthNumber}/{currentYearNumber} • Đoàn Khoa Kỹ thuật Cơ khí
                       </span>
                     </div>
                   </div>

@@ -188,7 +188,7 @@ export default function Navbar() {
         <div className="w-full px-4 sm:px-6 lg:px-10">
           <div className="flex justify-start sm:justify-center space-x-6 sm:space-x-10 py-2.5 text-[12.5px] sm:text-[13.5px] font-semibold text-[#007A87] overflow-x-auto whitespace-nowrap">
             <Link href="/dang-ky" className="hover:text-[#004A52] transition-colors font-bold text-[#EE6425]">
-              Hoạt động – Sự kiện Cơ khí
+              Hoạt động – Sự kiện
             </Link>
             <a href="#" className="hover:text-[#004A52] transition-colors">Xem gì hôm nay</a>
             <a href="#" className="hover:text-[#004A52] transition-colors">Bản tin học thuật</a>
