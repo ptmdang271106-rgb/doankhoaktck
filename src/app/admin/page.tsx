@@ -2407,7 +2407,6 @@ export default function AdminDashboard() {
                     <option value="Phong trào">Phong trào</option>
                     <option value="Học thuật - NCKH">Học thuật - NCKH</option>
                     <option value="Tổ chức - Đoàn thể">Tổ chức - Đoàn thể</option>
-                    <option value="Hội thảo Cơ khí">Hội thảo Cơ khí</option>
                     <option value="Tình nguyện">Tình nguyện</option>
                   </select>
                 </div>
@@ -2504,13 +2503,43 @@ export default function AdminDashboard() {
                 )}
               </div>
 
+              <div className="rounded-2xl border border-teal-100 bg-teal-50/40 p-4">
+                <div className="mb-3">
+                  <h3 className="text-sm font-extrabold text-[#004A52]">Quản lý riêng 3 chuyên mục trang chủ</h3>
+                  <p className="mt-1 text-xs text-slate-500">Chọn một mục để lọc bài viết và đặt chuyên mục đó cho bài mới.</p>
+                </div>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                  {[
+                    { name: "Xem gì hôm nay", tone: "border-teal-200 bg-teal-50 text-[#007A87]" },
+                    { name: "Bản tin học thuật", tone: "border-blue-200 bg-blue-50 text-blue-700" },
+                    { name: "Gương sáng FME", tone: "border-purple-200 bg-purple-50 text-purple-700" },
+                  ].map((category) => {
+                    const count = posts.filter((post) => post.category === category.name).length;
+                    const selected = postFilterCategory === category.name;
+
+                    return (
+                      <button
+                        key={category.name}
+                        type="button"
+                        aria-pressed={selected}
+                        onClick={() => {
+                          setPostFilterCategory(category.name);
+                          setPostCategory(category.name);
+                        }}
+                        className={`rounded-xl border p-3 text-left transition ${category.tone} ${selected ? "ring-2 ring-[#004A52] ring-offset-1" : "hover:shadow-sm"}`}
+                      >
+                        <span className="block text-xs font-extrabold">{category.name}</span>
+                        <span className="mt-1 block text-[11px] font-semibold opacity-80">{count} bài viết · Quản lý riêng</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               {/* BỘ LỌC CHUYÊN MỤC */}
               <div className="flex flex-wrap items-center gap-1.5 text-xs">
                 {[
                   "Tất cả",
-                  "Xem gì hôm nay",
-                  "Bản tin học thuật",
-                  "Gương sáng FME",
                   "Phong trào",
                   "Học thuật - NCKH",
                   "Tổ chức - Đoàn thể",

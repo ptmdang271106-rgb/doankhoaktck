@@ -1,6 +1,5 @@
 "use client";
 
-import { siteImages } from "@/lib/site-images";
 import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -8,6 +7,30 @@ import Navbar from "@/components/Navbar";
 import BannerSlider from "@/components/BannerSlider";
 import Footer from "@/components/Footer";
 import { supabase } from "@/lib/supabase";
+
+const separateHomeSections = [
+  {
+    name: "Xem gì hôm nay",
+    slug: "xem-gi-hom-nay",
+    id: "xem-gi-hom-nay",
+    heading: "text-[#007A87]",
+    badge: "bg-teal-50 text-[#007A87]",
+  },
+  {
+    name: "Bản tin học thuật",
+    slug: "ban-tin-hoc-thuat",
+    id: "ban-tin-hoc-thuat",
+    heading: "text-blue-700",
+    badge: "bg-blue-50 text-blue-700",
+  },
+  {
+    name: "Gương sáng FME",
+    slug: "guong-sang-fme",
+    id: "guong-sang-fme",
+    heading: "text-purple-700",
+    badge: "bg-purple-50 text-purple-700",
+  },
+];
 
 function HomeContent() {
   const searchParams = useSearchParams();
@@ -18,7 +41,14 @@ function HomeContent() {
 
   useEffect(() => {
     if (categoryParam) {
-      setActiveCategory(categoryParam);
+      const separateSection = separateHomeSections.find((section) => section.name === categoryParam);
+      if (separateSection) {
+        requestAnimationFrame(() => {
+          document.getElementById(separateSection.id)?.scrollIntoView({ behavior: "smooth" });
+        });
+      } else {
+        setActiveCategory(categoryParam);
+      }
     }
   }, [categoryParam]);
 
@@ -34,23 +64,21 @@ function HomeContent() {
 
   const categories = [
     { name: "Tất cả", color: "bg-[#F39C12] text-white" },
-    { name: "Xem gì hôm nay", color: "bg-[#007A87] text-white" },
-    { name: "Bản tin học thuật", color: "bg-[#2980B9] text-white" },
-    { name: "Gương sáng FME", color: "bg-[#8E44AD] text-white" },
     { name: "Phong trào", color: "bg-[#D35400] text-white" },
     { name: "Học thuật - NCKH", color: "bg-[#16A085] text-white" },
     { name: "Tổ chức - Đoàn thể", color: "bg-[#E67E22] text-white" },
-    { name: "Hội thảo Cơ khí", color: "bg-[#27AE60] text-white" },
     { name: "Tình nguyện", color: "bg-[#7F8C8D] text-white" },
   ];
 
+  const separateCategoryNames = new Set(separateHomeSections.map((section) => section.name));
+  const generalPosts = allPosts.filter((post) => !separateCategoryNames.has(post.category));
   const filteredPosts = activeCategory === "Tất cả"
-    ? allPosts
-    : allPosts.filter((post) => post.category === activeCategory);
+    ? generalPosts
+    : generalPosts.filter((post) => post.category === activeCategory);
 
   // Danh sách bài viết Nổi bật & Xem nhiều (lấy từ dữ liệu thật)
-  const featuredPosts = allPosts.slice(0, 5);
-  const popularPosts = [...allPosts].reverse().slice(0, 5);
+  const featuredPosts = generalPosts.slice(0, 5);
+  const popularPosts = [...generalPosts].reverse().slice(0, 5);
   const sidePosts = activeTabRank === "Nổi bật" ? featuredPosts : popularPosts;
 
   return (
@@ -63,7 +91,7 @@ function HomeContent() {
       {/* NỘI DUNG CHÍNH */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div id="doc-gi-hom-nay" className="scroll-mt-28">
-          <div id="xem-gi-hom-nay" className="flex flex-col md:flex-row md:items-center justify-between border-b-2 border-gray-100 pb-4 gap-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between border-b-2 border-gray-100 pb-4 gap-4">
             <h2 className="text-xl sm:text-2xl font-bold text-[#006674] tracking-tight">
               Đọc gì hôm nay
             </h2>
@@ -126,7 +154,7 @@ function HomeContent() {
                       </p>
                     </div>
                     <div className="text-[11px] text-gray-400 font-medium mt-2">
-                      {post.date} • Cổng thông tin CTUT
+                      {post.date} • Cổng thông tin Liên chi Hội Sinh viên Khoa Kỹ thuật Cơ khí
                     </div>
                   </div>
                 </Link>
@@ -214,6 +242,60 @@ function HomeContent() {
               </Link>
             </div>
           </div>
+        </div>
+
+        <div className="mt-12 space-y-10">
+          {separateHomeSections.map((section) => {
+            const sectionPosts = allPosts.filter((post) => post.category === section.name);
+
+            return (
+              <section key={section.name} id={section.id} className="scroll-mt-32 border-t border-slate-100 pt-7">
+                <div className="mb-5 flex flex-wrap items-end justify-between gap-3 border-b border-slate-100 pb-3">
+                  <div>
+                    <p className={`text-[11px] font-bold uppercase tracking-[0.16em] ${section.heading}`}>Chuyên mục riêng</p>
+                    <Link href={`/chuyen-muc/${section.slug}`} className={`mt-1 inline-block text-xl font-extrabold hover:underline sm:text-2xl ${section.heading}`}>{section.name}</Link>
+                  </div>
+                  <span className="text-xs font-semibold text-slate-400">{sectionPosts.length} bài viết</span>
+                </div>
+
+                {sectionPosts.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-400">
+                    Nội dung sẽ được cập nhật sớm.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {sectionPosts.map((post) => (
+                      <Link
+                        key={post.id}
+                        href={`/tin-tuc/${post.id}`}
+                        className="group overflow-hidden rounded-2xl border border-slate-100 bg-white transition hover:-translate-y-0.5 hover:shadow-md"
+                      >
+                        <div className="relative aspect-video overflow-hidden bg-gradient-to-tr from-[#006674] to-[#16A085]">
+                          {post.cover_image ? (
+                            <img src={post.cover_image} alt={post.title} className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
+                          ) : (
+                            <div className="flex h-full items-center justify-center text-sm font-black tracking-wider text-white">CTUT MECHANICAL</div>
+                          )}
+                          <span className={`absolute left-3 top-3 rounded-full px-2.5 py-1 text-[10px] font-bold ${section.badge}`}>
+                            {section.name}
+                          </span>
+                        </div>
+                        <div className="p-4">
+                          <h3 className="line-clamp-2 text-sm font-bold leading-snug text-slate-900 transition group-hover:text-[#EE6425] sm:text-base">
+                            {post.title}
+                          </h3>
+                          <p className="mt-2 line-clamp-3 text-xs leading-relaxed text-slate-500">
+                            {post.content ? post.content.replace(/<[^>]*>?/gm, "") : ""}
+                          </p>
+                          <p className="mt-3 text-[11px] font-medium text-slate-400">{post.date}</p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </section>
+            );
+          })}
         </div>
       </main>
 

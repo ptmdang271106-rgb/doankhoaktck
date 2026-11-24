@@ -344,6 +344,9 @@ export default function Navbar() {
               ["/tra-cuu-thong-tin", "Tra cứu sinh viên"],
               ["/dang-ky", "Hoạt động – sự kiện"],
               ["/gioi-thieu", "Giới thiệu"],
+              ["/chuyen-muc/xem-gi-hom-nay", "Xem gì hôm nay"],
+              ["/chuyen-muc/ban-tin-hoc-thuat", "Bản tin học thuật"],
+              ["/chuyen-muc/guong-sang-fme", "Gương sáng FME"],
             ].map(([href, label]) => (
               <Link
                 key={href}
@@ -359,11 +362,11 @@ export default function Navbar() {
             {currentUser ? (
               <>
                 <p className="truncate font-semibold text-slate-600">{currentUser.fullName || currentUser.mssv}</p>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <Link
                     href={currentUser.role === "branch_admin" ? "/admin/chi-doan" : currentUser.role === "super_admin" || currentUser.role === "admin" ? "/admin" : "/tra-cuu"}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex min-h-11 flex-1 items-center justify-center rounded-xl bg-[#004A52] px-3 py-2 font-bold text-white"
+                    className="flex min-h-11 min-w-0 flex-1 items-center justify-center rounded-xl bg-[#004A52] px-3 py-2 text-center font-bold text-white"
                   >
                     {currentUser.role === "branch_admin" || currentUser.role === "super_admin" || currentUser.role === "admin" ? "Trang quản lý" : "Cổng ĐRL"}
                   </Link>
@@ -375,7 +378,7 @@ export default function Navbar() {
                       setChangePassError("");
                       setChangePassSuccess("");
                     }}
-                    className="min-h-11 flex-1 rounded-xl border border-slate-200 px-3 py-2 font-bold text-slate-700"
+                    className="min-h-11 min-w-0 flex-1 rounded-xl border border-slate-200 px-3 py-2 text-center font-bold text-slate-700"
                   >
                     Đổi mật khẩu
                   </button>
@@ -499,13 +502,13 @@ export default function Navbar() {
             <Link href="/dang-ky" className="hover:text-[#004A52] transition-colors font-bold text-[#EE6425]">
               Hoạt động – Sự kiện
             </Link>
-            <Link href="/?category=Xem%20g%C3%AC%20h%C3%B4m%20nay#doc-gi-hom-nay" className="hover:text-[#004A52] transition-colors">
+            <Link href="/chuyen-muc/xem-gi-hom-nay" className="hover:text-[#004A52] transition-colors">
               Xem gì hôm nay
             </Link>
-            <Link href="/?category=B%E1%BA%A3n%20tin%20h%E1%BB%8Dc%20thu%E1%BA%ADt#doc-gi-hom-nay" className="hover:text-[#004A52] transition-colors">
+            <Link href="/chuyen-muc/ban-tin-hoc-thuat" className="hover:text-[#004A52] transition-colors">
               Bản tin học thuật
             </Link>
-            <Link href="/?category=G%C6%B0%C6%A1ng%20s%C3%A1ng%20FME#doc-gi-hom-nay" className="hover:text-[#004A52] transition-colors">
+            <Link href="/chuyen-muc/guong-sang-fme" className="hover:text-[#004A52] transition-colors">
               Gương sáng FME
             </Link>
           </div>

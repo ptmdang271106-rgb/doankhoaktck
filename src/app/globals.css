@@ -23,6 +23,13 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-be-vietnam-pro), sans-serif;
+  overflow-x: hidden;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 img,
@@ -34,6 +41,34 @@ iframe {
 @media (max-width: 639px) {
   body {
     min-width: 320px;
+  }
+
+  main,
+  header,
+  footer,
+  section,
+  article,
+  nav,
+  .grid > *,
+  .flex > * {
+    min-width: 0;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  p,
+  a,
+  button,
+  label {
+    overflow-wrap: anywhere;
+  }
+
+  .prose,
+  [contenteditable="true"] {
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
   input:not([type="checkbox"]):not([type="radio"]),
