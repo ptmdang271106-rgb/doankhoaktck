@@ -25,54 +25,45 @@ export default function SuKienHoatDongPage() {
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
 
   // Hàm bóc tách ngày tháng năm từ chuỗi thời gian sự kiện
-  function parseEventDate(timeStr?: string, createdAt?: string): { day: number; month: number; year: number } | null {
-    if (timeStr) {
-      // Khớp DD/MM/YYYY hoặc DD-MM-YYYY
-      const dmy = timeStr.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
-      if (dmy) {
-        return {
-          day: parseInt(dmy[1], 10),
-          month: parseInt(dmy[2], 10),
-          year: parseInt(dmy[3], 10),
-        };
-      }
-      // Khớp YYYY-MM-DD
-      const ymd = timeStr.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
-      if (ymd) {
-        return {
-          day: parseInt(ymd[3], 10),
-          month: parseInt(ymd[2], 10),
-          year: parseInt(ymd[1], 10),
-        };
-      }
-      // Khớp Ngày DD tháng MM năm YYYY
-      const textDmy = timeStr.match(/ngày\s*(\d{1,2})\s*tháng\s*(\d{1,2})(?:\s*năm\s*(\d{4}))?/i);
-      if (textDmy) {
-        return {
-          day: parseInt(textDmy[1], 10),
-          month: parseInt(textDmy[2], 10),
-          year: textDmy[3] ? parseInt(textDmy[3], 10) : new Date().getFullYear(),
-        };
-      }
-      // Khớp DD/MM
-      const dm = timeStr.match(/(\d{1,2})[\/\-](\d{1,2})/);
-      if (dm) {
-        return {
-          day: parseInt(dm[1], 10),
-          month: parseInt(dm[2], 10),
-          year: new Date().getFullYear(),
-        };
-      }
+  // Chỉ parse ngày diễn ra thực tế, KHÔNG dùng ngày tạo (createdAt) làm fallback
+  function parseEventDate(timeStr?: string): { day: number; month: number; year: number } | null {
+    if (!timeStr) return null;
+
+    // Khớp DD/MM/YYYY hoặc DD-MM-YYYY (phân biệt với giờ HH:MM bằng dấu / hoặc -)
+    const dmy = timeStr.match(/(\d{1,2})[\/](\d{1,2})[\/](\d{4})/);
+    if (dmy) {
+      return {
+        day: parseInt(dmy[1], 10),
+        month: parseInt(dmy[2], 10),
+        year: parseInt(dmy[3], 10),
+      };
     }
-    if (createdAt) {
-      const d = new Date(createdAt);
-      if (!isNaN(d.getTime())) {
-        return {
-          day: d.getDate(),
-          month: d.getMonth() + 1,
-          year: d.getFullYear(),
-        };
-      }
+    // Khớp DD-MM-YYYY (dùng dấu -)
+    const dmyDash = timeStr.match(/(\d{1,2})-(\d{1,2})-(\d{4})/);
+    if (dmyDash) {
+      return {
+        day: parseInt(dmyDash[1], 10),
+        month: parseInt(dmyDash[2], 10),
+        year: parseInt(dmyDash[3], 10),
+      };
+    }
+    // Khớp YYYY-MM-DD hoặc YYYY/MM/DD
+    const ymd = timeStr.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+    if (ymd) {
+      return {
+        day: parseInt(ymd[3], 10),
+        month: parseInt(ymd[2], 10),
+        year: parseInt(ymd[1], 10),
+      };
+    }
+    // Khớp "Ngày DD tháng MM năm YYYY"
+    const textDmy = timeStr.match(/ngày\s*(\d{1,2})\s*tháng\s*(\d{1,2})(?:\s*năm\s*(\d{4}))?/i);
+    if (textDmy) {
+      return {
+        day: parseInt(textDmy[1], 10),
+        month: parseInt(textDmy[2], 10),
+        year: textDmy[3] ? parseInt(textDmy[3], 10) : new Date().getFullYear(),
+      };
     }
     return null;
   }
@@ -102,7 +93,7 @@ export default function SuKienHoatDongPage() {
     setEvents(evList);
 
     // Tự động mở lịch vào tháng có sự kiện gần nhất
-    const firstParsed = evList.map(e => parseEventDate(e.time, e.created_at)).find(Boolean);
+    const firstParsed = evList.map(e => parseEventDate(e.time)).find(Boolean);
     if (firstParsed) {
       setCalMonth(firstParsed.month);
       setCalYear(firstParsed.year);
@@ -124,7 +115,7 @@ export default function SuKienHoatDongPage() {
   const eventsInCurrentMonth = events
     .map((e) => ({
       ...e,
-      parsedDate: parseEventDate(e.time, e.created_at),
+      parsedDate: parseEventDate(e.time),
     }))
     .filter((e) => e.parsedDate && e.parsedDate.month === calMonth && e.parsedDate.year === calYear);
 
@@ -139,7 +130,7 @@ export default function SuKienHoatDongPage() {
 
   const displayedEvents = selectedDay
     ? events.filter((e) => {
-        const pd = parseEventDate(e.time, e.created_at);
+        const pd = parseEventDate(e.time);
         return pd && pd.day === selectedDay && pd.month === calMonth && pd.year === calYear;
       })
     : events;
