@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from "react";
 
 export default function FloatingContact() {
-  const facebookUrl = "https://m.me/doankhoaktck.ctut";
-  const zaloUrl = "https://zalo.me/0939042183";
+  const facebookUrl = "https://www.facebook.com/profile.php?id=61559867482732";
+  const messengerUrl = "https://m.me/doankhoaktck.ctut";
   const [showTopBtn, setShowTopBtn] = useState(false);
 
   useEffect(() => {
@@ -42,33 +42,37 @@ export default function FloatingContact() {
         </button>
       )}
 
-      {/* Nút Zalo */}
+      {/* Nút Facebook Fanpage */}
       <a
-        href={zaloUrl}
+        href={facebookUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center justify-center w-12 h-12 max-sm:w-10 max-sm:h-10 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg hover:scale-110 transition duration-300 relative group"
-        title="Liên hệ Zalo Đoàn Khoa"
+        className="flex items-center justify-center w-12 h-12 max-sm:w-10 max-sm:h-10 bg-[#1877F2] hover:bg-[#166fe5] text-white rounded-full shadow-lg hover:scale-110 transition duration-300 relative group"
+        title="Fanpage Facebook Đoàn Khoa"
+        aria-label="Fanpage Facebook Đoàn Khoa"
       >
-        <span className="font-bold text-xs">Zalo</span>
+        <svg className="w-5 h-5 max-sm:w-4 max-sm:h-4 fill-current" viewBox="0 0 24 24">
+          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+        </svg>
         <span className="absolute right-14 bg-gray-900 text-white text-xs px-2.5 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition duration-200 pointer-events-none shadow">
-          Hỗ trợ Zalo
+          Fanpage Facebook
         </span>
       </a>
 
       {/* Nút Facebook Messenger */}
       <a
-        href={facebookUrl}
+        href={messengerUrl}
         target="_blank"
         rel="noopener noreferrer"
         className="flex items-center justify-center w-12 h-12 max-sm:w-10 max-sm:h-10 bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-90 text-white rounded-full shadow-lg hover:scale-110 transition duration-300 relative group"
-        title="Nhắn tin Facebook Đoàn Khoa"
+        title="Nhắn tin Messenger Đoàn Khoa"
+        aria-label="Nhắn tin Messenger Đoàn Khoa"
       >
-        <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
+        <svg className="w-6 h-6 max-sm:w-5 max-sm:h-5 fill-current" viewBox="0 0 24 24">
           <path d="M12 2C6.477 2 2 6.145 2 11.258c0 2.914 1.455 5.518 3.735 7.152V22l3.411-1.874c.907.251 1.868.388 2.854.388 5.523 0 10-4.145 10-9.256C22 6.145 17.523 2 12 2zm1.066 12.443l-2.614-2.788-5.1 2.788 5.61-5.957 2.679 2.788 5.035-2.788-5.61 5.957z" />
         </svg>
         <span className="absolute right-14 bg-gray-900 text-white text-xs px-2.5 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition duration-200 pointer-events-none shadow">
-          Fanpage Đoàn Khoa
+          Nhắn tin Messenger
         </span>
       </a>
     </div>
