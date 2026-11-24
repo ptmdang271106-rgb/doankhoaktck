@@ -96,12 +96,12 @@ function HomeContent() {
               Đọc gì hôm nay
             </h2>
 
-            <div className="flex flex-wrap items-center gap-1.5">
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full sm:flex-wrap">
               {categories.map((cat, idx) => (
                 <button
                   key={idx}
                   onClick={() => setActiveCategory(cat.name)}
-                  className={`text-xs font-semibold px-3 py-1.5 rounded transition-transform active:scale-95 ${
+                  className={`text-xs font-semibold px-3 py-1.5 rounded transition-transform active:scale-95 whitespace-nowrap flex-shrink-0 ${
                     activeCategory === cat.name
                       ? `${cat.color} shadow-sm`
                       : "bg-gray-100 text-gray-600 hover:bg-gray-200"

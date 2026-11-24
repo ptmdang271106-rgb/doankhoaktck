@@ -194,29 +194,47 @@ export default function Navbar() {
           </div>
 
           {/* 2. LOGO NGANG CHUẨN Ở GIỮA */}
-          <div className="col-span-12 lg:col-span-4 relative flex items-center justify-center py-1">
+          <div className="col-span-12 lg:col-span-4 relative flex items-center justify-between py-1 lg:justify-center">
             <Link href="/">
               <img
                 src={siteImages.logo}
                 alt="Tuổi trẻ Khoa Kỹ thuật Cơ khí - Trường Đại học Kỹ thuật - Công nghệ Cần Thơ"
-                className="h-10 sm:h-14 lg:h-16 w-auto max-w-[min(72vw,290px)] sm:max-w-[420px] object-contain block mx-auto cursor-pointer transition-transform hover:scale-105"
+                className="block h-10 w-auto max-w-[min(62vw,290px)] cursor-pointer object-contain transition-transform hover:scale-105 sm:h-14 sm:max-w-[420px] lg:h-16"
               />
             </Link>
-            <button
-              type="button"
-              aria-label={isMobileMenuOpen ? "Đóng menu" : "Mở menu"}
-              aria-expanded={isMobileMenuOpen}
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="absolute right-0 top-1/2 -translate-y-1/2 lg:hidden inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-[#004A52] shadow-xs transition hover:bg-slate-50 active:scale-95"
-            >
-              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                {isMobileMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 6l12 12M18 6L6 18" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
-            </button>
+            <div className="flex items-center gap-1.5 lg:hidden">
+              <Link
+                href="/tra-cuu"
+                className="inline-flex h-9 items-center justify-center rounded-lg bg-[#007A87] px-2 text-[10px] font-extrabold text-white shadow-sm transition hover:bg-[#00606B]"
+              >
+                ĐRL
+              </Link>
+              {currentUser && (
+                <button
+                  type="button"
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className="p-0.5 rounded-full border-2 border-orange-200 hover:border-[#EE6425] transition active:scale-95 cursor-pointer shadow-xs bg-white block flex-shrink-0"
+                  title={currentUser.fullName || currentUser.mssv}
+                >
+                  <img
+                    src="/avatar-fme.jpg"
+                    alt="Avatar"
+                    className="w-8 h-8 rounded-full object-cover block"
+                  />
+                </button>
+              )}
+              <button
+                type="button"
+                aria-label="Mở menu"
+                aria-expanded={isMobileMenuOpen}
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="inline-flex h-9 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-[#004A52] shadow-xs transition hover:bg-slate-50 active:scale-95"
+              >
+                <svg className="h-5 w-6" viewBox="0 0 28 24" fill="none" stroke="currentColor" aria-hidden="true">
+                  <path strokeLinecap="round" strokeWidth={2.5} d="M3 5h22M3 12h22M3 19h22" />
+                </svg>
+              </button>
+            </div>
           </div>
 
           {/* 3. MENU PHẢI (DESKTOP): HỖ TRỢ SINH VIÊN | VĂN PHÒNG ĐIỆN TỬ | USER AVATAR */}
@@ -244,83 +262,6 @@ export default function Navbar() {
                     className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover block"
                   />
                 </button>
-
-                {/* POPUP DROPDOWN KHI BẤM VÀO AVATAR (GỌN GÀNG, KHÔNG DÙNG ICON) */}
-                {isUserMenuOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-100 py-3 px-3.5 z-50 text-xs animate-in fade-in slide-in-from-top-2 duration-150">
-                    {/* THÔNG TIN TÀI KHOẢN */}
-                    <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
-                      <img
-                        src="/avatar-fme.jpg"
-                        alt="Avatar"
-                        className="w-10 h-10 rounded-full object-cover border border-orange-200 shadow-2xs flex-shrink-0"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <h4 className="font-extrabold text-slate-900 text-xs truncate leading-snug">
-                          {currentUser.fullName || currentUser.mssv}
-                        </h4>
-                        <p className="text-[11px] text-[#007A87] font-semibold truncate mt-0.5">
-                          {currentUser.studentClass || "Khoa Kỹ thuật Cơ khí"}
-                        </p>
-                        <span className="inline-block text-[9px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-[#EE6425] mt-1">
-                          {currentUser.role === "super_admin"
-                            ? "Admin Tối Cao"
-                            : currentUser.role === "branch_admin"
-                            ? "Cán bộ Chi đoàn"
-                            : "Đoàn viên sinh viên"}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* DANH SÁCH CHỨC NĂNG (GỌN GÀNG, KHÔNG DÙNG ICON) */}
-                    <div className="py-1.5 space-y-0.5">
-                      {(currentUser.role === "super_admin" || currentUser.role === "admin") && (
-                        <Link
-                          href="/admin"
-                          onClick={() => setIsUserMenuOpen(false)}
-                          className="block px-3 py-2 rounded-xl text-slate-700 hover:text-[#007A87] hover:bg-slate-50 font-bold transition-colors"
-                        >
-                          Trang Quản trị Hệ thống
-                        </Link>
-                      )}
-
-                      {currentUser.role === "branch_admin" && (
-                        <Link
-                          href="/admin/chi-doan"
-                          onClick={() => setIsUserMenuOpen(false)}
-                          className="block px-3 py-2 rounded-xl text-slate-700 hover:text-[#007A87] hover:bg-slate-50 font-bold transition-colors"
-                        >
-                          Quản trị Chi đoàn
-                        </Link>
-                      )}
-
-                      {/* NÚT ĐỔI MẬT KHẨU */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsUserMenuOpen(false);
-                          setIsChangePasswordOpen(true);
-                          setChangePassError("");
-                          setChangePassSuccess("");
-                        }}
-                        className="w-full text-left px-3 py-2 rounded-xl text-slate-700 hover:text-[#EE6425] hover:bg-orange-50/70 font-bold transition-colors cursor-pointer"
-                      >
-                        Đổi mật khẩu
-                      </button>
-                    </div>
-
-                    {/* NÚT ĐĂNG XUẤT */}
-                    <div className="pt-2 border-t border-slate-100">
-                      <button
-                        type="button"
-                        onClick={handleLogout}
-                        className="w-full text-center py-2 px-3 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs transition cursor-pointer"
-                      >
-                        Đăng xuất
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
             ) : (
               <Link
@@ -334,10 +275,107 @@ export default function Navbar() {
         </div>
       </div>
 
+      {/* POPUP DROPDOWN KHI BẤM VÀO AVATAR (MOBILE & DESKTOP) */}
+      {isUserMenuOpen && currentUser && (
+        <>
+          <div
+            className="fixed inset-0 z-[65] bg-black/10 backdrop-blur-[0.5px]"
+            onClick={() => setIsUserMenuOpen(false)}
+          />
+          <div className="fixed top-14 sm:top-16 right-2 sm:right-6 w-[280px] bg-white rounded-2xl shadow-2xl border border-slate-100 py-3 px-3.5 z-[70] text-xs animate-in fade-in slide-in-from-top-2 duration-150">
+            {/* THÔNG TIN TÀI KHOẢN */}
+            <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
+              <img
+                src="/avatar-fme.jpg"
+                alt="Avatar"
+                className="w-10 h-10 rounded-full object-cover border border-orange-200 shadow-2xs flex-shrink-0"
+              />
+              <div className="min-w-0 flex-1">
+                <h4 className="font-extrabold text-slate-900 text-xs truncate leading-snug">
+                  {currentUser.fullName || currentUser.mssv}
+                </h4>
+                <p className="text-[11px] text-[#007A87] font-semibold truncate mt-0.5">
+                  {currentUser.studentClass || "Khoa Kỹ thuật Cơ khí"}
+                </p>
+                <span className="inline-block text-[9px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-[#EE6425] mt-1">
+                  {currentUser.role === "super_admin"
+                    ? "Admin Tối Cao"
+                    : currentUser.role === "branch_admin"
+                    ? "Cán bộ Chi đoàn"
+                    : "Đoàn viên sinh viên"}
+                </span>
+              </div>
+            </div>
+
+            {/* DANH SÁCH CHỨC NĂNG */}
+            <div className="py-1.5 space-y-0.5">
+              {(currentUser.role === "super_admin" || currentUser.role === "admin") && (
+                <Link
+                  href="/admin"
+                  onClick={() => setIsUserMenuOpen(false)}
+                  className="block px-3 py-2 rounded-xl text-slate-700 hover:text-[#007A87] hover:bg-slate-50 font-bold transition-colors"
+                >
+                  Trang Quản trị Hệ thống
+                </Link>
+              )}
+
+              {currentUser.role === "branch_admin" && (
+                <Link
+                  href="/admin/chi-doan"
+                  onClick={() => setIsUserMenuOpen(false)}
+                  className="block px-3 py-2 rounded-xl text-slate-700 hover:text-[#007A87] hover:bg-slate-50 font-bold transition-colors"
+                >
+                  Quản trị Chi đoàn
+                </Link>
+              )}
+
+              {/* NÚT ĐỔI MẬT KHẨU */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsUserMenuOpen(false);
+                  setIsChangePasswordOpen(true);
+                  setChangePassError("");
+                  setChangePassSuccess("");
+                }}
+                className="w-full text-left px-3 py-2 rounded-xl text-slate-700 hover:text-[#EE6425] hover:bg-orange-50/70 font-bold transition-colors cursor-pointer"
+              >
+                Đổi mật khẩu
+              </button>
+            </div>
+
+            {/* NÚT ĐĂNG XUẤT */}
+            <div className="pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="w-full text-center py-2 px-3 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs transition cursor-pointer"
+              >
+                Đăng xuất
+              </button>
+            </div>
+          </div>
+        </>
+      )}
       {/* MODAL POPUP ĐỔI MẬT KHẨU */}
       {isMobileMenuOpen && (
-        <nav aria-label="Điều hướng chính trên điện thoại" className="lg:hidden border-t border-slate-100 px-3 py-3 sm:px-6">
-          <div className="grid grid-cols-2 gap-2 text-xs font-bold">
+        <div className="fixed inset-0 z-[60] lg:hidden">
+          <button
+            type="button"
+            aria-label="Đóng menu"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="absolute inset-0 h-full w-full bg-slate-950/40 backdrop-blur-[1px]"
+          />
+          <nav aria-label="Điều hướng chính trên điện thoại" className="absolute right-0 top-0 flex h-full w-[min(86vw,340px)] flex-col overflow-y-auto bg-white px-3 pb-5 pt-3 shadow-2xl">
+            <div className="mb-3 flex items-center justify-between border-b border-slate-100 pb-3">
+              <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="min-w-0">
+                <img src={siteImages.logo} alt="Tuổi trẻ Khoa Kỹ thuật Cơ khí" className="h-9 w-auto max-w-[190px] object-contain" />
+              </Link>
+              <button type="button" aria-label="Đóng menu" onClick={() => setIsMobileMenuOpen(false)} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xl font-bold text-slate-500">×</button>
+            </div>
+
+            <p className="mb-1 px-2 text-[10px] font-black uppercase tracking-widest text-slate-400">Điều hướng</p>
+            <div className="grid grid-cols-1 gap-2 text-xs font-bold">
             {[
               ["/diem-danh", "Điểm danh"],
               ["/tra-cuu", "Cổng ĐRL"],
@@ -352,21 +390,21 @@ export default function Navbar() {
                 key={href}
                 href={href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="flex min-h-11 items-center rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-[#23545A] transition hover:border-teal-200 hover:bg-teal-50"
+                className="flex min-h-10 items-center rounded-lg px-2.5 py-1.5 text-[#23545A] transition hover:bg-slate-50 hover:text-[#007A87]"
               >
                 {label}
               </Link>
             ))}
-          </div>
-          <div className="mt-3 flex flex-col gap-2 border-t border-slate-100 pt-3 text-xs">
+            </div>
+            <div className="mt-4 flex flex-col gap-2 border-t border-slate-100 pt-3 text-xs">
             {currentUser ? (
               <>
                 <p className="truncate font-semibold text-slate-600">{currentUser.fullName || currentUser.mssv}</p>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex w-full flex-nowrap gap-1">
                   <Link
                     href={currentUser.role === "branch_admin" ? "/admin/chi-doan" : currentUser.role === "super_admin" || currentUser.role === "admin" ? "/admin" : "/tra-cuu"}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex min-h-11 min-w-0 flex-1 items-center justify-center rounded-xl bg-[#004A52] px-3 py-2 text-center font-bold text-white"
+                    className="flex min-h-9 min-w-0 flex-1 items-center justify-center overflow-hidden rounded-lg bg-[#004A52] px-1.5 py-1.5 text-center text-[10px] font-bold leading-tight text-white"
                   >
                     {currentUser.role === "branch_admin" || currentUser.role === "super_admin" || currentUser.role === "admin" ? "Trang quản lý" : "Cổng ĐRL"}
                   </Link>
@@ -378,11 +416,11 @@ export default function Navbar() {
                       setChangePassError("");
                       setChangePassSuccess("");
                     }}
-                    className="min-h-11 min-w-0 flex-1 rounded-xl border border-slate-200 px-3 py-2 text-center font-bold text-slate-700"
+                    className="min-h-9 min-w-0 flex-1 rounded-lg border border-slate-200 px-1.5 py-1.5 text-center text-[10px] font-bold leading-tight text-slate-700"
                   >
                     Đổi mật khẩu
                   </button>
-                  <button type="button" onClick={handleLogout} className="min-h-11 rounded-xl bg-red-50 px-3 py-2 font-bold text-red-600">
+                  <button type="button" onClick={handleLogout} className="min-h-9 min-w-0 flex-1 overflow-hidden rounded-lg bg-red-50 px-1.5 py-1.5 text-center text-[10px] font-bold leading-tight text-red-600">
                     Đăng xuất
                   </button>
                 </div>
@@ -396,8 +434,9 @@ export default function Navbar() {
                 Đăng nhập
               </Link>
             )}
-          </div>
-        </nav>
+            </div>
+          </nav>
+        </div>
       )}
 
       {isChangePasswordOpen && (
@@ -498,17 +537,17 @@ export default function Navbar() {
       {/* MENU PHỤ BÊN DƯỚI */}
       <div className="bg-[#F8FCFC] border-t border-b border-[#E6F4F4]">
         <div className="w-full px-4 sm:px-6 lg:px-10">
-          <div className="flex justify-start sm:justify-center space-x-6 sm:space-x-10 py-2.5 text-[12.5px] sm:text-[13.5px] font-semibold text-[#007A87] overflow-x-auto whitespace-nowrap">
-            <Link href="/dang-ky" className="hover:text-[#004A52] transition-colors font-bold text-[#EE6425]">
+          <div className="flex items-center justify-between gap-1 py-2.5 text-center text-[9px] font-semibold leading-tight text-[#007A87] sm:justify-center sm:gap-x-10 sm:text-[13.5px]">
+            <Link href="/dang-ky" className="min-w-0 flex-1 hover:text-[#004A52] transition-colors font-bold text-[#EE6425]">
               Hoạt động – Sự kiện
             </Link>
-            <Link href="/chuyen-muc/xem-gi-hom-nay" className="hover:text-[#004A52] transition-colors">
+            <Link href="/chuyen-muc/xem-gi-hom-nay" className="min-w-0 flex-1 hover:text-[#004A52] transition-colors">
               Xem gì hôm nay
             </Link>
-            <Link href="/chuyen-muc/ban-tin-hoc-thuat" className="hover:text-[#004A52] transition-colors">
+            <Link href="/chuyen-muc/ban-tin-hoc-thuat" className="min-w-0 flex-1 hover:text-[#004A52] transition-colors">
               Bản tin học thuật
             </Link>
-            <Link href="/chuyen-muc/guong-sang-fme" className="hover:text-[#004A52] transition-colors">
+            <Link href="/chuyen-muc/guong-sang-fme" className="min-w-0 flex-1 hover:text-[#004A52] transition-colors">
               Gương sáng FME
             </Link>
           </div>

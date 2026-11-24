@@ -1172,28 +1172,28 @@ export default function AdminDashboard() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-100 py-8 px-4 sm:px-6 lg:px-8 font-sans antialiased text-slate-800">
+    <main className="min-h-screen bg-slate-100 py-4 sm:py-8 px-2 sm:px-6 lg:px-8 font-sans antialiased text-slate-800">
       <div className="max-w-7xl mx-auto">
         
         {/* HEADER TỐI GIẢN */}
-        <div className="bg-white px-5 py-3.5 sm:px-6 sm:py-4 rounded-2xl shadow-xs border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-3.5 sm:gap-4 w-full sm:w-auto">
+        <div className="bg-white px-3.5 py-3 sm:px-6 sm:py-4 rounded-2xl shadow-xs border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+          <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
             <Link href="/" className="flex-shrink-0">
               <img
                 src={siteImages.logo}
                 alt="Logo Đoàn Khoa"
-                className="h-10 sm:h-11 w-auto object-contain cursor-pointer"
+                className="h-8 sm:h-11 w-auto object-contain cursor-pointer"
               />
             </Link>
-            <div className="border-l border-slate-200 pl-3.5 min-w-0">
-              <h1 className="text-sm sm:text-base font-extrabold text-[#004A52] tracking-tight">
+            <div className="border-l border-slate-200 pl-3 min-w-0">
+              <h1 className="text-xs sm:text-base font-extrabold text-[#004A52] tracking-tight">
                 Quản trị hệ thống
               </h1>
-              <p className="text-xs text-slate-500 mt-0.5 truncate">
+              <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 truncate">
                 <span className="font-semibold text-slate-700">
                   {currentUser?.fullName?.replace(/\s*\([^)]*\)/g, "").trim() || "Ban Chấp hành Đoàn Khoa"}
                 </span>
-                <span className="mx-1.5 text-slate-300">•</span>
+                <span className="mx-1 text-slate-300">•</span>
                 <span className="text-[#007A87] font-medium">
                   {currentUser?.role === "super_admin" ? "Admin Tối Cao" : "Cán bộ Chi đoàn"}
                 </span>
@@ -1204,7 +1204,7 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-2 flex-shrink-0 whitespace-nowrap self-end sm:self-center">
             <Link
               href="/"
-              className="text-xs font-bold text-slate-600 hover:text-[#007A87] px-3.5 py-2 rounded-xl hover:bg-slate-50 border border-slate-200 transition whitespace-nowrap"
+              className="text-xs font-bold text-slate-600 hover:text-[#007A87] px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl hover:bg-slate-50 border border-slate-200 transition whitespace-nowrap"
             >
               Về trang chủ
             </Link>
@@ -1215,7 +1215,7 @@ export default function AdminDashboard() {
                 localStorage.removeItem("ctut_current_user");
                 router.push("/dang-nhap");
               }}
-              className="bg-red-50 text-red-600 hover:bg-red-100 text-xs font-bold px-3.5 py-2 rounded-xl border border-red-100 transition cursor-pointer whitespace-nowrap"
+              className="bg-red-50 text-red-600 hover:bg-red-100 text-xs font-bold px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl border border-red-100 transition cursor-pointer whitespace-nowrap"
             >
               Đăng xuất
             </button>
@@ -1223,10 +1223,10 @@ export default function AdminDashboard() {
         </div>
 
         {/* TAB NAVIGATION */}
-        <div inert={savingContent} className="flex flex-wrap gap-2 mb-6">
+        <div inert={savingContent} className="flex items-center gap-1.5 sm:gap-2 mb-4 sm:mb-6 overflow-x-auto pb-2 -mx-2 px-2 sm:mx-0 sm:px-0 no-scrollbar sm:flex-wrap">
           <button
             onClick={() => setActiveTab("students")}
-            className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition ${
+            className={`px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap flex-shrink-0 transition ${
               activeTab === "students" ? "bg-[#EE6425] text-white shadow" : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
             }`}
           >
@@ -1235,7 +1235,7 @@ export default function AdminDashboard() {
 
           <button
             onClick={() => setActiveTab("about")}
-            className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition ${
+            className={`px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap flex-shrink-0 transition ${
               activeTab === "about" ? "bg-[#EE6425] text-white shadow" : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
             }`}
           >
@@ -1245,7 +1245,7 @@ export default function AdminDashboard() {
           {currentUser?.role === "super_admin" && (
             <button
               onClick={() => setActiveTab("officers")}
-              className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition ${
+              className={`px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap flex-shrink-0 transition ${
                 activeTab === "officers" ? "bg-[#004A52] text-white shadow" : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
               }`}
             >
@@ -1255,7 +1255,7 @@ export default function AdminDashboard() {
 
           <button
             onClick={() => setActiveTab("semesters")}
-            className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition ${
+            className={`px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap flex-shrink-0 transition ${
               activeTab === "semesters" ? "bg-[#004A52] text-white shadow" : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
             }`}
           >
@@ -1264,7 +1264,7 @@ export default function AdminDashboard() {
 
           <button
             onClick={() => setActiveTab("review")}
-            className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition ${
+            className={`px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap flex-shrink-0 transition ${
               activeTab === "review" ? "bg-[#EE6425] text-white shadow" : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
             }`}
           >
@@ -1273,7 +1273,7 @@ export default function AdminDashboard() {
 
           <button
             onClick={() => setActiveTab("events")}
-            className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition ${
+            className={`px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap flex-shrink-0 transition ${
               activeTab === "events" ? "bg-[#EE6425] text-white shadow" : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
             }`}
           >
@@ -1282,7 +1282,7 @@ export default function AdminDashboard() {
 
           <button
             onClick={() => setActiveTab("posts")}
-            className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition ${
+            className={`px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap flex-shrink-0 transition ${
               activeTab === "posts" ? "bg-[#EE6425] text-white shadow" : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
             }`}
           >
@@ -1291,7 +1291,7 @@ export default function AdminDashboard() {
 
           <button
             onClick={() => setActiveTab("banners")}
-            className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition ${
+            className={`px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap flex-shrink-0 transition ${
               activeTab === "banners" ? "bg-[#EE6425] text-white shadow" : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
             }`}
           >
@@ -1467,136 +1467,138 @@ export default function AdminDashboard() {
                   {students.length === 0 ? "Chưa có sinh viên nào." : "Không tìm thấy sinh viên nào phù hợp với bộ lọc."}
                 </div>
               ) : (
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
-                    <tr>
-                      <th className="p-2.5">MSSV</th>
-                      <th className="p-2.5">Họ và tên</th>
-                      <th className="p-2.5">Lớp</th>
-                      <th className="p-2.5">Sổ Đoàn</th>
-                      <th className="p-2.5">Phiếu ĐRL</th>
-                      <th className="p-2.5">Đoàn/Đảng</th>
-                      <th className="p-2.5 text-center">Thao tác</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {visibleStudents.map((s, idx) => {
-                      const isEditing = editingMssv === s.mssv;
-                      const sub = submissionsMap[`${s.mssv}_${reviewSemester}`] || submissionsMap[s.mssv];
-                      const drlStatus = getDRLStatus(sub);
+                <div className="overflow-x-auto -mx-3.5 px-3.5 sm:mx-0 sm:px-0">
+                  <table className="w-full text-left text-xs min-w-[680px]">
+                    <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                      <tr>
+                        <th className="p-2.5">MSSV</th>
+                        <th className="p-2.5">Họ và tên</th>
+                        <th className="p-2.5">Lớp</th>
+                        <th className="p-2.5">Sổ Đoàn</th>
+                        <th className="p-2.5">Phiếu ĐRL</th>
+                        <th className="p-2.5">Đoàn/Đảng</th>
+                        <th className="p-2.5 text-center">Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {visibleStudents.map((s, idx) => {
+                        const isEditing = editingMssv === s.mssv;
+                        const sub = submissionsMap[`${s.mssv}_${reviewSemester}`] || submissionsMap[s.mssv];
+                        const drlStatus = getDRLStatus(sub);
 
-                      if (isEditing) {
+                        if (isEditing) {
+                          return (
+                            <tr key={s.mssv || idx} className="bg-orange-50/80 border-2 border-[#EE6425]/50">
+                              <td className="p-2 font-bold text-[#007A87] whitespace-nowrap">{s.mssv}</td>
+                              <td className="p-2">
+                                <input
+                                  type="text"
+                                  required
+                                  value={editFullName}
+                                  onChange={e => setEditFullName(e.target.value)}
+                                  className="w-full border border-slate-300 rounded-lg px-2 py-1 text-xs outline-none focus:border-[#EE6425] bg-white font-bold text-slate-800"
+                                  placeholder="Họ và tên..."
+                                />
+                              </td>
+                              <td className="p-2">
+                                <select
+                                  value={editClass}
+                                  onChange={e => setEditClass(e.target.value)}
+                                  className="w-full border border-slate-300 rounded-lg px-1.5 py-1 text-xs outline-none bg-white focus:border-[#EE6425]"
+                                >
+                                  {classNames.map(name => (
+                                    <option key={name} value={name}>{name}</option>
+                                  ))}
+                                </select>
+                              </td>
+                              <td className="p-2">
+                                <select
+                                  value={editSoDoan}
+                                  onChange={e => setEditSoDoan(e.target.value)}
+                                  className="border border-slate-300 rounded-lg px-1.5 py-1 text-xs outline-none bg-white focus:border-[#EE6425]"
+                                >
+                                  <option value="Đã nộp">Đã nộp</option>
+                                  <option value="Chưa nộp">Chưa nộp</option>
+                                </select>
+                              </td>
+                              <td className="p-2">
+                                <select
+                                  value={editDrlStatus}
+                                  onChange={e => setEditDrlStatus(e.target.value)}
+                                  className="border border-slate-300 rounded-lg px-1.5 py-1 text-xs outline-none bg-white focus:border-[#EE6425]"
+                                >
+                                  <option value="Chưa nộp">Chưa nộp</option>
+                                  <option value="Đã nộp">Đã nộp</option>
+                                  <option value="Đã duyệt">Đã duyệt</option>
+                                </select>
+                              </td>
+                              <td className="p-2">
+                                <input
+                                  type="date"
+                                  value={editUnionDate}
+                                  onChange={e => setEditUnionDate(e.target.value)}
+                                  className="border border-slate-300 rounded-lg px-1 py-1 text-xs outline-none bg-white focus:border-[#EE6425]"
+                                />
+                              </td>
+                              <td className="p-2 text-center whitespace-nowrap space-x-2">
+                                <button
+                                  type="button"
+                                  disabled={editSaving}
+                                  onClick={() => handleSaveStudentInlineOrModal(s.mssv)}
+                                  className="text-emerald-700 hover:text-emerald-900 font-bold hover:underline cursor-pointer disabled:opacity-50"
+                                >
+                                  {editSaving ? "Đang lưu..." : "Lưu"}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setEditingMssv(null)}
+                                  className="text-slate-500 hover:text-slate-700 font-bold hover:underline cursor-pointer"
+                                >
+                                  Hủy
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        }
+
                         return (
-                          <tr key={s.mssv || idx} className="bg-orange-50/80 border-2 border-[#EE6425]/50">
-                            <td className="p-2 font-bold text-[#007A87] whitespace-nowrap">{s.mssv}</td>
-                            <td className="p-2">
-                              <input
-                                type="text"
-                                required
-                                value={editFullName}
-                                onChange={e => setEditFullName(e.target.value)}
-                                className="w-full border border-slate-300 rounded-lg px-2 py-1 text-xs outline-none focus:border-[#EE6425] bg-white font-bold text-slate-800"
-                                placeholder="Họ và tên..."
-                              />
+                          <tr key={s.mssv || idx} className="hover:bg-slate-50">
+                            <td className="p-2.5 font-bold text-[#007A87]">{s.mssv}</td>
+                            <td className="p-2.5 font-medium text-slate-800">{s.full_name}</td>
+                            <td className="p-2.5 text-slate-600">{s.student_class}</td>
+                            <td className="p-2.5">
+                              <span className={`px-2 py-0.5 rounded font-bold text-[10px] ${s.so_doan === "Đã nộp" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>
+                                {s.so_doan || "Chưa nộp"}
+                              </span>
                             </td>
-                            <td className="p-2">
-                              <select
-                                value={editClass}
-                                onChange={e => setEditClass(e.target.value)}
-                                className="w-full border border-slate-300 rounded-lg px-1.5 py-1 text-xs outline-none bg-white focus:border-[#EE6425]"
-                              >
-                                {classNames.map(name => (
-                                  <option key={name} value={name}>{name}</option>
-                                ))}
-                              </select>
+                            <td className="p-2.5">
+                              <DRLStatusBadge status={drlStatus} size="sm" />
                             </td>
-                            <td className="p-2">
-                              <select
-                                value={editSoDoan}
-                                onChange={e => setEditSoDoan(e.target.value)}
-                                className="border border-slate-300 rounded-lg px-1.5 py-1 text-xs outline-none bg-white focus:border-[#EE6425]"
-                              >
-                                <option value="Đã nộp">Đã nộp</option>
-                                <option value="Chưa nộp">Chưa nộp</option>
-                              </select>
+                            <td className="p-2.5 text-[11px] text-slate-500">
+                              {s.chua_ket_nap_doan ? <span className="text-red-600 font-bold">Chưa vào Đoàn</span> : `Đoàn: ${s.union_date || "Có"}`}
                             </td>
-                            <td className="p-2">
-                              <select
-                                value={editDrlStatus}
-                                onChange={e => setEditDrlStatus(e.target.value)}
-                                className="border border-slate-300 rounded-lg px-1.5 py-1 text-xs outline-none bg-white focus:border-[#EE6425]"
-                              >
-                                <option value="Chưa nộp">Chưa nộp</option>
-                                <option value="Đã nộp">Đã nộp</option>
-                                <option value="Đã duyệt">Đã duyệt</option>
-                              </select>
-                            </td>
-                            <td className="p-2">
-                              <input
-                                type="date"
-                                value={editUnionDate}
-                                onChange={e => setEditUnionDate(e.target.value)}
-                                className="border border-slate-300 rounded-lg px-1 py-1 text-xs outline-none bg-white focus:border-[#EE6425]"
-                              />
-                            </td>
-                            <td className="p-2 text-center whitespace-nowrap space-x-2">
+                            <td className="p-2.5 text-center whitespace-nowrap space-x-2">
                               <button
                                 type="button"
-                                disabled={editSaving}
-                                onClick={() => handleSaveStudentInlineOrModal(s.mssv)}
-                                className="text-emerald-700 hover:text-emerald-900 font-bold hover:underline cursor-pointer disabled:opacity-50"
+                                onClick={() => handleStartInlineEdit(s)}
+                                className="text-[#007A87] hover:text-[#005a63] font-bold hover:underline cursor-pointer"
                               >
-                                {editSaving ? "Đang lưu..." : "Lưu"}
+                                Sửa
                               </button>
                               <button
                                 type="button"
-                                onClick={() => setEditingMssv(null)}
-                                className="text-slate-500 hover:text-slate-700 font-bold hover:underline cursor-pointer"
+                                onClick={() => handleDeleteSingleStudent(s.mssv, s.full_name)}
+                                className="text-red-600 hover:text-red-800 font-bold hover:underline cursor-pointer"
                               >
-                                Hủy
+                                Xóa
                               </button>
                             </td>
                           </tr>
                         );
-                      }
-
-                      return (
-                        <tr key={s.mssv || idx} className="hover:bg-slate-50">
-                          <td className="p-2.5 font-bold text-[#007A87]">{s.mssv}</td>
-                          <td className="p-2.5 font-medium text-slate-800">{s.full_name}</td>
-                          <td className="p-2.5 text-slate-600">{s.student_class}</td>
-                          <td className="p-2.5">
-                            <span className={`px-2 py-0.5 rounded font-bold text-[10px] ${s.so_doan === "Đã nộp" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>
-                              {s.so_doan || "Chưa nộp"}
-                            </span>
-                          </td>
-                          <td className="p-2.5">
-                            <DRLStatusBadge status={drlStatus} size="sm" />
-                          </td>
-                          <td className="p-2.5 text-[11px] text-slate-500">
-                            {s.chua_ket_nap_doan ? <span className="text-red-600 font-bold">Chưa vào Đoàn</span> : `Đoàn: ${s.union_date || "Có"}`}
-                          </td>
-                          <td className="p-2.5 text-center whitespace-nowrap space-x-2">
-                            <button
-                              type="button"
-                              onClick={() => handleStartInlineEdit(s)}
-                              className="text-[#007A87] hover:text-[#005a63] font-bold hover:underline cursor-pointer"
-                            >
-                              Sửa
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteSingleStudent(s.mssv, s.full_name)}
-                              className="text-red-600 hover:text-red-800 font-bold hover:underline cursor-pointer"
-                            >
-                              Xóa
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </div>
 
@@ -1877,35 +1879,37 @@ export default function AdminDashboard() {
               </form>
             </div>
 
-            <div className="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm overflow-x-auto">
+            <div className="lg:col-span-7 bg-white p-3.5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm">
               <h2 className="text-base font-bold text-[#004A52] mb-4">Danh sách cán bộ BCH Chi đoàn ({officers.length})</h2>
               {officers.length === 0 ? (
                 <p className="text-xs text-slate-400 py-4">Chưa có tài khoản cán bộ nào.</p>
               ) : (
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
-                    <tr>
-                      <th className="p-2.5">Tài khoản</th>
-                      <th className="p-2.5">Cán bộ</th>
-                      <th className="p-2.5">Chi đoàn</th>
-                      <th className="p-2.5">Mật khẩu</th>
-                      <th className="p-2.5 text-center">Thao tác</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {officers.map((off) => (
-                      <tr key={off.id} className="hover:bg-slate-50">
-                        <td className="p-2.5 font-bold text-[#007A87]">{off.username}</td>
-                        <td className="p-2.5 font-medium text-slate-800">{off.full_name}</td>
-                        <td className="p-2.5 text-slate-600">{off.branch_class}</td>
-                        <td className="p-2.5 font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded inline-block my-1">{off.password}</td>
-                        <td className="p-2.5 text-center">
-                          <button onClick={() => handleDeleteOfficer(off.id, off.full_name)} className="text-red-600 hover:text-red-800 font-bold hover:underline">Xóa</button>
-                        </td>
+                <div className="overflow-x-auto -mx-3.5 px-3.5 sm:mx-0 sm:px-0">
+                  <table className="w-full text-left text-xs min-w-[520px]">
+                    <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                      <tr>
+                        <th className="p-2.5">Tài khoản</th>
+                        <th className="p-2.5">Cán bộ</th>
+                        <th className="p-2.5">Chi đoàn</th>
+                        <th className="p-2.5">Mật khẩu</th>
+                        <th className="p-2.5 text-center">Thao tác</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {officers.map((off) => (
+                        <tr key={off.id} className="hover:bg-slate-50">
+                          <td className="p-2.5 font-bold text-[#007A87]">{off.username}</td>
+                          <td className="p-2.5 font-medium text-slate-800">{off.full_name}</td>
+                          <td className="p-2.5 text-slate-600">{off.branch_class}</td>
+                          <td className="p-2.5 font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded inline-block my-1">{off.password}</td>
+                          <td className="p-2.5 text-center">
+                            <button onClick={() => handleDeleteOfficer(off.id, off.full_name)} className="text-red-600 hover:text-red-800 font-bold hover:underline">Xóa</button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </div>
           </div>
@@ -1941,42 +1945,44 @@ export default function AdminDashboard() {
               </form>
             </div>
 
-            <div className="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm overflow-x-auto">
+            <div className="lg:col-span-7 bg-white p-3.5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm">
               <h2 className="text-base font-bold text-[#004A52] mb-4">Danh sách các học kỳ ({semesters.length})</h2>
               {semesters.length === 0 ? (
                 <p className="text-xs text-slate-400 py-4">Chưa có học kỳ nào.</p>
               ) : (
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
-                    <tr>
-                      <th className="p-2.5">Tên học kỳ</th>
-                      <th className="p-2.5">Thời gian</th>
-                      <th className="p-2.5 text-center">Trạng thái cổng</th>
-                      <th className="p-2.5 text-center">Hành động</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {semesters.map((s) => (
-                      <tr key={s.id} className="hover:bg-slate-50">
-                        <td className="p-2.5 font-bold text-slate-800">{s.title}</td>
-                        <td className="p-2.5 text-slate-500 font-mono text-[11px]">{s.start_date} đến {s.end_date}</td>
-                        <td className="p-2.5 text-center">
-                          <span className={`px-2.5 py-1 rounded-full font-bold text-[10px] ${s.is_active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-                            {s.is_active ? "ĐANG MỞ" : "ĐÃ ĐÓNG"}
-                          </span>
-                        </td>
-                        <td className="p-2.5 text-center">
-                          <button
-                            onClick={() => handleToggleSemesterActive(s.id, s.is_active)}
-                            className={`px-3 py-1.5 rounded-lg font-bold text-[11px] text-white ${s.is_active ? "bg-red-500 hover:bg-red-600" : "bg-emerald-600 hover:bg-emerald-700"}`}
-                          >
-                            {s.is_active ? "Khóa cổng" : "Mở cổng"}
-                          </button>
-                        </td>
+                <div className="overflow-x-auto -mx-3.5 px-3.5 sm:mx-0 sm:px-0">
+                  <table className="w-full text-left text-xs min-w-[480px]">
+                    <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                      <tr>
+                        <th className="p-2.5">Tên học kỳ</th>
+                        <th className="p-2.5">Thời gian</th>
+                        <th className="p-2.5 text-center">Trạng thái cổng</th>
+                        <th className="p-2.5 text-center">Hành động</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {semesters.map((s) => (
+                        <tr key={s.id} className="hover:bg-slate-50">
+                          <td className="p-2.5 font-bold text-slate-800">{s.title}</td>
+                          <td className="p-2.5 text-slate-500 font-mono text-[11px]">{s.start_date} đến {s.end_date}</td>
+                          <td className="p-2.5 text-center">
+                            <span className={`px-2.5 py-1 rounded-full font-bold text-[10px] ${s.is_active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                              {s.is_active ? "ĐANG MỞ" : "ĐÃ ĐÓNG"}
+                            </span>
+                          </td>
+                          <td className="p-2.5 text-center">
+                            <button
+                              onClick={() => handleToggleSemesterActive(s.id, s.is_active)}
+                              className={`px-3 py-1.5 rounded-lg font-bold text-[11px] text-white ${s.is_active ? "bg-red-500 hover:bg-red-600" : "bg-emerald-600 hover:bg-emerald-700"}`}
+                            >
+                              {s.is_active ? "Khóa cổng" : "Mở cổng"}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </div>
           </div>
@@ -2161,59 +2167,61 @@ export default function AdminDashboard() {
                         const secScore = getOfficerSectionScore(section);
                         return (
                           <div key={section.id} className="border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
-                            <div className="bg-slate-100 p-3.5 flex justify-between items-center text-xs font-black text-[#004A52]">
+                            <div className="bg-slate-100 p-3 sm:p-3.5 flex flex-col sm:flex-row justify-between sm:items-center gap-2 text-xs font-black text-[#004A52]">
                               <span>{section.title} (Tối đa {section.maxPoints} đ)</span>
-                              <span className="bg-white px-3 py-1 rounded-xl border border-slate-200 text-[#EE6425]">
+                              <span className="bg-white px-3 py-1 rounded-xl border border-slate-200 text-[#EE6425] self-start sm:self-auto">
                                 Lớp chấm phần này: {secScore} / {section.maxPoints} đ
                               </span>
                             </div>
 
-                            <table className="w-full text-left text-xs">
-                              <thead>
-                                <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold text-[11px]">
-                                  <th className="py-2.5 px-3 w-5/12">Nội dung đánh giá</th>
-                                  <th className="py-2.5 px-2 text-center w-24">Quy định</th>
-                                  <th className="py-2.5 px-2 text-center w-20">SV tự chấm</th>
-                                  <th className="py-2.5 px-3 text-center w-28 text-[#EE6425]">Lớp chấm (đ)</th>
-                                </tr>
-                              </thead>
-                              <tbody className="divide-y divide-slate-100">
-                                {section.items.map((item) => {
-                                  const svVal = studentSubmission?.scores_detail?.[item.id] || 0;
-                                  const classVal = officerScores[item.id] !== undefined ? officerScores[item.id] : svVal;
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-left text-xs min-w-[500px]">
+                                <thead>
+                                  <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold text-[11px]">
+                                    <th className="py-2.5 px-3 w-5/12">Nội dung đánh giá</th>
+                                    <th className="py-2.5 px-2 text-center w-24">Quy định</th>
+                                    <th className="py-2.5 px-2 text-center w-20">SV tự chấm</th>
+                                    <th className="py-2.5 px-3 text-center w-28 text-[#EE6425]">Lớp chấm (đ)</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                  {section.items.map((item) => {
+                                    const svVal = studentSubmission?.scores_detail?.[item.id] || 0;
+                                    const classVal = officerScores[item.id] !== undefined ? officerScores[item.id] : svVal;
 
-                                  return (
-                                    <tr key={item.id} className="hover:bg-slate-50">
-                                      <td className="py-3 px-3 text-slate-700">
-                                        <span className="font-bold block text-slate-800 leading-snug">{item.title}</span>
-                                        <span className="block text-[11px] italic text-slate-500 mt-1 leading-relaxed">{item.subtext}</span>
-                                      </td>
-                                      <td className="py-3 px-2 text-center font-bold text-slate-600 align-top pt-4">
-                                        {item.maxLabel}
-                                      </td>
-                                      <td className="py-3 px-2 text-center font-mono font-bold text-slate-600 align-top pt-4">
-                                        {svVal} đ
-                                      </td>
-                                      <td className="py-3 px-3 text-center align-top pt-3">
-                                        <div className="flex flex-col items-center">
-                                          <input
-                                            type="number"
-                                            min="0"
-                                            max={item.max}
-                                            value={classVal}
-                                            onChange={(e) => {
-                                              const val = Math.max(0, Number(e.target.value) || 0);
-                                              setOfficerScores((prev) => ({ ...prev, [item.id]: val }));
-                                            }}
-                                            className="w-16 border border-slate-300 rounded-lg py-1.5 text-center font-bold text-[#EE6425] outline-none"
-                                          />
-                                        </div>
-                                      </td>
-                                    </tr>
-                                  );
-                                })}
-                              </tbody>
-                            </table>
+                                    return (
+                                      <tr key={item.id} className="hover:bg-slate-50">
+                                        <td className="py-3 px-3 text-slate-700">
+                                          <span className="font-bold block text-slate-800 leading-snug">{item.title}</span>
+                                          <span className="block text-[11px] italic text-slate-500 mt-1 leading-relaxed">{item.subtext}</span>
+                                        </td>
+                                        <td className="py-3 px-2 text-center font-bold text-slate-600 align-top pt-4">
+                                          {item.maxLabel}
+                                        </td>
+                                        <td className="py-3 px-2 text-center font-mono font-bold text-slate-600 align-top pt-4">
+                                          {svVal} đ
+                                        </td>
+                                        <td className="py-3 px-3 text-center align-top pt-3">
+                                          <div className="flex flex-col items-center">
+                                            <input
+                                              type="number"
+                                              min="0"
+                                              max={item.max}
+                                              value={classVal}
+                                              onChange={(e) => {
+                                                const val = Math.max(0, Number(e.target.value) || 0);
+                                                setOfficerScores((prev) => ({ ...prev, [item.id]: val }));
+                                              }}
+                                              className="w-16 border border-slate-300 rounded-lg py-1.5 text-center font-bold text-[#EE6425] outline-none"
+                                            />
+                                          </div>
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
+                                </tbody>
+                              </table>
+                            </div>
                           </div>
                         );
                       })}

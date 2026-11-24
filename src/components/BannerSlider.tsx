@@ -187,18 +187,18 @@ export default function BannerSlider() {
           
           {/* CỘT TRÁI: BANNER SLIDER CHÍNH (8 CỘT TRÊN MÀN HÌNH LỚN) */}
           <div className="lg:col-span-8 relative">
-            <div className="relative w-full h-full min-h-[220px] sm:min-h-[300px] md:min-h-[360px] overflow-hidden rounded-xl sm:rounded-2xl shadow-sm group bg-slate-900 flex items-center">
+            <div className="relative w-full h-full aspect-[16/9] sm:aspect-[21/9] lg:aspect-auto lg:min-h-[360px] overflow-hidden rounded-xl sm:rounded-2xl shadow-sm group bg-slate-950 flex items-center justify-center">
               {/* TRACK CAROUSEL TRƯỢT MƯỢT MÀ */}
               <div
                 className="flex transition-transform duration-500 ease-out w-full h-full"
                 style={{ transform: `translateX(-${currentIndex * 100}%)` }}
               >
                 {banners.map((banner, idx) => (
-                  <div key={banner.id || idx} className="w-full h-full flex-shrink-0 relative flex items-center justify-center">
+                  <div key={banner.id || idx} className="w-full h-full flex-shrink-0 relative flex items-center justify-center bg-slate-950">
                     <img
                       src={banner.image}
                       alt="Banner Khoa Kỹ thuật Cơ khí"
-                      className="w-full h-full object-cover sm:object-contain select-none pointer-events-none block"
+                      className="w-full h-full object-contain select-none pointer-events-none block"
                       draggable={false}
                     />
                   </div>
@@ -257,8 +257,8 @@ export default function BannerSlider() {
               <div>
                 <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-slate-100">
                   <div className="flex items-center gap-2">
-                    <span className="w-8 h-8 rounded-lg bg-[#FFF2EB] text-[#EE6425] flex items-center justify-center text-sm font-bold shadow-2xs">
-                      📅
+                    <span className="w-8 h-8 rounded-lg bg-[#FFF2EB] text-[#EE6425] flex items-center justify-center text-xs font-black shadow-2xs">
+                      FME
                     </span>
                     <div>
                       <h3 className="font-extrabold text-xs sm:text-sm text-slate-900 tracking-tight uppercase flex items-center gap-1.5">
@@ -300,7 +300,7 @@ export default function BannerSlider() {
                           {ev.title}
                         </h4>
                         <div className="flex items-center gap-2 text-[10px] text-slate-500 mt-0.5 truncate">
-                          <span>📍 {ev.location}</span>
+                          <span>{ev.location}</span>
                         </div>
                         <div className="flex items-center gap-2 mt-1">
                           <span className="inline-flex items-center text-[9px] font-bold px-1.5 py-0.5 rounded bg-orange-50 text-[#EE6425] border border-orange-100">
@@ -322,7 +322,7 @@ export default function BannerSlider() {
                   href="/dang-ky"
                   className="w-full bg-[#EE6425] hover:bg-[#d85216] text-white text-xs font-bold py-2 px-3 rounded-xl transition shadow flex items-center justify-center gap-1.5 active:scale-98"
                 >
-                  <span>📝 Đăng ký tham gia ngay</span>
+                  <span>Đăng ký tham gia ngay</span>
                   <span className="text-xs">→</span>
                 </Link>
               </div>
