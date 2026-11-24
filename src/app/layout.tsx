@@ -14,6 +14,16 @@ const beVietnamPro = Be_Vietnam_Pro({
 export const metadata: Metadata = {
   title: "Tuổi trẻ Khoa Kỹ thuật Cơ khí - CTUT",
   description: "Cổng thông tin & Hoạt động phong trào Đoàn Khoa Kỹ thuật Cơ khí CTUT",
+  keywords: [
+    "FME",
+    "CTUT",
+    "Tuổi trẻ Khoa Kỹ thuật Cơ khí",
+    "Khoa Kỹ thuật Cơ khí CTUT",
+    "Liên chi Hội Sinh viên Khoa Kỹ thuật Cơ khí",
+    "Đoàn Khoa Kỹ thuật Cơ khí",
+    "hoạt động sinh viên CTUT",
+    "cổng thông tin CTUT",
+  ],
   icons: {
     icon: siteImages.icon,
     shortcut: siteImages.icon,

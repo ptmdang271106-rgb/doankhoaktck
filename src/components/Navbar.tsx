@@ -6,10 +6,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { endImageSession, changeUserPassword } from "@/app/dang-nhap/actions";
+import { uploadImage } from "@/lib/cloudinary";
 
 export default function Navbar() {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [avatarUrl, setAvatarUrl] = useState("/avatar-fme.jpg");
+  const [avatarUploading, setAvatarUploading] = useState(false);
   const [isIntroOpen, setIsIntroOpen] = useState(false);
   const [isBranchOpen, setIsBranchOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -27,6 +30,7 @@ export default function Navbar() {
   const introDropdownRef = useRef<HTMLDivElement>(null);
   const branchDropdownRef = useRef<HTMLDivElement>(null);
   const userDropdownRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const savedUser = localStorage.getItem("ctut_current_user");
@@ -45,7 +49,11 @@ export default function Navbar() {
       if (branchDropdownRef.current && !branchDropdownRef.current.contains(e.target as Node)) {
         setIsBranchOpen(false);
       }
-      if (userDropdownRef.current && !userDropdownRef.current.contains(e.target as Node)) {
+      if (
+        userDropdownRef.current &&
+        !userDropdownRef.current.contains(e.target as Node) &&
+        !userMenuRef.current?.contains(e.target as Node)
+      ) {
         setIsUserMenuOpen(false);
       }
     };
@@ -53,12 +61,47 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (!currentUser) {
+      setAvatarUrl("/avatar-fme.jpg");
+      return;
+    }
+    const avatarKey = `ctut_avatar_${currentUser.mssv || currentUser.username || "user"}`;
+    setAvatarUrl(localStorage.getItem(avatarKey) || "/avatar-fme.jpg");
+  }, [currentUser]);
+
+  const handleAvatarChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !file.type.startsWith("image/")) return;
+    if (!currentUser) return;
+
+    setAvatarUploading(true);
+    try {
+      const uploadedUrl = await uploadImage(file);
+      const avatarKey = `ctut_avatar_${currentUser.mssv || currentUser.username || "user"}`;
+      localStorage.setItem(avatarKey, uploadedUrl);
+      setAvatarUrl(uploadedUrl);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Không thể tải ảnh đại diện. Vui lòng thử lại.";
+      alert(message);
+    } finally {
+      setAvatarUploading(false);
+      event.target.value = "";
+    }
+  };
+
   const handleLogout = async () => {
-    await endImageSession();
-    await supabase.auth.signOut({ scope: "local" });
+    // Xóa phiên local trước để thao tác luôn hoàn tất kể cả khi mạng/server lỗi.
     localStorage.removeItem("ctut_current_user");
+    sessionStorage.removeItem("ctut_current_user");
     setCurrentUser(null);
-    window.location.href = "/";
+    setAvatarUrl("/avatar-fme.jpg");
+    setIsUserMenuOpen(false);
+    setIsMobileMenuOpen(false);
+    window.location.replace("/");
+
+    // Dọn các phiên phía server ở chế độ nền, không chặn giao diện.
+    void Promise.allSettled([endImageSession(), supabase.auth.signOut({ scope: "local" })]);
   };
 
   const handleChangePasswordSubmit = async (e: React.FormEvent) => {
@@ -217,7 +260,7 @@ export default function Navbar() {
                   title={currentUser.fullName || currentUser.mssv}
                 >
                   <img
-                    src="/avatar-fme.jpg"
+                    src={avatarUrl}
                     alt="Avatar"
                     className="w-8 h-8 rounded-full object-cover block"
                   />
@@ -257,7 +300,7 @@ export default function Navbar() {
                   title={currentUser.fullName || currentUser.mssv}
                 >
                   <img
-                    src="/avatar-fme.jpg"
+                    src={avatarUrl}
                     alt="Avatar"
                     className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover block"
                   />
@@ -282,14 +325,23 @@ export default function Navbar() {
             className="fixed inset-0 z-[65] bg-black/10 backdrop-blur-[0.5px]"
             onClick={() => setIsUserMenuOpen(false)}
           />
-          <div className="fixed top-14 sm:top-16 right-2 sm:right-6 w-[280px] bg-white rounded-2xl shadow-2xl border border-slate-100 py-3 px-3.5 z-[70] text-xs animate-in fade-in slide-in-from-top-2 duration-150">
+          <div
+            ref={userMenuRef}
+            onMouseDown={(event) => event.stopPropagation()}
+            onClick={(event) => event.stopPropagation()}
+            className="fixed top-14 sm:top-16 right-2 sm:right-6 w-[280px] bg-white rounded-2xl shadow-2xl border border-slate-100 py-3 px-3.5 z-[70] text-xs animate-in fade-in slide-in-from-top-2 duration-150"
+          >
             {/* THÔNG TIN TÀI KHOẢN */}
             <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
-              <img
-                src="/avatar-fme.jpg"
-                alt="Avatar"
-                className="w-10 h-10 rounded-full object-cover border border-orange-200 shadow-2xs flex-shrink-0"
-              />
+              <label className={`relative block h-10 w-10 shrink-0 ${avatarUploading ? "cursor-wait opacity-70" : "cursor-pointer"}`} title={avatarUploading ? "Đang tải avatar" : "Đổi avatar"}>
+                <img
+                  src={avatarUrl}
+                  alt="Avatar"
+                  className="h-10 w-10 rounded-full object-cover border border-orange-200 shadow-2xs"
+                />
+                <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#007A87] text-[11px] font-black text-white">{avatarUploading ? "…" : "+"}</span>
+                <input type="file" accept="image/*" disabled={avatarUploading} onChange={handleAvatarChange} className="hidden" />
+              </label>
               <div className="min-w-0 flex-1">
                 <h4 className="font-extrabold text-slate-900 text-xs truncate leading-snug">
                   {currentUser.fullName || currentUser.mssv}
@@ -537,7 +589,7 @@ export default function Navbar() {
       {/* MENU PHỤ BÊN DƯỚI */}
       <div className="bg-[#F8FCFC] border-t border-b border-[#E6F4F4]">
         <div className="w-full px-4 sm:px-6 lg:px-10">
-          <div className="flex items-center justify-between gap-1 py-2.5 text-center text-[9px] font-semibold leading-tight text-[#007A87] sm:justify-center sm:gap-x-10 sm:text-[13.5px]">
+          <div className="mx-auto flex w-full max-w-5xl items-center justify-center gap-[clamp(0.35rem,2vw,2.5rem)] py-2.5 text-center text-[clamp(9px,1.15vw,13.5px)] font-semibold leading-tight tracking-tight text-[#007A87]">
             <Link href="/dang-ky" className="min-w-0 flex-1 hover:text-[#004A52] transition-colors font-bold text-[#EE6425]">
               Hoạt động – Sự kiện
             </Link>

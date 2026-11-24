@@ -1209,11 +1209,15 @@ export default function AdminDashboard() {
               Về trang chủ
             </Link>
             <button
-              onClick={async () => {
-                await endImageSession();
-                await supabase.auth.signOut({ scope: "local" });
+              onClick={() => {
+                // Xóa phiên local trước để nút đăng xuất không bị kẹt khi server lỗi.
                 localStorage.removeItem("ctut_current_user");
-                router.push("/dang-nhap");
+                sessionStorage.removeItem("ctut_current_user");
+                router.replace("/dang-nhap");
+                void Promise.allSettled([
+                  endImageSession(),
+                  supabase.auth.signOut({ scope: "local" }),
+                ]);
               }}
               className="bg-red-50 text-red-600 hover:bg-red-100 text-xs font-bold px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl border border-red-100 transition cursor-pointer whitespace-nowrap"
             >
