@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 
 export default function FloatingContact() {
   const facebookUrl = "https://m.me/doankhoaktck.ctut";
-  const zaloUrl = "https://zalo.me/0900000000";
+  const zaloUrl = "https://zalo.me/0939042183";
   const [showTopBtn, setShowTopBtn] = useState(false);
 
   useEffect(() => {
