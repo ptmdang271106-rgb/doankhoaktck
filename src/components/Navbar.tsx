@@ -589,17 +589,17 @@ export default function Navbar() {
       {/* MENU PHỤ BÊN DƯỚI */}
       <div className="bg-[#F8FCFC] border-t border-b border-[#E6F4F4]">
         <div className="w-full px-4 sm:px-6 lg:px-10">
-          <div className="mx-auto flex w-full max-w-5xl items-center justify-center gap-[clamp(0.35rem,2vw,2.5rem)] py-2.5 text-center text-[clamp(9px,1.15vw,13.5px)] font-semibold leading-tight tracking-tight text-[#007A87]">
-            <Link href="/dang-ky" className="min-w-0 flex-1 hover:text-[#004A52] transition-colors font-bold text-[#EE6425]">
+          <div className="mx-auto flex w-full max-w-3xl items-center justify-center gap-[clamp(0.25rem,1.25vw,1.5rem)] py-2.5 text-center text-[clamp(9px,1.15vw,13.5px)] font-semibold leading-tight tracking-tight text-[#007A87]">
+            <Link href="/dang-ky" className="min-w-0 flex-1 sm:flex-none hover:text-[#004A52] transition-colors font-bold text-[#EE6425]">
               Hoạt động – Sự kiện
             </Link>
-            <Link href="/chuyen-muc/xem-gi-hom-nay" className="min-w-0 flex-1 hover:text-[#004A52] transition-colors">
+            <Link href="/chuyen-muc/xem-gi-hom-nay" className="min-w-0 flex-1 sm:flex-none hover:text-[#004A52] transition-colors">
               Xem gì hôm nay
             </Link>
-            <Link href="/chuyen-muc/ban-tin-hoc-thuat" className="min-w-0 flex-1 hover:text-[#004A52] transition-colors">
+            <Link href="/chuyen-muc/ban-tin-hoc-thuat" className="min-w-0 flex-1 sm:flex-none hover:text-[#004A52] transition-colors">
               Bản tin học thuật
             </Link>
-            <Link href="/chuyen-muc/guong-sang-fme" className="min-w-0 flex-1 hover:text-[#004A52] transition-colors">
+            <Link href="/chuyen-muc/guong-sang-fme" className="min-w-0 flex-1 sm:flex-none hover:text-[#004A52] transition-colors">
               Gương sáng FME
             </Link>
           </div>
