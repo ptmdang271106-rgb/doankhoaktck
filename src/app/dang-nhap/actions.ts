@@ -35,6 +35,25 @@ export async function loginWithPassword(username: string, password: string, role
   if (role === "admin") {
     let user = authenticateAdmin(username, password);
     if (!user) {
+      const adminUsername = process.env.ADMIN_USERNAME;
+      if (adminUsername && username.toLowerCase() === adminUsername.toLowerCase()) {
+        const { data: settingData } = await supabase
+          .from("site_settings")
+          .select("value")
+          .eq("key", "admin_custom_password")
+          .maybeSingle();
+        if (settingData?.value && settingData.value === password) {
+          user = {
+            mssv: adminUsername.toUpperCase(),
+            username: adminUsername,
+            fullName: "Ban Chấp hành Đoàn Khoa (Admin Tối Cao)",
+            studentClass: "Đoàn Khoa Cơ Khí",
+            role: "super_admin",
+          };
+        }
+      }
+    }
+    if (!user) {
       const { data } = await supabase.from("branch_officers").select("username,full_name,branch_class")
         .eq("username", username).eq("password", password).maybeSingle();
       if (!data) return { error: "Tài khoản hoặc mật khẩu Quản trị viên / Cán bộ không chính xác." };
@@ -86,4 +105,102 @@ export async function loginWithGoogleSession(accessToken: string) {
 
 export async function endImageSession() {
   await clearUploadSession();
+}
+
+export async function changeUserPassword(params: {
+  usernameOrMssv: string;
+  role: string;
+  currentPassword: string;
+  newPassword: string;
+}) {
+  const { usernameOrMssv, role, currentPassword, newPassword } = params;
+  if (!usernameOrMssv || !currentPassword || !newPassword) {
+    return { error: "Vui lòng điền đầy đủ mật khẩu hiện tại và mật khẩu mới." };
+  }
+  if (newPassword.length < 4) {
+    return { error: "Mật khẩu mới phải có ít nhất 4 ký tự." };
+  }
+
+  // 1. Cán bộ Chi đoàn
+  if (role === "branch_admin") {
+    const { data, error } = await supabase
+      .from("branch_officers")
+      .select("id, password")
+      .eq("username", usernameOrMssv)
+      .maybeSingle();
+
+    if (error || !data) {
+      return { error: "Không tìm thấy thông tin tài khoản cán bộ chi đoàn." };
+    }
+    if (data.password !== currentPassword) {
+      return { error: "Mật khẩu hiện tại không chính xác." };
+    }
+
+    const { error: updateError } = await supabase
+      .from("branch_officers")
+      .update({ password: newPassword })
+      .eq("username", usernameOrMssv);
+
+    if (updateError) {
+      return { error: "Lỗi cập nhật mật khẩu: " + updateError.message };
+    }
+    return { success: true, message: "Đổi mật khẩu Chi đoàn thành công!" };
+  }
+
+  // 2. Sinh viên
+  if (role === "student") {
+    const { data, error } = await supabase
+      .from("students")
+      .select("mssv, password")
+      .eq("mssv", usernameOrMssv.toUpperCase())
+      .maybeSingle();
+
+    if (error || !data) {
+      return { error: "Không tìm thấy thông tin sinh viên." };
+    }
+    const defaultPass = data.mssv.slice(-3);
+    const isValid = data.password ? data.password === currentPassword : currentPassword === defaultPass;
+    if (!isValid) {
+      return { error: "Mật khẩu hiện tại không chính xác." };
+    }
+
+    const { error: updateError } = await supabase
+      .from("students")
+      .update({ password: newPassword })
+      .eq("mssv", usernameOrMssv.toUpperCase());
+
+    if (updateError) {
+      return { error: "Lỗi cập nhật mật khẩu: " + updateError.message };
+    }
+    return { success: true, message: "Đổi mật khẩu sinh viên thành công!" };
+  }
+
+  // 3. Admin Tối Cao
+  if (role === "super_admin") {
+    const adminPass = process.env.ADMIN_PASSWORD;
+    const { data: settingData } = await supabase
+      .from("site_settings")
+      .select("value")
+      .eq("key", "admin_custom_password")
+      .maybeSingle();
+
+    const expectedPass = settingData?.value || adminPass;
+    if (currentPassword !== expectedPass) {
+      return { error: "Mật khẩu quản trị hiện tại không chính xác." };
+    }
+
+    const { error: settingError } = await supabase
+      .from("site_settings")
+      .upsert(
+        [{ key: "admin_custom_password", value: newPassword, updated_at: new Date().toISOString() }],
+        { onConflict: "key" }
+      );
+
+    if (settingError) {
+      return { error: "Lỗi cập nhật mật khẩu quản trị: " + settingError.message };
+    }
+    return { success: true, message: "Đổi mật khẩu Admin thành công!" };
+  }
+
+  return { error: "Vai trò không hợp lệ." };
 }

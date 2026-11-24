@@ -24,3 +24,39 @@ body {
   color: var(--foreground);
   font-family: var(--font-be-vietnam-pro), sans-serif;
 }
+
+img,
+video,
+iframe {
+  max-width: 100%;
+}
+
+@media (max-width: 639px) {
+  body {
+    min-width: 320px;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  .overflow-x-auto {
+    max-width: 100%;
+    overscroll-behavior-inline: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .fixed.inset-0 > div {
+    max-height: calc(100dvh - 2rem);
+    overflow-y: auto;
+  }
+
+  .prose img,
+  .prose video,
+  .prose iframe {
+    height: auto;
+  }
+}

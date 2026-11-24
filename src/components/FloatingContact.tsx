@@ -23,13 +23,13 @@ export default function FloatingContact() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50">
+    <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50 max-sm:bottom-4 max-sm:right-3 max-sm:gap-2">
       {/* Nút về đầu trang */}
       {showTopBtn && (
         <button
           type="button"
           onClick={scrollToTop}
-          className="flex items-center justify-center w-12 h-12 bg-white text-[#004A52] hover:text-white hover:bg-[#EE6425] border border-slate-200 rounded-full shadow-lg hover:scale-110 transition duration-300 relative group animate-fade-in"
+          className="flex items-center justify-center w-12 h-12 max-sm:w-10 max-sm:h-10 bg-white text-[#004A52] hover:text-white hover:bg-[#EE6425] border border-slate-200 rounded-full shadow-lg hover:scale-110 transition duration-300 relative group animate-fade-in"
           title="Về đầu trang"
           aria-label="Về đầu trang"
         >
@@ -47,7 +47,7 @@ export default function FloatingContact() {
         href={zaloUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center justify-center w-12 h-12 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg hover:scale-110 transition duration-300 relative group"
+        className="flex items-center justify-center w-12 h-12 max-sm:w-10 max-sm:h-10 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg hover:scale-110 transition duration-300 relative group"
         title="Liên hệ Zalo Đoàn Khoa"
       >
         <span className="font-bold text-xs">Zalo</span>
@@ -61,7 +61,7 @@ export default function FloatingContact() {
         href={facebookUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-90 text-white rounded-full shadow-lg hover:scale-110 transition duration-300 relative group"
+        className="flex items-center justify-center w-12 h-12 max-sm:w-10 max-sm:h-10 bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-90 text-white rounded-full shadow-lg hover:scale-110 transition duration-300 relative group"
         title="Nhắn tin Facebook Đoàn Khoa"
       >
         <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">

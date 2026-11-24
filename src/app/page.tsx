@@ -1,17 +1,26 @@
 "use client";
 
 import { siteImages } from "@/lib/site-images";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import BannerSlider from "@/components/BannerSlider";
 import Footer from "@/components/Footer";
 import { supabase } from "@/lib/supabase";
 
-export default function CTUTYouthPortal() {
+function HomeContent() {
+  const searchParams = useSearchParams();
+  const categoryParam = searchParams.get("category");
   const [activeCategory, setActiveCategory] = useState("Tất cả");
   const [activeTabRank, setActiveTabRank] = useState("Nổi bật");
   const [allPosts, setAllPosts] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (categoryParam) {
+      setActiveCategory(categoryParam);
+    }
+  }, [categoryParam]);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -25,9 +34,13 @@ export default function CTUTYouthPortal() {
 
   const categories = [
     { name: "Tất cả", color: "bg-[#F39C12] text-white" },
+    { name: "Xem gì hôm nay", color: "bg-[#007A87] text-white" },
+    { name: "Bản tin học thuật", color: "bg-[#2980B9] text-white" },
+    { name: "Gương sáng FME", color: "bg-[#8E44AD] text-white" },
     { name: "Phong trào", color: "bg-[#D35400] text-white" },
     { name: "Học thuật - NCKH", color: "bg-[#16A085] text-white" },
     { name: "Tổ chức - Đoàn thể", color: "bg-[#E67E22] text-white" },
+    { name: "Hội thảo Cơ khí", color: "bg-[#27AE60] text-white" },
     { name: "Tình nguyện", color: "bg-[#7F8C8D] text-white" },
   ];
 
@@ -49,25 +62,27 @@ export default function CTUTYouthPortal() {
 
       {/* NỘI DUNG CHÍNH */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between border-b-2 border-gray-100 pb-4 gap-4">
-          <h2 className="text-xl sm:text-2xl font-bold text-[#006674] tracking-tight">
-            Đọc gì hôm nay
-          </h2>
+        <div id="doc-gi-hom-nay" className="scroll-mt-28">
+          <div id="xem-gi-hom-nay" className="flex flex-col md:flex-row md:items-center justify-between border-b-2 border-gray-100 pb-4 gap-4">
+            <h2 className="text-xl sm:text-2xl font-bold text-[#006674] tracking-tight">
+              Đọc gì hôm nay
+            </h2>
 
-          <div className="flex flex-wrap items-center gap-1.5">
-            {categories.map((cat, idx) => (
-              <button
-                key={idx}
-                onClick={() => setActiveCategory(cat.name)}
-                className={`text-xs font-semibold px-3 py-1.5 rounded transition-transform active:scale-95 ${
-                  activeCategory === cat.name
-                    ? `${cat.color} shadow-sm`
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}
-              >
-                {cat.name}
-              </button>
-            ))}
+            <div className="flex flex-wrap items-center gap-1.5">
+              {categories.map((cat, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setActiveCategory(cat.name)}
+                  className={`text-xs font-semibold px-3 py-1.5 rounded transition-transform active:scale-95 ${
+                    activeCategory === cat.name
+                      ? `${cat.color} shadow-sm`
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  }`}
+                >
+                  {cat.name}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -75,7 +90,7 @@ export default function CTUTYouthPortal() {
           <div className="lg:col-span-8 space-y-6">
             {filteredPosts.length === 0 ? (
               <div className="text-center py-12 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-slate-400 text-sm">
-                Chưa có bài viết nào thuộc danh mục này.
+                Chưa có bài viết nào thuộc chuyên mục "{activeCategory}".
               </div>
             ) : (
               filteredPosts.map((post, idx) => (
@@ -174,7 +189,7 @@ export default function CTUTYouthPortal() {
                           {post.title}
                         </h4>
                         <div className="flex items-center gap-2 mt-1 text-[10px] text-gray-400">
-                          {post.date && <span>📅 {post.date}</span>}
+                          {post.date && <span>{post.date}</span>}
                           {post.category && (
                             <span className="text-[#007A87] font-semibold">
                               • {post.category}
@@ -204,5 +219,13 @@ export default function CTUTYouthPortal() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function CTUTYouthPortal() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white"></div>}>
+      <HomeContent />
+    </Suspense>
   );
 }

@@ -50,7 +50,7 @@ export default function ChiTietTinTucPage() {
         </h1>
 
         <div className="flex items-center gap-3 text-xs text-slate-400 font-medium mb-6 pb-4 border-b border-slate-100">
-          <span>📅 Ngày đăng: {post.date}</span>
+          <span>Ngày đăng: {post.date}</span>
           <span>•</span>
           <span>Khoa Kỹ thuật Cơ khí CTUT</span>
         </div>
