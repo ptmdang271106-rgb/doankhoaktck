@@ -133,7 +133,10 @@ export default function ChiDoanDashboard() {
       setStudentProofs(proofs || []);
       if (sub) {
         setStudentSubmission(sub);
-        setOfficerScores(sub.scores_detail || {});
+        // Chỉ load điểm lớp đã chấm nếu trạng thái là "Đã duyệt" (lớp đã từng chấm và gửi điểm)
+        // Nếu chỉ là "Đã nộp" (SV nộp nhưng lớp chưa chấm), scores_detail là điểm SV tự chấm → không dùng
+        const isDuyet = String(sub.status || "").toLowerCase().includes("đã duyệt");
+        setOfficerScores(isDuyet ? (sub.scores_detail || {}) : {});
       } else {
         setStudentSubmission(null);
         setOfficerScores({});
@@ -433,7 +436,8 @@ export default function ChiDoanDashboard() {
                               <tbody className="divide-y divide-slate-100">
                                 {section.items.map((item) => {
                                   const svVal = studentSubmission?.scores_detail?.[item.id] || 0;
-                                  const classVal = officerScores[item.id] !== undefined ? officerScores[item.id] : svVal;
+                                  // Điểm lớp chấm: dùng giá trị đã nhập, hoặc 0 nếu chưa nhập (KHÔNG lấy điểm SV tự chấm làm mặc định)
+                                  const classVal = officerScores[item.id] !== undefined ? officerScores[item.id] : 0;
 
                                   return (
                                     <tr key={item.id} className="hover:bg-slate-50">
