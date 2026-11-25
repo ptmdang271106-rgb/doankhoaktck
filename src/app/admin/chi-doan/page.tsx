@@ -29,51 +29,46 @@ export default function ChiDoanDashboard() {
     setLoading(true);
     try {
       const assignedClass = officer?.studentClass?.trim() || "";
-      if (officer?.role !== "super_admin" && !assignedClass) {
-        setStudentsInClass([]);
-        setSubmissionsMap({});
-        setLoading(false);
-        return;
-      }
 
-      let query = supabase.from("students").select("*").order("full_name", { ascending: true });
-      if (officer?.role !== "super_admin") {
-        query = query.eq("student_class", assignedClass);
+      // Load students
+      let studentQuery = supabase.from("students").select("*").order("full_name", { ascending: true });
+      if (officer?.role !== "super_admin" && assignedClass) {
+        studentQuery = studentQuery.eq("student_class", assignedClass);
       }
-      const { data: stData } = await query;
+      const { data: stData, error: stError } = await studentQuery;
+      if (stError) console.error("Load students error:", stError.message);
       if (stData) setStudentsInClass(stData);
 
+      // Load semesters
       const { data: semData } = await supabase
         .from("drl_semesters")
         .select("*")
         .order("created_at", { ascending: false });
       if (semData && semData.length > 0) {
         setSemesters(semData);
-        if (!semData.some((s: any) => s.id === reviewSemester)) {
-          setReviewSemester(semData[0].id);
-        }
+        setReviewSemester((prev) => semData.some((s: any) => s.id === prev) ? prev : semData[0].id);
       }
 
-      let subQuery = supabase
+      // Load submissions — không filter theo student_class vì bảng không có cột đó
+      // Filter phía client dựa trên mssv của sinh viên trong lớp
+      const { data: subs, error: subError } = await supabase
         .from("drl_submissions")
-        .select("mssv,semester_id,status,final_score,self_score");
-      if (officer?.role !== "super_admin") {
-        subQuery = subQuery.eq("student_class", assignedClass);
-      }
-      const { data: subs } = await subQuery;
+        .select("mssv,semester_id,status,final_score,self_score,student_class");
+      if (subError) console.error("Load submissions error:", subError.message);
       if (subs) {
         const map: Record<string, any> = {};
         subs.forEach((s: any) => {
+          // Nếu có semester_id thì dùng key kép, luôn lưu cả key đơn để tương thích
           if (s.semester_id) {
             map[`${s.mssv}_${s.semester_id}`] = s;
-          } else {
-            map[s.mssv] = s;
           }
+          // Luôn lưu key mssv đơn để fallback
+          if (!map[s.mssv]) map[s.mssv] = s;
         });
         setSubmissionsMap(map);
       }
     } catch (e) {
-      console.error(e);
+      console.error("loadClassData error:", e);
     }
     setLoading(false);
   };
