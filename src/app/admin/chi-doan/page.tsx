@@ -28,9 +28,17 @@ export default function ChiDoanDashboard() {
   const loadClassData = async (officer: any) => {
     setLoading(true);
     try {
+      const assignedClass = officer?.studentClass?.trim() || "";
+      if (officer?.role !== "super_admin" && !assignedClass) {
+        setStudentsInClass([]);
+        setSubmissionsMap({});
+        setLoading(false);
+        return;
+      }
+
       let query = supabase.from("students").select("*").order("full_name", { ascending: true });
       if (officer?.role !== "super_admin") {
-        query = query.eq("student_class", officer.studentClass);
+        query = query.eq("student_class", assignedClass);
       }
       const { data: stData } = await query;
       if (stData) setStudentsInClass(stData);
@@ -46,9 +54,13 @@ export default function ChiDoanDashboard() {
         }
       }
 
-      const { data: subs } = await supabase
+      let subQuery = supabase
         .from("drl_submissions")
         .select("mssv,semester_id,status,final_score,self_score");
+      if (officer?.role !== "super_admin") {
+        subQuery = subQuery.eq("student_class", assignedClass);
+      }
+      const { data: subs } = await subQuery;
       if (subs) {
         const map: Record<string, any> = {};
         subs.forEach((s: any) => {
@@ -98,6 +110,13 @@ export default function ChiDoanDashboard() {
   const matchingStudents = searchStudents(statusFilteredStudents, reviewSearch);
 
   const handleSelectStudent = async (st: any) => {
+    if (
+      currentOfficer?.role !== "super_admin" &&
+      st.student_class?.trim() !== currentOfficer?.studentClass?.trim()
+    ) {
+      alert("Bạn chỉ được xem và chấm điểm cho sinh viên thuộc lớp mình quản lý!");
+      return;
+    }
     const request = ++reviewRequest.current;
     setSelectedStudent(null);
     try {
@@ -157,6 +176,13 @@ export default function ChiDoanDashboard() {
   const handleSendFinalScore = async () => {
     const request = reviewRequest.current;
     if (!selectedStudent) return;
+    if (
+      currentOfficer?.role !== "super_admin" &&
+      selectedStudent.student_class?.trim() !== currentOfficer?.studentClass?.trim()
+    ) {
+      alert("Bạn không có quyền chấm điểm cho sinh viên ngoài lớp quản lý!");
+      return;
+    }
     if (!confirm(`Xác nhận gửi bảng điểm rèn luyện chính thức (${grandOfficerTotalScore} điểm) về cho sinh viên ${selectedStudent.full_name}?`)) return;
 
     try {

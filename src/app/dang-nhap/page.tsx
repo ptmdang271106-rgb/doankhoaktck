@@ -122,7 +122,11 @@ function LoginForm() {
         return;
       }
       localStorage.setItem("ctut_current_user", JSON.stringify(result.user));
-      router.push(loginRole === "admin" ? "/admin" : redirectUrl);
+      if (result.user.role === "branch_admin") {
+        router.push("/admin/chi-doan");
+      } else {
+        router.push(loginRole === "admin" ? "/admin" : redirectUrl);
+      }
     } catch {
       setErrorMsg("Không thể kết nối đến máy chủ. Vui lòng thử lại.");
     } finally {
