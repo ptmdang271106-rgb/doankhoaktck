@@ -84,6 +84,7 @@ const EVENT_CRITERIA_OPTIONS = [
 export default function AdminDashboard() {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const [activeTab, setActiveTab] = useState<"students" | "officers" | "semesters" | "review" | "events" | "posts" | "about" | "banners">("students");
   
   const [students, setStudents] = useState<any[]>([]);
@@ -359,11 +360,11 @@ export default function AdminDashboard() {
       return;
     }
     if (user.role !== "super_admin" && user.role !== "admin") {
-      alert("Bạn không có quyền truy cập trang quản trị!");
-      router.push("/");
+      router.replace("/");
       return;
     }
     setCurrentUser(user);
+    setAuthChecked(true);
     supabase.from("site_settings").select("value").like("key", "class:%").then(({ data, error }) => {
       if (error) alert("Không tải được danh sách lớp: " + error.message);
       if (data) setSavedClasses(prev => [...new Set([...prev, ...data.map(row => row.value)])]);
@@ -1088,9 +1089,10 @@ export default function AdminDashboard() {
     }
   };
 
+  if (!currentUser) return null;
+
   return (
-    <main className="min-h-screen bg-slate-100 py-4 sm:py-8 px-2 sm:px-6 lg:px-8 font-sans antialiased text-slate-800">
-      <div className="max-w-7xl mx-auto">
+    <main className="min-h-screen bg-slate-100 py-4 sm:py-8 px-2 sm:px-6 lg:px-8 font-sans antialiased text-slate-800">      <div className="max-w-7xl mx-auto">
         
         {/* HEADER TỐI GIẢN */}
         <div className="bg-white px-3.5 py-3 sm:px-6 sm:py-4 rounded-2xl shadow-xs border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
