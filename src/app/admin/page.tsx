@@ -699,11 +699,14 @@ export default function AdminDashboard() {
       if (cols.length >= 2 && cols[0] && !cols[0].toLowerCase().includes("mssv")) {
         const mssv = cols[0].replace(/\s+/g, "").toUpperCase();
         const full_name = cols[1];
-        const birth_place = cols[3] || "Cần Thơ";
-        const union_date = cols[4] || "2020-03-26";
-        const party_date = cols[5] || "";
-        const so_doan = cols[6] || "Đã nộp";
-        const chua_ket_nap_doan = cols[7] ? cols[7].toLowerCase() === "true" : false;
+        const hasBirthDate = /^\d{4}-\d{2}-\d{2}$/.test(cols[3] || "");
+        const birth_date = hasBirthDate ? cols[3] : undefined;
+        const offset = hasBirthDate ? 1 : 0;
+        const birth_place = cols[3 + offset] || "Cần Thơ";
+        const union_date = cols[4 + offset] || "2020-03-26";
+        const party_date = cols[5 + offset] || "";
+        const so_doan = cols[6 + offset] || "Đã nộp";
+        const chua_ket_nap_doan = cols[7 + offset] ? cols[7 + offset].toLowerCase() === "true" : false;
         
         const password = mssv.slice(-3);
         const email = generateCtuetEmail(full_name, mssv);
@@ -714,6 +717,7 @@ export default function AdminDashboard() {
           email,
           student_class: enrollmentClass,
           password,
+          ...(birth_date ? { birth_date } : {}),
           birth_place,
           union_date,
           party_date,
@@ -794,17 +798,21 @@ export default function AdminDashboard() {
           const full_name = cols[1];
           const password = mssv.slice(-3);
           const email = generateCtuetEmail(full_name, mssv);
+          const hasBirthDate = /^\d{4}-\d{2}-\d{2}$/.test(cols[3] || "");
+          const birth_date = hasBirthDate ? cols[3] : undefined;
+          const offset = hasBirthDate ? 1 : 0;
           imported.push({
             mssv,
             full_name,
             email,
             student_class: enrollmentClass,
             password,
-            birth_place: "Cần Thơ",
-            union_date: "2020-03-26",
-            party_date: "",
-            so_doan: "Đã nộp",
-            chua_ket_nap_doan: false,
+            ...(birth_date ? { birth_date } : {}),
+            birth_place: cols[3 + offset] || "Cần Thơ",
+            union_date: cols[4 + offset] || "2020-03-26",
+            party_date: cols[5 + offset] || "",
+            so_doan: cols[6 + offset] || "Đã nộp",
+            chua_ket_nap_doan: cols[7 + offset] ? cols[7 + offset].toLowerCase() === "true" : false,
           });
         }
       }
@@ -821,9 +829,9 @@ export default function AdminDashboard() {
 
   const handleDownloadSampleTemplate = () => {
     const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + 
-      "MSSV,Họ và tên,Lớp,Nơi sinh,Ngày vào Đoàn,Ngày vào Đảng,Sổ Đoàn,Chưa kết nạp Đoàn\n" +
-      "CNDT2411081,Phạm Thái Minh Đăng,CNKT Tự động hóa K2024,Cần Thơ,2020-03-26,,Đã nộp,false\n" +
-      "CNDT2411026,Nguyễn Huỳnh Bảo Châu,CNKT Tự động hóa K2024,Vĩnh Long,2020-03-26,,Chưa nộp,false\n";
+      "MSSV,Họ và tên,Lớp,Ngày sinh,Nơi sinh,Ngày vào Đoàn,Ngày vào Đảng,Sổ Đoàn,Chưa kết nạp Đoàn\n" +
+      "CNDT2411081,Phạm Thái Minh Đăng,CNKT Tự động hóa K2024,2006-01-15,Cần Thơ,2020-03-26,,Đã nộp,false\n" +
+      "CNDT2411026,Nguyễn Huỳnh Bảo Châu,CNKT Tự động hóa K2024,2006-08-20,Vĩnh Long,2020-03-26,,Chưa nộp,false\n";
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -1325,7 +1333,7 @@ export default function AdminDashboard() {
 
               {studentInputMode === "file" && (
                 <div className="space-y-3 p-4 bg-slate-50 border border-dashed border-slate-300 rounded-2xl text-center">
-                  <p className="text-xs font-bold text-slate-700">Chọn file .csv hoặc .txt. Toàn bộ danh sách sẽ vào lớp {enrollmentClass}.</p>
+                  <p className="text-xs font-bold text-slate-700">Chọn file .csv hoặc .txt. Sinh viên trùng MSSV sẽ tự động được cập nhật theo danh sách mới của lớp {enrollmentClass}.</p>
                   <input type="file" accept=".csv, .txt" onChange={handleFileUpload} className="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#EE6425] file:text-white cursor-pointer" />
                 </div>
               )}

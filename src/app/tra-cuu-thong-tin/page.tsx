@@ -5,6 +5,15 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { supabase } from "@/lib/supabase";
 
+function formatBirthDate(value?: string) {
+  if (!value) return "Chưa cập nhật";
+
+  const dateOnly = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (dateOnly) return `${dateOnly[3]}/${dateOnly[2]}/${dateOnly[1]}`;
+
+  return value;
+}
+
 export default function TraCuuThongTinPage() {
   const [mssvInput, setMssvInput] = useState("");
   const [studentInfo, setStudentInfo] = useState<any>(null);
@@ -80,6 +89,7 @@ export default function TraCuuThongTinPage() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-slate-700 font-medium">
                     <div><strong>Lớp sinh hoạt:</strong> {studentInfo.student_class || "Chưa cập nhật"}</div>
+                    <div><strong>Ngày sinh:</strong> {formatBirthDate(studentInfo.birth_date)}</div>
                     <div><strong>Nơi sinh:</strong> {studentInfo.birth_place || "Chưa cập nhật"}</div>
                     <div><strong>Ngày vào Đoàn:</strong> {studentInfo.union_date || "Chưa cập nhật"}</div>
                     <div><strong>Ngày vào Đảng:</strong> {studentInfo.party_date || "Chưa kết nạp Đảng"}</div>
